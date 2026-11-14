@@ -1,0 +1,46 @@
+{
+  "machine": "ubuntu-latest",
+  "model": "",
+  "startedAt": "2026-11-14T16:51:05.003Z",
+  "seconds": 2.994,
+  "items": [
+    {
+      "id": "M1",
+      "title": "有可用的真实模型",
+      "status": "fail",
+      "detail": "OpenCode nemotron-3.5-super-vl-free：OpenCode nemotron-3.5-super-vl-free: 429 {\"type\":\"error\",\"error\":{\"type\":\"FreeUsageLimitError\",\"message\":\"Free usage limit reached. Free models work in OpenCode (https://opencode.ai); subscribe to Ope；OpenCode mimo-v2.6-flash-free：OpenCode mimo-v2.6-flash-free: 429 {\"type\":\"error\",\"error\":{\"type\":\"FreeUsageLimitError\",\"message\":\"Free usage limit reached. Free models work in OpenCode (https://opencode.ai); subscribe to OpenCode ；OpenCode nemotron-3.5-lightning-free：OpenCode nemotron-3.5-lightning-free: 429 {\"type\":\"error\",\"error\":{\"type\":\"FreeUsageLimitError\",\"message\":\"Free usage limit reached. Free models work in OpenCode (https://opencode.ai); subscribe to Op；OpenCode flint-40b-free：OpenCode flint-40b-free: 429 {\"type\":\"error\",\"error\":{\"type\":\"FreeUsageLimitError\",\"message\":\"Free usage limit reached. Free models work in OpenCode (https://opencode.ai); subscribe to OpenCode Go to ；GitHub Models openai/gpt-4.1-mini：Unexpected token 'O', \"OK\r\n\" is not valid JSON；GitHub Models openai/gpt-4o-mini：Unexpected token 'O', \"OK\r\n\" is not valid JSON"
+    },
+    {
+      "id": "T1",
+      "title": "协作全流程",
+      "status": "skip",
+      "detail": "没有可用的模型"
+    }
+  ],
+  "models": [
+    {
+      "name": "OpenCode nemotron-3.5-super-vl-free",
+      "answer": "OpenCode nemotron-3.5-super-vl-free: 429 {\"type\":\"error\",\"error\":{\"type\":\"FreeUsageLimitError\",\"message\":\"Free usage limit reached. Free models work in OpenCode (https://opencode.ai); subscribe to Ope"
+    },
+    {
+      "name": "OpenCode mimo-v2.6-flash-free",
+      "answer": "OpenCode mimo-v2.6-flash-free: 429 {\"type\":\"error\",\"error\":{\"type\":\"FreeUsageLimitError\",\"message\":\"Free usage limit reached. Free models work in OpenCode (https://opencode.ai); subscribe to OpenCode "
+    },
+    {
+      "name": "OpenCode nemotron-3.5-lightning-free",
+      "answer": "OpenCode nemotron-3.5-lightning-free: 429 {\"type\":\"error\",\"error\":{\"type\":\"FreeUsageLimitError\",\"message\":\"Free usage limit reached. Free models work in OpenCode (https://opencode.ai); subscribe to Op"
+    },
+    {
+      "name": "OpenCode flint-40b-free",
+      "answer": "OpenCode flint-40b-free: 429 {\"type\":\"error\",\"error\":{\"type\":\"FreeUsageLimitError\",\"message\":\"Free usage limit reached. Free models work in OpenCode (https://opencode.ai); subscribe to OpenCode Go to "
+    },
+    {
+      "name": "GitHub Models openai/gpt-4.1-mini",
+      "answer": "Unexpected token 'O', \"OK\r\n\" is not valid JSON"
+    },
+    {
+      "name": "GitHub Models openai/gpt-4o-mini",
+      "answer": "Unexpected token 'O', \"OK\r\n\" is not valid JSON"
+    }
+  ]
+}
