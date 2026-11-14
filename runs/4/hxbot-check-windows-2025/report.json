@@ -1,0 +1,1723 @@
+{
+ "format": 1,
+ "machine": "windows-2025",
+ "platform": "windows",
+ "system": "Microsoft Windows Server 2025 Datacenter 10.0.26100 (Windows_NT 10.0.26100 x64)",
+ "startedAt": 1794624628191,
+ "finishedAt": 1794624941089,
+ "items": [
+  {
+   "id": "env.system",
+   "group": "env",
+   "outcome": "passed",
+   "detail": "Microsoft Windows Server 2025 Datacenter 10.0.26100 (Windows_NT 10.0.26100 x64)；Node v24.22.2；语言 en-US；Microsoft Windows Server 2025 Datacenter 10.0.26100 | interactive=True | session=2 | culture=en-US | ui=en-US",
+   "ms": 3144
+  },
+  {
+   "id": "env.desktop",
+   "group": "env",
+   "outcome": "passed",
+   "detail": "有桌面会话。Microsoft Windows Server 2025 Datacenter 10.0.26100 | interactive=True | session=2 | culture=en-US | ui=en-US",
+   "ms": 0
+  },
+  {
+   "id": "catalog.scan",
+   "group": "catalog",
+   "outcome": "passed",
+   "detail": "176 个应用，57 个设置页，16 项设置；用时 1473 毫秒",
+   "ms": 1478
+  },
+  {
+   "id": "catalog.known",
+   "group": "catalog",
+   "outcome": "passed",
+   "detail": "找到：Notepad（Notepad）、Paint（Paint）、Calculator（Calculator）、Command Prompt（Command Prompt）、Settings（Settings）、File Explorer（File Explorer）",
+   "ms": 1
+  },
+  {
+   "id": "catalog.saved",
+   "group": "catalog",
+   "outcome": "passed",
+   "detail": "从存盘读入 249 个条目，用时 2 毫秒，没有再扫描。",
+   "ms": 2
+  },
+  {
+   "id": "catalog.rescan",
+   "group": "catalog",
+   "outcome": "passed",
+   "detail": "再扫描一次，249 个条目和第一次相同；用时 520 毫秒。",
+   "ms": 520
+  },
+  {
+   "id": "catalog.ids",
+   "group": "catalog",
+   "outcome": "passed",
+   "detail": "249 个编号，没有重复。",
+   "ms": 1
+  },
+  {
+   "id": "search.01",
+   "group": "search",
+   "outcome": "passed",
+   "detail": "“蓝牙” → page:bluetooth",
+   "ms": 3
+  },
+  {
+   "id": "search.02",
+   "group": "search",
+   "outcome": "passed",
+   "detail": "“蓝牙设置” → page:bluetooth",
+   "ms": 2
+  },
+  {
+   "id": "search.03",
+   "group": "search",
+   "outcome": "passed",
+   "detail": "“打开蓝牙设置” → page:bluetooth",
+   "ms": 2
+  },
+  {
+   "id": "search.04",
+   "group": "search",
+   "outcome": "passed",
+   "detail": "“bluetooth settings” → page:bluetooth",
+   "ms": 2
+  },
+  {
+   "id": "search.05",
+   "group": "search",
+   "outcome": "passed",
+   "detail": "“wifi” → page:wifi",
+   "ms": 1
+  },
+  {
+   "id": "search.06",
+   "group": "search",
+   "outcome": "passed",
+   "detail": "“声音设置” → page:sound",
+   "ms": 1
+  },
+  {
+   "id": "search.07",
+   "group": "search",
+   "outcome": "passed",
+   "detail": "“屏幕” → page:display",
+   "ms": 2
+  },
+  {
+   "id": "search.08",
+   "group": "search",
+   "outcome": "passed",
+   "detail": "“夜间模式” → page:night-light",
+   "ms": 0
+  },
+  {
+   "id": "search.09",
+   "group": "search",
+   "outcome": "passed",
+   "detail": "“壁纸” → page:background",
+   "ms": 1
+  },
+  {
+   "id": "search.10",
+   "group": "search",
+   "outcome": "passed",
+   "detail": "“任务栏” → page:taskbar",
+   "ms": 119
+  },
+  {
+   "id": "search.11",
+   "group": "search",
+   "outcome": "passed",
+   "detail": "“打印机” → page:printers",
+   "ms": 1
+  },
+  {
+   "id": "search.12",
+   "group": "search",
+   "outcome": "passed",
+   "detail": "“系统更新” → page:windows-update",
+   "ms": 0
+  },
+  {
+   "id": "search.13",
+   "group": "search",
+   "outcome": "passed",
+   "detail": "“默认应用” → page:default-apps",
+   "ms": 1
+  },
+  {
+   "id": "search.14",
+   "group": "search",
+   "outcome": "passed",
+   "detail": "“剪贴板” → page:clipboard",
+   "ms": 0
+  },
+  {
+   "id": "search.15",
+   "group": "search",
+   "outcome": "passed",
+   "detail": "“隐私” → page:privacy",
+   "ms": 1
+  },
+  {
+   "id": "search.16",
+   "group": "search",
+   "outcome": "passed",
+   "detail": "“深色模式” → setting:dark-mode",
+   "ms": 0
+  },
+  {
+   "id": "search.17",
+   "group": "search",
+   "outcome": "passed",
+   "detail": "“打开深色模式” → setting:dark-mode",
+   "ms": 1
+  },
+  {
+   "id": "search.18",
+   "group": "search",
+   "outcome": "passed",
+   "detail": "“dark mode” → setting:dark-mode",
+   "ms": 0
+  },
+  {
+   "id": "search.19",
+   "group": "search",
+   "outcome": "passed",
+   "detail": "“透明效果” → setting:transparency",
+   "ms": 0
+  },
+  {
+   "id": "search.20",
+   "group": "search",
+   "outcome": "passed",
+   "detail": "“亮度” → setting:brightness",
+   "ms": 1
+  },
+  {
+   "id": "search.21",
+   "group": "search",
+   "outcome": "passed",
+   "detail": "“剪贴板历史记录” → setting:clipboard-history",
+   "ms": 0
+  },
+  {
+   "id": "search.22",
+   "group": "search",
+   "outcome": "passed",
+   "detail": "“记事本” → app:{1AC14E77-02E7-4E5D-B744-2EB1AE5198B7}\\notepad.exe",
+   "ms": 1
+  },
+  {
+   "id": "search.23",
+   "group": "search",
+   "outcome": "passed",
+   "detail": "“notepad” → app:{1AC14E77-02E7-4E5D-B744-2EB1AE5198B7}\\notepad.exe",
+   "ms": 0
+  },
+  {
+   "id": "search.24",
+   "group": "search",
+   "outcome": "passed",
+   "detail": "“设置” → app:windows.immersivecontrolpanel_cw5n1h2txyewy!microsoft.windows.immersivecontrolpanel",
+   "ms": 0
+  },
+  {
+   "id": "search.25",
+   "group": "search",
+   "outcome": "passed",
+   "detail": "“打开设置” → app:windows.immersivecontrolpanel_cw5n1h2txyewy!microsoft.windows.immersivecontrolpanel",
+   "ms": 3
+  },
+  {
+   "id": "search.26",
+   "group": "search",
+   "outcome": "passed",
+   "detail": "“系统设置” → app:windows.immersivecontrolpanel_cw5n1h2txyewy!microsoft.windows.immersivecontrolpanel",
+   "ms": 1
+  },
+  {
+   "id": "search.27",
+   "group": "search",
+   "outcome": "passed",
+   "detail": "“资源管理器” → app:Microsoft.Windows.Explorer",
+   "ms": 1
+  },
+  {
+   "id": "search.28",
+   "group": "search",
+   "outcome": "passed",
+   "detail": "“cmd” → app:{1AC14E77-02E7-4E5D-B744-2EB1AE5198B7}\\cmd.exe",
+   "ms": 0
+  },
+  {
+   "id": "open.cost",
+   "group": "open",
+   "outcome": "passed",
+   "detail": "打开一个设置页的命令用了 1238 毫秒（回答 opened）",
+   "ms": 1641
+  },
+  {
+   "id": "open.app.notepad",
+   "group": "open",
+   "outcome": "passed",
+   "detail": "进程 notepad 在 538 毫秒后出现；已关掉。",
+   "ms": 1064
+  },
+  {
+   "id": "open.app.paint",
+   "group": "open",
+   "outcome": "passed",
+   "detail": "进程 mspaint 在 486 毫秒后出现；已关掉。",
+   "ms": 998
+  },
+  {
+   "id": "open.app.calculator",
+   "group": "open",
+   "outcome": "passed",
+   "detail": "进程 win32calc 在 753 毫秒后出现；已关掉。",
+   "ms": 1747
+  },
+  {
+   "id": "open.folder",
+   "group": "open",
+   "outcome": "passed",
+   "detail": "文件夹窗口从 0 个变成 1 个，用时 1840 毫秒。",
+   "ms": 3679,
+   "shot": "open-folder.jpg"
+  },
+  {
+   "id": "open.document",
+   "group": "open",
+   "outcome": "passed",
+   "detail": "notepad 在 301 毫秒后出现；已关掉。",
+   "ms": 1345,
+   "shot": "open-document.jpg"
+  },
+  {
+   "id": "open.url",
+   "group": "open",
+   "outcome": "passed",
+   "detail": "浏览器 msedge 在 400 毫秒后出现；已关掉。",
+   "ms": 3317,
+   "shot": "open-url.jpg"
+  },
+  {
+   "id": "open.refuse.script-sh",
+   "group": "open",
+   "outcome": "passed",
+   "detail": "script.sh 被拒绝，没有启动任何系统命令。",
+   "ms": 0
+  },
+  {
+   "id": "open.refuse.double-click-command",
+   "group": "open",
+   "outcome": "passed",
+   "detail": "double-click.command 被拒绝，没有启动任何系统命令。",
+   "ms": 1
+  },
+  {
+   "id": "open.refuse.program-exe",
+   "group": "open",
+   "outcome": "passed",
+   "detail": "program.exe 被拒绝，没有启动任何系统命令。",
+   "ms": 0
+  },
+  {
+   "id": "open.refuse.batch-bat",
+   "group": "open",
+   "outcome": "passed",
+   "detail": "batch.bat 被拒绝，没有启动任何系统命令。",
+   "ms": 1
+  },
+  {
+   "id": "open.refuse.shortcut-lnk",
+   "group": "open",
+   "outcome": "passed",
+   "detail": "shortcut.lnk 被拒绝，没有启动任何系统命令。",
+   "ms": 0
+  },
+  {
+   "id": "open.refuse.address-url",
+   "group": "open",
+   "outcome": "passed",
+   "detail": "address.url 被拒绝，没有启动任何系统命令。",
+   "ms": 1
+  },
+  {
+   "id": "open.refuse.macro-py",
+   "group": "open",
+   "outcome": "passed",
+   "detail": "macro.py 被拒绝，没有启动任何系统命令。",
+   "ms": 0
+  },
+  {
+   "id": "open.refuse.installer-msi",
+   "group": "open",
+   "outcome": "passed",
+   "detail": "installer.msi 被拒绝，没有启动任何系统命令。",
+   "ms": 1
+  },
+  {
+   "id": "open.refuse.scheme",
+   "group": "open",
+   "outcome": "passed",
+   "detail": "4 个不是网页的地址都被拒绝，没有启动任何系统命令。",
+   "ms": 0
+  },
+  {
+   "id": "open.missing",
+   "group": "open",
+   "outcome": "passed",
+   "detail": "不存在的路径和不存在的名称都回答“没有找到”。",
+   "ms": 2
+  },
+  {
+   "id": "setting.dark-mode.read",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "off（252 毫秒）",
+   "ms": 252
+  },
+  {
+   "id": "setting.dark-mode.same",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "写回 off，读到 off",
+   "ms": 1251
+  },
+  {
+   "id": "setting.dark-mode.change",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "off → on（1036 毫秒）",
+   "ms": 2058,
+   "shot": "setting-dark-mode-after.jpg"
+  },
+  {
+   "id": "setting.dark-mode.effect",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "换一条路读，也是 on。退出码 0：HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize ColorPrevalence REG_DWORD 0x0 EnableTransparency REG_DWORD 0x1 AppsUseLightTheme REG_DWORD 0x0 SystemUsesLightTheme REG_D…",
+   "ms": 18
+  },
+  {
+   "id": "setting.dark-mode.restore",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "改回了 off",
+   "ms": 775
+  },
+  {
+   "id": "setting.dark-mode.fast",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "off → on（一次启动 508 毫秒）",
+   "ms": 1292
+  },
+  {
+   "id": "setting.app-dark-mode.read",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "off（250 毫秒）",
+   "ms": 251
+  },
+  {
+   "id": "setting.app-dark-mode.same",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "写回 off，读到 off",
+   "ms": 684
+  },
+  {
+   "id": "setting.app-dark-mode.change",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "off → on（702 毫秒）",
+   "ms": 1741,
+   "shot": "setting-app-dark-mode-after.jpg"
+  },
+  {
+   "id": "setting.app-dark-mode.effect",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "换一条路读，也是 on。退出码 0：HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize AppsUseLightTheme REG_DWORD 0x0",
+   "ms": 16
+  },
+  {
+   "id": "setting.app-dark-mode.restore",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "改回了 off",
+   "ms": 729
+  },
+  {
+   "id": "setting.app-dark-mode.fast",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "off → on（一次启动 476 毫秒）",
+   "ms": 1369
+  },
+  {
+   "id": "setting.system-dark-mode.read",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "off（246 毫秒）",
+   "ms": 246
+  },
+  {
+   "id": "setting.system-dark-mode.same",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "写回 off，读到 off",
+   "ms": 689
+  },
+  {
+   "id": "setting.system-dark-mode.change",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "off → on（706 毫秒）",
+   "ms": 1742,
+   "shot": "setting-system-dark-mode-after.jpg"
+  },
+  {
+   "id": "setting.system-dark-mode.effect",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "换一条路读，也是 on。退出码 0：HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize SystemUsesLightTheme REG_DWORD 0x0",
+   "ms": 16
+  },
+  {
+   "id": "setting.system-dark-mode.restore",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "改回了 off",
+   "ms": 886
+  },
+  {
+   "id": "setting.system-dark-mode.fast",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "off → on（一次启动 495 毫秒）",
+   "ms": 1218
+  },
+  {
+   "id": "setting.transparency.read",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "on（251 毫秒）",
+   "ms": 251
+  },
+  {
+   "id": "setting.transparency.same",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "写回 on，读到 on",
+   "ms": 702
+  },
+  {
+   "id": "setting.transparency.change",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "on → off（688 毫秒）",
+   "ms": 1714,
+   "shot": "setting-transparency-after.jpg"
+  },
+  {
+   "id": "setting.transparency.effect",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "换一条路读，也是 off。退出码 0：HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize EnableTransparency REG_DWORD 0x0",
+   "ms": 16
+  },
+  {
+   "id": "setting.transparency.restore",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "改回了 on",
+   "ms": 703
+  },
+  {
+   "id": "setting.transparency.fast",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "on → off（一次启动 476 毫秒）",
+   "ms": 1183
+  },
+  {
+   "id": "setting.clipboard-history.read",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "off（257 毫秒）",
+   "ms": 257
+  },
+  {
+   "id": "setting.clipboard-history.same",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "写回 off，读到 off",
+   "ms": 520
+  },
+  {
+   "id": "setting.clipboard-history.change",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "off → on（512 毫秒）",
+   "ms": 1538,
+   "shot": "setting-clipboard-history-after.jpg"
+  },
+  {
+   "id": "setting.clipboard-history.effect",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "换一条路读，也是 on。退出码 0：HKEY_CURRENT_USER\\Software\\Microsoft\\Clipboard EnableClipboardHistory REG_DWORD 0x1",
+   "ms": 16
+  },
+  {
+   "id": "setting.clipboard-history.restore",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "改回了 off",
+   "ms": 516
+  },
+  {
+   "id": "setting.clipboard-history.fast",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "off → on（一次启动 270 毫秒）",
+   "ms": 782
+  },
+  {
+   "id": "setting.brightness.read",
+   "group": "setting",
+   "outcome": "unavailable",
+   "detail": "命令成功，但这台机器上没有值。退出码 0：none",
+   "ms": 563
+  },
+  {
+   "id": "setting.taskbar-alignment.read",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "center（248 毫秒）",
+   "ms": 248
+  },
+  {
+   "id": "setting.taskbar-alignment.same",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "写回 center，读到 center",
+   "ms": 708
+  },
+  {
+   "id": "setting.taskbar-alignment.change",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "center → left（696 毫秒）",
+   "ms": 1728,
+   "shot": "setting-taskbar-alignment-after.jpg"
+  },
+  {
+   "id": "setting.taskbar-alignment.effect",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "换一条路读，也是 left。退出码 0：HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced TaskbarAl REG_DWORD 0x0",
+   "ms": 16
+  },
+  {
+   "id": "setting.taskbar-alignment.restore",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "改回了 center",
+   "ms": 709
+  },
+  {
+   "id": "setting.taskbar-alignment.fast",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "center → left（一次启动 478 毫秒）",
+   "ms": 1192
+  },
+  {
+   "id": "setting.task-view-button.read",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "on（249 毫秒）",
+   "ms": 249
+  },
+  {
+   "id": "setting.task-view-button.same",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "写回 on，读到 on",
+   "ms": 771
+  },
+  {
+   "id": "setting.task-view-button.change",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "on → off（735 毫秒）",
+   "ms": 1754,
+   "shot": "setting-task-view-button-after.jpg"
+  },
+  {
+   "id": "setting.task-view-button.effect",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "换一条路读，也是 off。退出码 0：HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced ShowTaskViewButton REG_DWORD 0x0",
+   "ms": 16
+  },
+  {
+   "id": "setting.task-view-button.restore",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "改回了 on",
+   "ms": 701
+  },
+  {
+   "id": "setting.task-view-button.fast",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "on → off（一次启动 483 毫秒）",
+   "ms": 1195
+  },
+  {
+   "id": "setting.clock-seconds.read",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "off（254 毫秒）",
+   "ms": 254
+  },
+  {
+   "id": "setting.clock-seconds.same",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "写回 off，读到 off",
+   "ms": 695
+  },
+  {
+   "id": "setting.clock-seconds.change",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "off → on（700 毫秒）",
+   "ms": 1725,
+   "shot": "setting-clock-seconds-after.jpg"
+  },
+  {
+   "id": "setting.clock-seconds.effect",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "换一条路读，也是 on。退出码 0：HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced ShowSecondsInSystemClock REG_DWORD 0x1",
+   "ms": 15
+  },
+  {
+   "id": "setting.clock-seconds.restore",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "改回了 off",
+   "ms": 692
+  },
+  {
+   "id": "setting.clock-seconds.fast",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "off → on（一次启动 470 毫秒）",
+   "ms": 1253
+  },
+  {
+   "id": "setting.accent-title-bars.read",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "off（259 毫秒）",
+   "ms": 259
+  },
+  {
+   "id": "setting.accent-title-bars.same",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "写回 off，读到 off",
+   "ms": 712
+  },
+  {
+   "id": "setting.accent-title-bars.change",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "off → on（695 毫秒）",
+   "ms": 1740,
+   "shot": "setting-accent-title-bars-after.jpg"
+  },
+  {
+   "id": "setting.accent-title-bars.effect",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "换一条路读，也是 on。退出码 0：HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\DWM ColorPrevalence REG_DWORD 0x1",
+   "ms": 16
+  },
+  {
+   "id": "setting.accent-title-bars.restore",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "改回了 off",
+   "ms": 693
+  },
+  {
+   "id": "setting.accent-title-bars.fast",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "off → on（一次启动 457 毫秒）",
+   "ms": 1151
+  },
+  {
+   "id": "setting.accent-start-taskbar.read",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "off（254 毫秒）",
+   "ms": 254
+  },
+  {
+   "id": "setting.accent-start-taskbar.same",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "写回 off，读到 off",
+   "ms": 704
+  },
+  {
+   "id": "setting.accent-start-taskbar.change",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "off → on（716 毫秒）",
+   "ms": 1746,
+   "shot": "setting-accent-start-taskbar-after.jpg"
+  },
+  {
+   "id": "setting.accent-start-taskbar.effect",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "换一条路读，也是 on。退出码 0：HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize ColorPrevalence REG_DWORD 0x1",
+   "ms": 16
+  },
+  {
+   "id": "setting.accent-start-taskbar.restore",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "改回了 off",
+   "ms": 1170
+  },
+  {
+   "id": "setting.accent-start-taskbar.fast",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "off → on（一次启动 487 毫秒）",
+   "ms": 1493
+  },
+  {
+   "id": "setting.notifications.read",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "on（257 毫秒）",
+   "ms": 257
+  },
+  {
+   "id": "setting.notifications.same",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "写回 on，读到 on",
+   "ms": 525
+  },
+  {
+   "id": "setting.notifications.change",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "on → off（515 毫秒）",
+   "ms": 1550,
+   "shot": "setting-notifications-after.jpg"
+  },
+  {
+   "id": "setting.notifications.effect",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "换一条路读，也是 off。退出码 0：HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\PushNotifications ToastEnabled REG_DWORD 0x0",
+   "ms": 16
+  },
+  {
+   "id": "setting.notifications.restore",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "改回了 on",
+   "ms": 494
+  },
+  {
+   "id": "setting.notifications.fast",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "on → off（一次启动 269 毫秒）",
+   "ms": 761
+  },
+  {
+   "id": "setting.game-mode.read",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "on（242 毫秒）",
+   "ms": 242
+  },
+  {
+   "id": "setting.game-mode.same",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "写回 on，读到 on",
+   "ms": 505
+  },
+  {
+   "id": "setting.game-mode.change",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "on → off（490 毫秒）",
+   "ms": 1509,
+   "shot": "setting-game-mode-after.jpg"
+  },
+  {
+   "id": "setting.game-mode.effect",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "换一条路读，也是 off。退出码 0：HKEY_CURRENT_USER\\Software\\Microsoft\\GameBar AllowAutoGameMode REG_DWORD 0x0",
+   "ms": 16
+  },
+  {
+   "id": "setting.game-mode.restore",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "改回了 on",
+   "ms": 493
+  },
+  {
+   "id": "setting.game-mode.fast",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "on → off（一次启动 258 毫秒）",
+   "ms": 746
+  },
+  {
+   "id": "setting.storage-sense.read",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "on（243 毫秒）",
+   "ms": 243
+  },
+  {
+   "id": "setting.storage-sense.same",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "写回 on，读到 on",
+   "ms": 493
+  },
+  {
+   "id": "setting.storage-sense.change",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "on → off（507 毫秒）",
+   "ms": 1535,
+   "shot": "setting-storage-sense-after.jpg"
+  },
+  {
+   "id": "setting.storage-sense.effect",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "换一条路读，也是 off。退出码 0：HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\StorageSense\\Parameters\\StoragePolicy 01 REG_DWORD 0x0",
+   "ms": 16
+  },
+  {
+   "id": "setting.storage-sense.restore",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "改回了 on",
+   "ms": 505
+  },
+  {
+   "id": "setting.storage-sense.fast",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "on → off（一次启动 284 毫秒）",
+   "ms": 801
+  },
+  {
+   "id": "setting.screen-off-minutes.read",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "0（274 毫秒）",
+   "ms": 274
+  },
+  {
+   "id": "setting.screen-off-minutes.same",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "写回 0，读到 0",
+   "ms": 654
+  },
+  {
+   "id": "setting.screen-off-minutes.change",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "0 → 60（592 毫秒）",
+   "ms": 1716,
+   "shot": "setting-screen-off-minutes-after.jpg"
+  },
+  {
+   "id": "setting.screen-off-minutes.restore",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "改回了 0",
+   "ms": 595
+  },
+  {
+   "id": "setting.screen-off-minutes.fast",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "0 → 60（一次启动 455 毫秒）",
+   "ms": 1111
+  },
+  {
+   "id": "setting.sleep-minutes.read",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "0（200 毫秒）",
+   "ms": 200
+  },
+  {
+   "id": "setting.sleep-minutes.same",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "写回 0，读到 0",
+   "ms": 568
+  },
+  {
+   "id": "setting.sleep-minutes.change",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "0 → 60（554 毫秒）",
+   "ms": 1584,
+   "shot": "setting-sleep-minutes-after.jpg"
+  },
+  {
+   "id": "setting.sleep-minutes.restore",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "改回了 0",
+   "ms": 549
+  },
+  {
+   "id": "setting.sleep-minutes.fast",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "0 → 60（一次启动 430 毫秒）",
+   "ms": 998
+  },
+  {
+   "id": "page.display",
+   "group": "page",
+   "outcome": "passed",
+   "detail": "窗口显示：System / Display / Brightness & color / Color profile / Determine how colors appear on your screen / HDR / More about HDR / Scale & layout / Scale / Change the size of text, apps, and other items / 100% (Recommended) / Display resolution / Adjust the resolution to fit your connected display / 1024 × 768 (Recommended)（1990 毫秒）",
+   "ms": 1990,
+   "shot": "page-display.jpg"
+  },
+  {
+   "id": "page.night-light",
+   "group": "page",
+   "outcome": "unavailable",
+   "detail": "Windows Server 没有“Night light”这一页；桌面版的 Windows 有。窗口显示：System / Display / Brightness & color / Color profile / Determine how colors appear on your screen / HDR / More about HDR / Scale & layout / Scale / Change the size of text, apps, and other items / 100% (Recommended) / Display resolution / Adjust the resolution to fit your connected display / 1024 × 768 (Recommended)",
+   "ms": 0
+  },
+  {
+   "id": "page.sound",
+   "group": "page",
+   "outcome": "passed",
+   "detail": "窗口显示：System / Sound / Output / Choose where to play sound. Apps might have their own settings. / Choose where to play sound / Apps might have their own settings / No output devices found / Show more settings / Pair a new output device / Add device / Volume / Mute volume / 0 / Adjust the output volume（973 毫秒）",
+   "ms": 973,
+   "shot": "page-sound.jpg"
+  },
+  {
+   "id": "page.notifications",
+   "group": "page",
+   "outcome": "passed",
+   "detail": "窗口显示：System / Notifications / Get notifications from apps and other senders / Show more settings / Do not disturb / Notifications will be sent directly to notification center / Turn on do not disturb automatically / Set priority notifications / Focus / Session duration, hide badges on apps / Notifications from apps and other senders / Sort by: / Most recent / ServiceFabricLocalClusterManager（793 毫秒）",
+   "ms": 793,
+   "shot": "page-notifications.jpg"
+  },
+  {
+   "id": "page.focus",
+   "group": "page",
+   "outcome": "passed",
+   "detail": "窗口显示：System / Focus / Focus sessions help you get more done by reducing distractions. When you start a session, these settings will apply for a set amount of time. / Start focus session / Show more settings / Session duration / Decrease duration / 30 mins / Increase duration / Show the timer in the Clock app / Hide badges on taskbar apps / Hide flashing on taskbar apps / Turn on do not disturb / More about focus（778 毫秒）",
+   "ms": 778,
+   "shot": "page-focus.jpg"
+  },
+  {
+   "id": "page.power",
+   "group": "page",
+   "outcome": "passed",
+   "detail": "窗口显示：System / Power / Energy recommendationsLower your carbon footprint by applying these recommendations1 of 2 applied / Energy recommendations / Lower your carbon footprint by applying these recommendations / 1 of 2 applied / 1 of 2 / Screen timeout / Choose what happens when your device is idle for a specified time / Show more settings / Energy saver / Reduce power consumption and increase battery life by limiting some background activities / Off / Give feedback（1006 毫秒）",
+   "ms": 1006,
+   "shot": "page-power.jpg"
+  },
+  {
+   "id": "page.storage",
+   "group": "page",
+   "outcome": "passed",
+   "detail": "窗口显示：System / Storage / ‎Windows (C:) - 149 GB / 81.1223 percent of disk space used / 121 GB used / 28.2 GB free / Temporary files, 199 MB out of 121 GB. used / Busy / 199 MB/121 GB used / Temporary files / Show more categories / Storage management / Storage Sense / Automatically free up space, delete temporary files, and manage locally available cloud content（1059 毫秒）",
+   "ms": 1059,
+   "shot": "page-storage.jpg"
+  },
+  {
+   "id": "page.multitasking",
+   "group": "page",
+   "outcome": "passed",
+   "detail": "窗口显示：System / Multitasking / Snap windows / Snap windows to automatically resize and arrange them into layouts / Show more settings / Show tabs from apps when snapping or pressing Alt+Tab / 3 most recent tabs / Desktops / Title bar window shake / When I grab a window’s title bar and shake it, minimize all other windows / Give feedback（1013 毫秒）",
+   "ms": 1013,
+   "shot": "page-multitasking.jpg"
+  },
+  {
+   "id": "page.clipboard",
+   "group": "page",
+   "outcome": "unavailable",
+   "detail": "Windows Server 没有“Clipboard”这一页；桌面版的 Windows 有。窗口显示：System / Multitasking / Snap windows / Snap windows to automatically resize and arrange them into layouts / Show more settings / Show tabs from apps when snapping or pressing Alt+Tab / 3 most recent tabs / Desktops / Title bar window shake / When I grab a window’s title bar and shake it, minimize all other windows / Give feedback",
+   "ms": 0
+  },
+  {
+   "id": "page.about",
+   "group": "page",
+   "outcome": "passed",
+   "detail": "窗口显示：System / About / runnervmm7ud1 / Virtual Machine / Rename this PC / Device specifications / Copy / Show more settings / Device name / Processor / AMD EPYC 9V74 80-Core Processor (2.60 GHz) / Installed RAM / 16.0 GB / Device ID（880 毫秒）",
+   "ms": 880,
+   "shot": "page-about.jpg"
+  },
+  {
+   "id": "page.bluetooth",
+   "group": "page",
+   "outcome": "passed",
+   "detail": "窗口显示：Bluetooth & devices / Devices / Add device / Other devices / Generic Monitor (HyperVMonitor), Category Display device, Battery Unknown, State Unknown device state, / Show more settings / Generic Monitor (HyperVMonitor) / Mellanox ConnectX-5 Ex Virtual Adapter, Category Unknown device, Battery Unknown, State Unknown device state, / Mellanox ConnectX-5 Ex Virtual Adapter / Microsoft NVMe Direct Disk v2, Category Storage device, Battery Unknown, State Unknown device state, / Microsoft NVMe Direct Disk v2 / Virtual_Disk NVME Premium, Category Storage device, Battery Unknown, State Unknown device state, / Virtual_Disk NVME Premium / Device settings（1109 毫秒）",
+   "ms": 1109,
+   "shot": "page-bluetooth.jpg"
+  },
+  {
+   "id": "page.printers",
+   "group": "page",
+   "outcome": "passed",
+   "detail": "窗口显示：Bluetooth & devices / More / Printers & scanners / Add a printer or scanner / Microsoft Print to PDF / Default / Printer preferences / Windows protected print mode / This feature helps ensure the latest security standard for printer software. Turning this on may limit the availability of some printers using an older default security standard. / This feature helps ensure the latest security standard for printer software. Turning this on may limit the availability of some printers using an older default security standard. Learn more. / Learn more. / Set Up / Let Windows manage my default printer / Download drivers and device software over metered connections（877 毫秒）",
+   "ms": 877,
+   "shot": "page-printers.jpg"
+  },
+  {
+   "id": "page.mouse",
+   "group": "page",
+   "outcome": "passed",
+   "detail": "窗口显示：Bluetooth & devices / Mouse / Primary mouse button / Left / Mouse pointer speed / Enhance pointer precision / Scrolling / Roll the mouse wheel to scroll / Multiple lines at a time / Lines to scroll at a time / Scroll inactive windows when hovering over them / Scrolling direction / Down motion scrolls down / Related settings（812 毫秒）",
+   "ms": 812,
+   "shot": "page-mouse.jpg"
+  },
+  {
+   "id": "page.touchpad",
+   "group": "page",
+   "outcome": "unavailable",
+   "detail": "“Touchpad”要有相应的硬件才有，这台机器没有显示它。窗口显示：Bluetooth & devices / Mouse / Primary mouse button / Left / Mouse pointer speed / Enhance pointer precision / Scrolling / Roll the mouse wheel to scroll / Multiple lines at a time / Lines to scroll at a time / Scroll inactive windows when hovering over them / Scrolling direction / Down motion scrolls down / Related settings",
+   "ms": 0
+  },
+  {
+   "id": "page.typing",
+   "group": "page",
+   "outcome": "passed",
+   "detail": "窗口显示：Time & language / Typing / Touch keyboard / Show more settings / Multilingual text suggestions / Show text suggestions based on my language preferences / Autocorrect misspelled words / Highlight misspelled words / Typing insights / View your typing and corrections history / Advanced keyboard settings / Related settings / Language & region / Windows display language, preferred languages, regional formats（733 毫秒）",
+   "ms": 733,
+   "shot": "page-typing.jpg"
+  },
+  {
+   "id": "page.network",
+   "group": "page",
+   "outcome": "passed",
+   "detail": "窗口显示：Network & internet / NetworkHeroControlList / Ethernet / Authentication, IP and DNS settings, metered network / VPN / Add, connect, manage / Proxy / Proxy server for Wi-Fi and Ethernet connections / Dial-up / Set up a dial-up internet connection / Advanced network settings / View all network adapters, network reset / Vertical（1038 毫秒）",
+   "ms": 1038,
+   "shot": "page-network.jpg"
+  },
+  {
+   "id": "page.wifi",
+   "group": "page",
+   "outcome": "unavailable",
+   "detail": "“Wi-Fi”要有相应的硬件才有，这台机器没有显示它。窗口显示：Network & internet / NetworkHeroControlList / Ethernet / Authentication, IP and DNS settings, metered network / VPN / Add, connect, manage / Proxy / Proxy server for Wi-Fi and Ethernet connections / Dial-up / Set up a dial-up internet connection / Advanced network settings / View all network adapters, network reset / Vertical",
+   "ms": 0
+  },
+  {
+   "id": "page.ethernet",
+   "group": "page",
+   "outcome": "passed",
+   "detail": "窗口显示：Network & internet / Ethernet / Network / Connected / Show more settings / Network profile type / Public network (Recommended) / Your device is not discoverable on the network. Use this in most cases—when connected to a network at home, work, or in a public place. / Private network / Your device is discoverable on the network. Select this if you need file sharing or use apps that communicate over this network. You should know and trust the people and devices on the network. / Configure firewall and security settings / Authentication settings / Edit / Metered connection（792 毫秒）",
+   "ms": 792,
+   "shot": "page-ethernet.jpg"
+  },
+  {
+   "id": "page.vpn",
+   "group": "page",
+   "outcome": "passed",
+   "detail": "窗口显示：Network & internet / VPN / VPN connections / Add VPN / Advanced settings for all VPN connections / Allow VPN over metered networks / Allow VPN while roaming / Give feedback（661 毫秒）",
+   "ms": 661,
+   "shot": "page-vpn.jpg"
+  },
+  {
+   "id": "page.proxy",
+   "group": "page",
+   "outcome": "passed",
+   "detail": "窗口显示：Network & internet / Proxy / Use a proxy server for Ethernet or Wi-Fi connections. These settings don’t apply to VPN connections. / Automatic proxy setup / Automatically detect settings / Use setup script / Off / Set up / Manual proxy setup / Use a proxy server / Give feedback（662 毫秒）",
+   "ms": 662,
+   "shot": "page-proxy.jpg"
+  },
+  {
+   "id": "page.airplane",
+   "group": "page",
+   "outcome": "unavailable",
+   "detail": "“Airplane mode”要有相应的硬件才有，这台机器没有显示它。窗口显示：Network & internet / Proxy / Use a proxy server for Ethernet or Wi-Fi connections. These settings don’t apply to VPN connections. / Automatic proxy setup / Automatically detect settings / Use setup script / Off / Set up / Manual proxy setup / Use a proxy server / Give feedback",
+   "ms": 0
+  },
+  {
+   "id": "page.hotspot",
+   "group": "page",
+   "outcome": "unavailable",
+   "detail": "“Mobile hotspot”要有相应的硬件才有，这台机器没有显示它。窗口显示：Network & internet / Proxy / Use a proxy server for Ethernet or Wi-Fi connections. These settings don’t apply to VPN connections. / Automatic proxy setup / Automatically detect settings / Use setup script / Off / Set up / Manual proxy setup / Use a proxy server / Give feedback",
+   "ms": 0
+  },
+  {
+   "id": "page.personalization",
+   "group": "page",
+   "outcome": "passed",
+   "detail": "窗口显示：Personalization / Desktop preview / Select a theme to apply / Windows (light), 1 images / Windows (dark), 1 images / Windows spotlight, dynamic images / Windows Spotlight Icon / Glow, 4 images / Captured Motion, 4 images / Sunrise, 4 images / Background / Background image, color, slideshow / Colors / Accent color, transparency effects, color theme（819 毫秒）",
+   "ms": 819,
+   "shot": "page-personalization.jpg"
+  },
+  {
+   "id": "page.background",
+   "group": "page",
+   "outcome": "passed",
+   "detail": "窗口显示：Personalization / Background / Desktop preview / Personalize your background / A picture background applies to your current desktop. Solid color or slideshow backgrounds apply to all your desktops. / Picture / Show more settings / Recent images / c:\\windows\\web\\wallpaper\\windows\\img0.jpg / img0 / c:\\windows\\web\\wallpaper\\themea\\img20.jpg / img20 / c:\\windows\\web\\wallpaper\\themeb\\img24.jpg / img24（715 毫秒）",
+   "ms": 715,
+   "shot": "page-background.jpg"
+  },
+  {
+   "id": "page.colors",
+   "group": "page",
+   "outcome": "passed",
+   "detail": "窗口显示：Personalization / Colors / Desktop preview / Choose your mode / Change the colors that appear in Windows and your apps / Light / Transparency effects / Windows and surfaces appear translucent / Accent color / Manual / Show more settings / Recent colors / Seafoam / Storm（773 毫秒）",
+   "ms": 773,
+   "shot": "page-colors.jpg"
+  },
+  {
+   "id": "page.lock-screen",
+   "group": "page",
+   "outcome": "passed",
+   "detail": "窗口显示：Personalization / Lock screen / Lock screen preview / Personalize your lock screen / Picture / Show more settings / Recent images / C:\\Windows\\Web\\Screen\\img100.jpg / Windows Server / C:\\Windows\\Web\\Screen\\img101.jpg / 1 / C:\\Windows\\Web\\Screen\\img102.jpg / 2 / C:\\Windows\\Web\\Screen\\img103.jpg（863 毫秒）",
+   "ms": 863,
+   "shot": "page-lock-screen.jpg"
+  },
+  {
+   "id": "page.themes",
+   "group": "page",
+   "outcome": "passed",
+   "detail": "窗口显示：PopupHost / Popup / Show more settings / Personalization / Themes / Desktop preview / Background Windows Server / Background / Windows Server / Color Custom color / Color / Blue / Sounds Windows Default / Sounds（743 毫秒）",
+   "ms": 743,
+   "shot": "page-themes.jpg"
+  },
+  {
+   "id": "page.fonts",
+   "group": "page",
+   "outcome": "passed",
+   "detail": "窗口显示：Personalization / Fonts / Informational icon / Fonts Control Panel is being redirected here. To access the legacy interface, click this link or navigate to C:\\Windows\\Fonts in File Explorer. / Legacy Fonts Control Panel interface / Close / Drag and drop to install / Drag font files from File Explorer or your desktop and drop them here to install fonts on your device. / Browse and install fonts / Get more fonts in the Microsoft Store / Related settings / Show more settings / Available fonts / Type here to search（720 毫秒）",
+   "ms": 720,
+   "shot": "page-fonts.jpg"
+  },
+  {
+   "id": "page.taskbar",
+   "group": "page",
+   "outcome": "passed",
+   "detail": "窗口显示：Personalization / Taskbar / Taskbar items / Show or hide buttons that appear on the taskbar / Show more settings / Search / Search box / Task view / System tray icons / Choose which icons can appear in the system tray / Pen Menu / Show pen menu icon when pen is in use / Touch keyboard / Show touch keyboard icon（716 毫秒）",
+   "ms": 716,
+   "shot": "page-taskbar.jpg"
+  },
+  {
+   "id": "page.start",
+   "group": "page",
+   "outcome": "passed",
+   "detail": "窗口显示：Personalization / Start / Layout / More pins / Default / More recommendations / Show recently added apps / Show most used apps / Show recommended files in Start, recent files in File Explorer, and items in Jump Lists / Show recommendations for tips, shortcuts, new apps, and more / Show account-related notifications / When off, required notifications are still shown / Folders / These folders appear on Start next to the Power button（707 毫秒）",
+   "ms": 707,
+   "shot": "page-start.jpg"
+  },
+  {
+   "id": "page.apps",
+   "group": "page",
+   "outcome": "passed",
+   "detail": "窗口显示：Apps / Installed apps / Search / View apps by / List view. / Grid view. / Tile view. / Filter by: / Drive filter options. Currently filtered by: / All drives / Sort by: / Sort options. Currently sorted by: / Name (A to Z) / 64 apps found（2338 毫秒）",
+   "ms": 2338,
+   "shot": "page-apps.jpg"
+  },
+  {
+   "id": "page.default-apps",
+   "group": "page",
+   "outcome": "passed",
+   "detail": "窗口显示：Apps / Default apps / Set a default for a file type or link type / Enter a file type or link type / , Choose a default / Choose a default / Set defaults for applications / Search apps / App Installer / DesktopStickerEditorCentennial / Eye Control / Feedback Hub / File Explorer / Firefox（1295 毫秒）",
+   "ms": 1295,
+   "shot": "page-default-apps.jpg"
+  },
+  {
+   "id": "page.startup-apps",
+   "group": "page",
+   "outcome": "passed",
+   "detail": "窗口显示：Apps / Startup / Apps can be configured to start when you log in. In most cases, apps will start minimized or may only start a background task. / Sort by: / Name / AzureArcSysTray / Not measured / ServiceFabricLocalClusterManager / Microsoft / Terminal / Microsoft Corporation / No impact / Windows Security notification icon / Give feedback（763 毫秒）",
+   "ms": 763,
+   "shot": "page-startup-apps.jpg"
+  },
+  {
+   "id": "page.your-info",
+   "group": "page",
+   "outcome": "passed",
+   "detail": "窗口显示：Local Account / Accounts / Your info / RUNNERADMIN / Administrator / Adjust your photo / Choose a file / Browse files / Account settings / Local account / Windows is better when settings and files automatically sync / Sign in with a Microsoft account instead / Related settings / Accounts, Manage my accounts（773 毫秒）",
+   "ms": 773,
+   "shot": "page-your-info.jpg"
+  },
+  {
+   "id": "page.email-accounts",
+   "group": "page",
+   "outcome": "passed",
+   "detail": "窗口显示：Accounts / Email & accounts / Accounts used by email, calendar, and contacts / Add a new account / Add account / Accounts used by other apps / Add accounts / Add a work or school account / Add a Microsoft account / Give feedback（710 毫秒）",
+   "ms": 710,
+   "shot": "page-email-accounts.jpg"
+  },
+  {
+   "id": "page.sign-in",
+   "group": "page",
+   "outcome": "passed",
+   "detail": "窗口显示：Accounts / Sign-in options / Informational icon / Some of these settings are managed by your organization. / Ways to sign in / Security key / Sign in with a physical security key / Show more settings / Password / Sign in with your account’s password / Additional settings / Dynamic lock / Automatically lock your device when you’re away / Automatically save my restartable apps and restart them when I sign back in（819 毫秒）",
+   "ms": 819,
+   "shot": "page-sign-in.jpg"
+  },
+  {
+   "id": "page.other-users",
+   "group": "page",
+   "outcome": "passed",
+   "detail": "窗口显示：Accounts / Other Users / Other users / Add other user / Add account / Give feedback（732 毫秒）",
+   "ms": 732,
+   "shot": "page-other-users.jpg"
+  },
+  {
+   "id": "page.date-time",
+   "group": "page",
+   "outcome": "passed",
+   "detail": "窗口显示：Time & language / Date & time / 2:54 AM / ‎Saturday, ‎November ‎14, ‎2026 / Time zone / (UTC) Coordinated Universal Time / Region / United States / Enable location permission for the Settings to improve time zone accuracy. / Location Settings / Set time zone automatically / Show more settings / Set time automatically / Show time and date in the System tray（873 毫秒）",
+   "ms": 873,
+   "shot": "page-date-time.jpg"
+  },
+  {
+   "id": "page.language",
+   "group": "page",
+   "outcome": "passed",
+   "detail": "窗口显示：Time & language / More / Language & region / Language / Windows display language / Windows features like Settings and File Explorer will appear in this language / English (United States) / Preferred languages / Microsoft Store apps will appear in the first supported language in this list / Add a language / language pack, text-to-speech, speech recognition, handwriting, basic typing / More options / Region / Country or region（1094 毫秒）",
+   "ms": 1094,
+   "shot": "page-language.jpg"
+  },
+  {
+   "id": "page.speech",
+   "group": "page",
+   "outcome": "passed",
+   "detail": "窗口显示：Time & language / Speech / Choose the primary language you speak, manage voices for your device and apps, and set up your microphone. / Speech language / Choose the language you speak with your device / English (United States) / Recognize non-native accents for this language / Voices / Choose a voice / Microsoft David / Voice speed / Listen to voice sample / Preview voice / Manage voices（975 毫秒）",
+   "ms": 975,
+   "shot": "page-speech.jpg"
+  },
+  {
+   "id": "page.game-bar",
+   "group": "page",
+   "outcome": "unavailable",
+   "detail": "Windows Server 没有“Game Bar”这一页；桌面版的 Windows 有。窗口显示：Time & language / Speech / Choose the primary language you speak, manage voices for your device and apps, and set up your microphone. / Speech language / Choose the language you speak with your device / English (United States) / Recognize non-native accents for this language / Voices / Choose a voice / Microsoft David / Voice speed / Listen to voice sample / Preview voice / Manage voices",
+   "ms": 0
+  },
+  {
+   "id": "page.accessibility",
+   "group": "page",
+   "outcome": "passed",
+   "detail": "窗口显示：Accessibility / Vision / Text size / Text size that appears throughout Windows and your apps / Visual effects / Scroll bars, transparency, animations, notification timeout / Mouse pointer and touch / Mouse pointer color, size / Text cursor / Appearance and thickness, text cursor indicator / Magnifier / Magnifier reading, zoom increment / Color filters / Colorblindness filters, grayscale, inverted（731 毫秒）",
+   "ms": 731,
+   "shot": "page-accessibility.jpg"
+  },
+  {
+   "id": "page.text-size",
+   "group": "page",
+   "outcome": "passed",
+   "detail": "窗口显示：PopupHost / Popup / 100% / Accessibility / Text size / Text size preview / The size of these words will change as you adjust the slider. Changes you make here will apply to most of the text on your device. / Text size that appears throughout Windows and your apps / Apply / Related settings / Display / Monitors, brightness, night light, display profile / Give feedback / Vertical（698 毫秒）",
+   "ms": 698,
+   "shot": "page-text-size.jpg"
+  },
+  {
+   "id": "page.mouse-pointer",
+   "group": "page",
+   "outcome": "passed",
+   "detail": "窗口显示：PopupHost / Popup / 100% / Accessibility / More / Mouse pointer and touch / Mouse pointer / Mouse pointer style / Show more settings / White / Black / Inverted / Custom / Size（731 毫秒）",
+   "ms": 731,
+   "shot": "page-mouse-pointer.jpg"
+  },
+  {
+   "id": "page.narrator",
+   "group": "page",
+   "outcome": "passed",
+   "detail": "窗口显示：PopupHost / Popup / 100% / Accessibility / Narrator / Narrator is a screen reader that describes what's on your screen. / Use Narrator / Show more settings / Keyboard shortcut for Narrator / Press the Windows logo key  + Ctrl + Enter to turn Narrator on and off / Narrator Home / Get help, access settings, and learn about new Narrator features / Complete guide to Narrator / Narrator's voice（897 毫秒）",
+   "ms": 897,
+   "shot": "page-narrator.jpg"
+  },
+  {
+   "id": "page.magnifier",
+   "group": "page",
+   "outcome": "passed",
+   "detail": "窗口显示：PopupHost / Popup / 100% / Accessibility / Magnifier / Press the Windows logo key  + the Plus sign to turn on Magnifier—and press the Windows logo key  + Esc to turn it off / Show more settings / Zoom level / Press the Windows logo key  + the Plus sign or the Minus sign to zoom in or out—or press and hold Ctrl + Alt and rotate your mouse wheel / Zoom out / 200% / Zoom in / Zoom increment / 100% (default)（735 毫秒）",
+   "ms": 735,
+   "shot": "page-magnifier.jpg"
+  },
+  {
+   "id": "page.privacy",
+   "group": "page",
+   "outcome": "passed",
+   "detail": "窗口显示：PopupHost / Popup / 100% / Privacy & security / Security / Windows Security / Antivirus, browser, firewall, and network protection for your device / Windows permissions / General / Advertising ID, local content, app launches, settings suggestions, productivity tools / Speech / Online speech recognition for dictation and other voice-based interactions / Inking & typing personalization / Custom dictionary, words in your dictionary（812 毫秒）",
+   "ms": 812,
+   "shot": "page-privacy.jpg"
+  },
+  {
+   "id": "page.location",
+   "group": "page",
+   "outcome": "passed",
+   "detail": "窗口显示：PopupHost / Popup / 100% / Privacy & security / Location / Windows can use your device’s capabilities like GPS or Wi-Fi to determine your location. Microsoft might use location data to improve the accuracy of its location services. Some desktop apps might not appear on this page or be affected by these settings. Learn more about location / Learn more about location / Location services / Location is turned off and Windows and other users on this device will not be able to use location / Let apps access your location / All apps can access approximate location, but you can choose which apps can access your precise location / Show more settings / Let desktop apps access your location / Desktop a…（812 毫秒）",
+   "ms": 812,
+   "shot": "page-location.jpg"
+  },
+  {
+   "id": "page.camera",
+   "group": "page",
+   "outcome": "passed",
+   "detail": "窗口显示：PopupHost / Popup / 100% / Privacy & security / Camera / The settings on this page do not prevent you from signing in with your camera using facial recognition (Windows Hello). Some desktop apps might not appear on this page or be affected by these settings. Learn more about camera / Learn more about camera / Camera access / Anyone using this device can choose if their apps have camera access when this is on / Let apps access your camera / Choose which apps can access your camera / Show more settings / Feedback Hub / Let desktop apps access your camera（783 毫秒）",
+   "ms": 783,
+   "shot": "page-camera.jpg"
+  },
+  {
+   "id": "page.microphone",
+   "group": "page",
+   "outcome": "passed",
+   "detail": "窗口显示：PopupHost / Popup / 100% / Privacy & security / Microphone / If an app is using your microphone, you’ll see a microphone icon on your Windows taskbar. Some desktop apps might not appear on this page or be affected by these settings. Learn more about microphone / Learn more about microphone / Microphone access / Anyone using this device can choose if their apps have microphone access when this is on / Let apps access your microphone / Choose which apps can access your microphone / Show more settings / Feedback Hub / Let desktop apps access your microphone（741 毫秒）",
+   "ms": 741,
+   "shot": "page-microphone.jpg"
+  },
+  {
+   "id": "page.windows-security",
+   "group": "page",
+   "outcome": "passed",
+   "detail": "窗口显示：Privacy & security / More / Windows Security / Windows Security is your home to view and manage the security and health of your device. / Open Windows Security / Protection areas / Virus & threat protection Actions needed. / Virus & threat protection / Actions needed. / Firewall & network protection No actions needed. / Firewall & network protection / No actions needed. / App & browser control Actions recommended. / App & browser control（1145 毫秒）",
+   "ms": 1145,
+   "shot": "page-windows-security.jpg"
+  },
+  {
+   "id": "page.windows-update",
+   "group": "page",
+   "outcome": "passed",
+   "detail": "窗口显示：Windows Update / You're up to date / Last checked: ‎11/‎3/‎2026, ‏‎6:29 PM / Check for updates / More options / Get the latest updates as soon as they're available / Be among the first to get the latest non-security updates, fixes, and improvements as they roll out. Learn more / Learn more / Pause updates / Pause for 1 week / Update history / Advanced options / Delivery optimization, optional updates, active hours, other update settings / Windows Insider Program（928 毫秒）",
+   "ms": 928,
+   "shot": "page-windows-update.jpg"
+  },
+  {
+   "id": "page.backup",
+   "group": "page",
+   "outcome": "unavailable",
+   "detail": "Windows Server 没有“Windows Backup”这一页；桌面版的 Windows 有。窗口显示：Windows Update / You're up to date / Last checked: ‎11/‎3/‎2026, ‏‎6:29 PM / Check for updates / More options / Get the latest updates as soon as they're available / Be among the first to get the latest non-security updates, fixes, and improvements as they roll out. Learn more / Learn more / Pause updates / Pause for 1 week / Update history / Advanced options / Delivery optimization, optional updates, active hours, other update settings / Windows Insider Program",
+   "ms": 658
+  },
+  {
+   "id": "page.troubleshoot",
+   "group": "page",
+   "outcome": "passed",
+   "detail": "窗口显示：System / Troubleshoot / Options / Recommended troubleshooter history / Other troubleshooters / Quick assistance from a friend / Give feedback（702 毫秒）",
+   "ms": 702,
+   "shot": "page-troubleshoot.jpg"
+  },
+  {
+   "id": "page.recovery",
+   "group": "page",
+   "outcome": "passed",
+   "detail": "窗口显示：System / Recovery / If you’re having problems with your PC or want to reset it, these recovery options might help. / Fix problems without resetting your PC / Resetting can take a while — first, try resolving issues by running a troubleshooter / Recovery options / Advanced startup / Restart your device to change startup settings, including starting from a disc or USB drive / Restart now / Give feedback（664 毫秒）",
+   "ms": 664,
+   "shot": "page-recovery.jpg"
+  },
+  {
+   "id": "page.activation",
+   "group": "page",
+   "outcome": "passed",
+   "detail": "窗口显示：System / Activation / Windows Server 2025 Datacenter / Activation state, Active / Activation state / Active / Show more settings / Windows is activated using your organization’s activation service. / Change product key / Change / Give feedback（717 毫秒）",
+   "ms": 717,
+   "shot": "page-activation.jpg"
+  },
+  {
+   "id": "page.developers",
+   "group": "page",
+   "outcome": "passed",
+   "detail": "窗口显示：System / For developers / Informational icon / These settings are intended for development use only. / Learn more / Developer Mode / Install apps from any source, including loose files / Device discovery / Make your device visible to USB connections and your local network / Show more settings / End Task / Enable end task in taskbar by right click / File Explorer / Adjust these settings for a more developer-friendly experience using File Explorer（733 毫秒）",
+   "ms": 733,
+   "shot": "page-developers.jpg"
+  },
+  {
+   "id": "gate.before",
+   "group": "gate",
+   "outcome": "passed",
+   "detail": "自检之前改 setting:dark-mode：没有直接改，打开了设置页，值仍是 off。",
+   "ms": 2246
+  },
+  {
+   "id": "gate.selftest",
+   "group": "gate",
+   "outcome": "passed",
+   "detail": "自检 34 项通过、0 项失败、1 项跳过；dark-mode 现在记为“核对过”，可以直接改。",
+   "ms": 15352
+  },
+  {
+   "id": "gate.selftest-items",
+   "group": "gate",
+   "outcome": "passed",
+   "detail": "自检的 35 项里没有失败的（设置面板标识一项见 page.panes）。",
+   "ms": 1
+  },
+  {
+   "id": "gate.after",
+   "group": "gate",
+   "outcome": "passed",
+   "detail": "自检之后直接改成功：off → on → off，回答里带着原值。",
+   "ms": 1629
+  },
+  {
+   "id": "tool.set.query",
+   "group": "tool",
+   "outcome": "passed",
+   "detail": "用“把深色模式打开”找对了 setting:dark-mode，并改成了 on；已改回。",
+   "ms": 1295
+  },
+  {
+   "id": "tool.set.invalid",
+   "group": "tool",
+   "outcome": "passed",
+   "detail": "给了不合法的值：回答“值不对”，并说明要的是 on or off；值没有变。",
+   "ms": 268
+  },
+  {
+   "id": "tool.find",
+   "group": "tool",
+   "outcome": "passed",
+   "detail": "查“深色模式”：第一名是 setting:dark-mode，标着可以直接改；3 个结果都标明了能不能直接改。",
+   "ms": 2
+  },
+  {
+   "id": "tool.set.security",
+   "group": "tool",
+   "outcome": "passed",
+   "detail": "对安全相关的页面调用 computer_set：只打开了页面，回答里标明是安全页面。",
+   "ms": 1254,
+   "shot": "tool-security-page.jpg"
+  },
+  {
+   "id": "tool.refuse",
+   "group": "tool",
+   "outcome": "passed",
+   "detail": "助手没开 Computer Use、在任务里、参数给错这三种情况都被挡住，没有启动任何系统命令。",
+   "ms": 1
+  },
+  {
+   "id": "probe.explorer-advanced",
+   "group": "probe",
+   "outcome": "passed",
+   "detail": "50 毫秒，退出码 0：HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced Start_SearchFiles REG_DWORD 0x1 StartMenuAdminTools REG_DWORD 0x1 ServerAdminUI REG_DWORD 0x1 Hidden REG_DWORD 0x2 ShowCompColor REG_DWORD 0x1 HideFileExt REG_DWORD 0x1 DontPrettyPath REG_DWORD 0x0 ShowInfoTip REG_DWORD 0x1 HideIcons REG_DWORD 0x0 MapNetDrvBtn REG_DWORD 0x0 WebView REG_DWORD 0x1 Filter REG_DWORD 0x0 ShowSuperHidden REG_DWORD 0x0 SeparateProcess REG_DWORD 0x0 AutoCheckSelect REG_DWORD 0x0 IconsOnly REG_DWORD 0x1 ShowTypeOverlay REG_DWORD 0x1 ShowStatusBar REG_DWORD 0x1 ListviewAlphaSelect REG_DWORD 0x0 ListviewShadow REG_DWORD 0x0 TaskbarAnimations REG_DWORD 0x0 TaskbarSizeMove REG_DWORD 0x0 DisablePreviewDesktop REG_DWORD 0x1 TaskbarSmallIcons REG_DWORD 0x0 TaskbarAutoHideInTabletMode REG_DWORD 0x0 ShellMigrationLevel REG_DWORD 0x3 ProgrammableTaskbarStatus REG_DWORD 0x1 StartMenuInit REG_DWORD 0xd WinXMigrationLevel REG_DWORD 0x1 TaskbarStateLastRun REG_BINARY 8BC9F76A00000000 TaskbarAl REG_DWORD 0x1 ShowTaskViewButton REG_DWORD 0x1 ShowSecondsInSystemClock REG_DWORD 0x0",
+   "ms": 50
+  },
+  {
+   "id": "probe.explorer",
+   "group": "probe",
+   "outcome": "passed",
+   "detail": "26 毫秒，退出码 0：HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer ExplorerStartupTraceRecorded REG_DWORD 0x1 ShellState REG_BINARY 240000003428000000000000000000000000000001000000130000000000000072000000 LogonCount REG_QWORD 0x1 UserSignedIn REG_DWORD 0x1 TelemetrySalt REG_DWORD 0x0 SIDUpdatedOnLibraries REG_DWORD 0x1 LocalKnownFoldersMigrated REG_DWORD 0x1 AppReadinessLogonComplete REG_DWORD 0x1 FirstRunTelemetryComplete REG_DWORD 0x1 AadAccountAttachedCache REG_DWORD 0x0 IrisClientRefresh REG_DWORD 0x1 PostAppInstallTasksCompleted REG_DWORD 0x1 HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Accent HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\AutoplayHandlers HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\BannerStore HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\BitBucket HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\CabinetState HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\CLSID HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Discardable HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\FileExts HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\LogonStats HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\LowRegistry HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\MenuOrder HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Modules HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\MountPoints2 HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Package Installation HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\QuietHours HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\RecentDocs HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\RunMRU HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\SearchPlatform HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Shell Folders HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Shutdown HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\StartPage HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\StartupApproved HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\StorageProvider HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Streams HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\StuckRects3 HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\TabletMode HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Taskband HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\TWinUI HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\TypedPaths HKEY_CURRENT_USER\\Software\\Microsoft\\…",
+   "ms": 26
+  },
+  {
+   "id": "probe.search",
+   "group": "probe",
+   "outcome": "passed",
+   "detail": "16 毫秒，退出码 0：HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Search InstalledPackagedAppsRevision REG_SZ {6872F8D8-0CAE-4F90-AD16-EB8FBE951D64} InstalledWin32AppsRevision REG_SZ {DC4850FC-06E5-4A5A-9716-5BB24F95A481} SearchboxTaskbarModeCache REG_DWORD 0x1 SearchboxTaskbarMode REG_DWORD 0x2 CortanaStateLastRun REG_BINARY 4CC9F76A00000000 IsWebView2 REG_DWORD 0x1 HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Search\\JumplistData",
+   "ms": 16
+  },
+  {
+   "id": "probe.personalize",
+   "group": "probe",
+   "outcome": "passed",
+   "detail": "16 毫秒，退出码 0：HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize ColorPrevalence REG_DWORD 0x0 EnableTransparency REG_DWORD 0x1 AppsUseLightTheme REG_DWORD 0x1 SystemUsesLightTheme REG_DWORD 0x1",
+   "ms": 16
+  },
+  {
+   "id": "probe.dwm",
+   "group": "probe",
+   "outcome": "passed",
+   "detail": "19 毫秒，退出码 0：HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\DWM Composition REG_DWORD 0x1 AccentColor REG_DWORD 0xffd47800 ColorPrevalence REG_DWORD 0x0 ColorizationColor REG_DWORD 0xc40078d4 ColorizationColorBalance REG_DWORD 0x59 ColorizationAfterglow REG_DWORD 0xc40078d4 ColorizationAfterglowBalance REG_DWORD 0xa ColorizationBlurBalance REG_DWORD 0x1 EnableWindowColorization REG_DWORD 0x0 ColorizationGlassAttribute REG_DWORD 0x1 EnableAeroPeek REG_DWORD 0x0 AlwaysHibernateThumbnails REG_DWORD 0x0",
+   "ms": 19
+  },
+  {
+   "id": "probe.mouse",
+   "group": "probe",
+   "outcome": "passed",
+   "detail": "27 毫秒，退出码 0：HKEY_CURRENT_USER\\Control Panel\\Mouse ActiveWindowTracking REG_DWORD 0x0 Beep REG_SZ No DoubleClickHeight REG_SZ 4 DoubleClickSpeed REG_SZ 500 DoubleClickWidth REG_SZ 4 ExtendedSounds REG_SZ No MouseHoverHeight REG_SZ 4 MouseHoverTime REG_SZ 400 MouseHoverWidth REG_SZ 4 MouseSensitivity REG_SZ 10 MouseSpeed REG_SZ 1 MouseThreshold1 REG_SZ 6 MouseThreshold2 REG_SZ 10 MouseTrails REG_SZ 0 SmoothMouseXCurve REG_BINARY 0000000000000000156E000000000000004001000000000029DC0300000000000000280000000000 SmoothMouseYCurve REG_BINARY 0000000000000000FD11010000000000002404000000000000FC12000000000000C0BB0100000000 SnapToDefaultButton REG_SZ 0 SwapMouseButtons REG_SZ 0",
+   "ms": 27
+  },
+  {
+   "id": "probe.desktop",
+   "group": "probe",
+   "outcome": "passed",
+   "detail": "88 毫秒，退出码 0：HKEY_CURRENT_USER\\Control Panel\\Desktop BlockSendInputResets REG_SZ 0 CaretTimeout REG_DWORD 0x1388 CaretWidth REG_DWORD 0x1 ClickLockTime REG_DWORD 0x4b0 CoolSwitchColumns REG_SZ 7 CoolSwitchRows REG_SZ 3 CursorBlinkRate REG_SZ 530 DockMoving REG_SZ 1 DragFromMaximize REG_SZ 1 DragFullWindows REG_SZ 0 DragHeight REG_SZ 4 DragWidth REG_SZ 4 FocusBorderHeight REG_DWORD 0x1 FocusBorderWidth REG_DWORD 0x1 FontSmoothing REG_SZ 2 FontSmoothingGamma REG_DWORD 0x0 FontSmoothingOrientation REG_DWORD 0x1 FontSmoothingType REG_DWORD 0x2 ForegroundFlashCount REG_DWORD 0x7 ForegroundLockTimeout REG_DWORD 0x30d40 LeftOverlapChars REG_SZ 3 MenuShowDelay REG_SZ 400 MouseWheelRouting REG_DWORD 0x2 PaintDesktopVersion REG_DWORD 0x0 Pattern REG_DWORD 0x0 RightOverlapChars REG_SZ 3 SnapSizing REG_SZ 1 TileWallpaper REG_SZ 0 WallpaperOriginX REG_DWORD 0x0 WallpaperOriginY REG_DWORD 0x0 WallpaperStyle REG_SZ 10 WheelScrollChars REG_SZ 3 WheelScrollLines REG_SZ 3 WindowArrangementActive REG_SZ 1 ScreenSaveActive REG_SZ 1 WallPaper REG_SZ C:\\Windows\\web\\wallpaper\\Windows\\img0.jpg Win8DpiScaling REG_DWORD 0x0 DpiScalingVer REG_DWORD 0x1000 UserPreferencesMask REG_BINARY 9012038010000000 MaxVirtualDesktopDimension REG_DWORD 0x400 MaxMonitorDimension REG_DWORD 0x400 TranscodedImageCount REG_DWORD 0x1 LastUpdated REG_DWORD 0xffffffff TranscodedImageCache REG_BINARY 7AC30100748E0D0080070000B00400002478C0460284DA0143003A005C00570069006E0064006F00770073005C007700650062005C00770061006C006C00700061007000650072005C00570069006E0064006F00770073005C0069006D00670030002E006A007000670000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000 HKEY_CURRENT_USER\\Control Panel\\Deskto…",
+   "ms": 88
+  },
+  {
+   "id": "probe.accessibility",
+   "group": "probe",
+   "outcome": "passed",
+   "detail": "18 毫秒，退出码 0：HKEY_CURRENT_USER\\Control Panel\\Accessibility MessageDuration REG_DWORD 0x5 MinimumHitRadius REG_DWORD 0x0 HKEY_CURRENT_USER\\Control Panel\\Accessibility\\AudioDescription HKEY_CURRENT_USER\\Control Panel\\Accessibility\\Blind Access HKEY_CURRENT_USER\\Control Panel\\Accessibility\\HighContrast HKEY_CURRENT_USER\\Control Panel\\Accessibility\\Keyboard Preference HKEY_CURRENT_USER\\Control Panel\\Accessibility\\Keyboard Response HKEY_CURRENT_USER\\Control Panel\\Accessibility\\MouseKeys HKEY_CURRENT_USER\\Control Panel\\Accessibility\\On HKEY_CURRENT_USER\\Control Panel\\Accessibility\\ShowSounds HKEY_CURRENT_USER\\Control Panel\\Accessibility\\SlateLaunch HKEY_CURRENT_USER\\Control Panel\\Accessibility\\SoundSentry HKEY_CURRENT_USER\\Control Panel\\Accessibility\\StickyKeys HKEY_CURRENT_USER\\Control Panel\\Accessibility\\TimeOut HKEY_CURRENT_USER\\Control Panel\\Accessibility\\ToggleKeys",
+   "ms": 18
+  },
+  {
+   "id": "probe.notifications",
+   "group": "probe",
+   "outcome": "passed",
+   "detail": "15 毫秒，退出码 0：HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\PushNotifications DatabaseMigrationCompleted REG_DWORD 0x1 ToastEnabled REG_DWORD 0x1 HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\PushNotifications\\Applications HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\PushNotifications\\Backup HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\PushNotifications\\wpnidm",
+   "ms": 15
+  },
+  {
+   "id": "probe.game-bar",
+   "group": "probe",
+   "outcome": "passed",
+   "detail": "14 毫秒，退出码 0：HKEY_CURRENT_USER\\Software\\Microsoft\\GameBar AllowAutoGameMode REG_DWORD 0x1",
+   "ms": 14
+  },
+  {
+   "id": "probe.storage-sense",
+   "group": "probe",
+   "outcome": "passed",
+   "detail": "15 毫秒，退出码 0：HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\StorageSense\\Parameters\\StoragePolicy 01 REG_DWORD 0x1 2048 REG_DWORD 0x0",
+   "ms": 15
+  },
+  {
+   "id": "probe.clipboard",
+   "group": "probe",
+   "outcome": "passed",
+   "detail": "14 毫秒，退出码 0：HKEY_CURRENT_USER\\Software\\Microsoft\\Clipboard EnableClipboardHistory REG_DWORD 0x0",
+   "ms": 14
+  },
+  {
+   "id": "probe.power-scheme",
+   "group": "probe",
+   "outcome": "passed",
+   "detail": "163 毫秒，退出码 0：Power Scheme GUID: 8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c (High performance)",
+   "ms": 163
+  },
+  {
+   "id": "probe.power-display",
+   "group": "probe",
+   "outcome": "passed",
+   "detail": "176 毫秒，退出码 0：Power Scheme GUID: 8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c (High performance) GUID Alias: SCHEME_MIN Subgroup GUID: 7516b95f-f776-4464-8c53-06167f40cc99 (Display) GUID Alias: SUB_VIDEO Power Setting GUID: 3c0bc021-c8a8-4e07-a973-6b14cbcb2b7e (Turn off display after) GUID Alias: VIDEOIDLE Minimum Possible Setting: 0x00000000 Maximum Possible Setting: 0xffffffff Possible Settings increment: 0x00000001 Possible Settings units: Seconds Current AC Power Setting Index: 0x00000000 Current DC Power Setting Index: 0x00000258",
+   "ms": 176
+  },
+  {
+   "id": "probe.power-sleep",
+   "group": "probe",
+   "outcome": "passed",
+   "detail": "172 毫秒，退出码 0：Power Scheme GUID: 8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c (High performance) GUID Alias: SCHEME_MIN Subgroup GUID: 238c9fa8-0aad-41ed-83f4-97be242c8f20 (Sleep) GUID Alias: SUB_SLEEP Power Setting GUID: 29f6c1db-86da-48c5-9fdb-f2b67b1f44da (Sleep after) GUID Alias: STANDBYIDLE Minimum Possible Setting: 0x00000000 Maximum Possible Setting: 0xffffffff Possible Settings increment: 0x00000001 Possible Settings units: Seconds Current AC Power Setting Index: 0x00000000 Current DC Power Setting Index: 0x00000000",
+   "ms": 172
+  },
+  {
+   "id": "probe.sound-devices",
+   "group": "probe",
+   "outcome": "unavailable",
+   "detail": "352 毫秒，退出码 0，没有输出",
+   "ms": 353
+  },
+  {
+   "id": "probe.network-adapters",
+   "group": "probe",
+   "outcome": "passed",
+   "detail": "1605 毫秒，退出码 0：[{\"Name\":\"vEthernet (nat)\",\"InterfaceDescription\":\"Hyper-V Virtual Ethernet Adapter\",\"Status\":\"Up\"},{\"Name\":\"Ethernet 4\",\"InterfaceDescription\":\"Mellanox ConnectX-5 Ex Virtual Adapter\",\"Status\":\"Up\"},{\"Name\":\"Ethernet 3\",\"InterfaceDescription\":\"Microsoft Hyper-V Network Adapter #3\",\"Status\":\"Up\"}]",
+   "ms": 1605
+  },
+  {
+   "id": "probe.start-apps",
+   "group": "probe",
+   "outcome": "passed",
+   "detail": "518 毫秒，退出码 0：7-Zip File Manager ; 7-Zip Help ; Anaconda PowerShell Prompt ; Anaconda Prompt ; Application Stack Builder ; Application Verifier (WOW) ; Application Verifier (X64) ; Azure Arc Setup ; Azure Cosmos DB Emulator ; Blend for Visual Studio ; Calculator ; Character Map ; CMake (cmake-gui) ; CMake Documentation ; Command Prompt ; Component Services ; Computer Management ; Control Panel ; CPAN Client ; CPAN Module Search ; Create local library areas ; Debuggable Package Manager ; Debugging Help ; Debugging Help ; Debugging Help ; Defragment and Optimize Drives ; Developer Command Prompt for VS ; Developer PowerShell for VS ; Disk Cleanup ; Documentation for Desktop Apps ; Documentation for UWP Apps ; DTF Documentation ; Event Viewer ; Feedback Hub ; File Explorer ; Firefox ; Firefox Private Browsing ; Get Started ; Git Bash ; Git CMD ; Git FAQs (Frequently Asked Questions) ; Git GUI ; Git Release Notes ; Global Flags (ARM64) ; Global Flags (X64) ; Global Flags (X86) ; Google Chrome ; GPUView ; IDLE (Python 3.11 64-bit) ; IDLE (Python 3.12 64-bit) ; IDLE (Python 3.13 64-bit) ; IDLE (Python 3.14 64-bit) ; IDLE (Python 3.15 64-bit) ; ImageMagick Web Pages ; Inno Setup Compiler ; Inno Setup Documentation ; Inno Setup Documentation (Dark) ; Inno Setup Example Scripts ; Inno Setup FAQ ; Inno Setup Revision History ; Install Additional Tools for Node.js ; Installation notes ; iSCSI Initiator ; Learning Perl (tutorials, examples) ; Live captions ; Live Support (chat) ; Local Security Policy ; Magnifier ; MetaCPAN Search Engine ; Microsoft Edge ; Microsoft Web Platform Installer ; MSI SDK Documentation ; MySQL 8.4 Command Line Client ; MySQL 8.4 Command Line Client - Unicode ; MySQL 8.4 Configurator ; Narrator ; Node.js ; Node.js command prompt ; Node.js documentation ; Node.js website ; Notepad ; ODBC Data Sources (32-bit) ; ODBC Data Sources (64-bit) ; Official OpenSSL Documentation ; Official OpenSSL Website ; On-Screen Keyboard ; Paint ; Performance Monitor ; Perl (command line) ; Perl Documentation ; pgAdmin 4 ; pgAdmin documentation ; PostgreSQL documentation ; PostgreSQL release notes ; PowerShell 7 (x64) ; Python 3.11 (64-bit) ; Python 3.11 Manuals (64-bit) ; Python 3.11 Module Docs (64-bit) ; Python 3.12 (64-bit) ; Python 3.12 Manuals (64-bit) ; Python 3.12 Module Docs (64-bit) ; Python 3.13 (64-bit) ; Python 3.13 Manuals (64-bit) ; Python 3.13 Module Docs (64-bit) ; Python 3.14 (64-bit) ; Python 3.14 Manuals (64-bit) ; Python 3.14 Module Docs (64-bit) ; Python 3.15 (64-bit) ; Python 3.15 Manuals (64-bit) ; Python 3.15 Module Docs (64-bit) ; R 4.6.2 ; Recovery Drive ; Registry Editor ; Reload Configuration ; Remote Desktop Connection ; Resource Monitor ; Rtools45 Bash ; Run ; Sample Desktop Apps ; Sample UWP Apps ; Server Manager ; Service Fabric Local Cluster Manager ; Services ; Settings ; Snipping Tool ; SQL Shell (psql) ; Steps Recorder ; Strawberry Perl README ; Strawberry Perl Release Notes ; Strawberry Perl Website ; System Configuration ; System…",
+   "ms": 518
+  },
+  {
+   "id": "probe.brightness",
+   "group": "probe",
+   "outcome": "unavailable",
+   "detail": "414 毫秒，退出码 1：Get-CimInstance : Not supported At line:1 char:138 + ... = 'probe'; Get-CimInstance -Namespace root/WMI -ClassName WmiMonitor ... + ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ + CategoryInfo : NotImplemented: (root/WMI:WmiMonitorBrightness:String) [Get-CimInstance], CimException + FullyQualifiedErrorId : HRESULT 0x8004100c,Microsoft.Management.Infrastructure.CimCmdlets.GetCimInstanceCommand",
+   "ms": 414
+  },
+  {
+   "id": "probe.culture",
+   "group": "probe",
+   "outcome": "passed",
+   "detail": "504 毫秒，退出码 0：en-US ; en-US ; en-US",
+   "ms": 504
+  },
+  {
+   "id": "probe.powershell-start",
+   "group": "probe",
+   "outcome": "passed",
+   "detail": "958 毫秒，退出码 0：this one was already up for 253 ms; another one takes 393, 139, 136 ms",
+   "ms": 958
+  },
+  {
+   "id": "final.restored",
+   "group": "final",
+   "outcome": "passed",
+   "detail": "15 项读到过值的设置，结束时都是开始时的值。",
+   "ms": 0
+  },
+  {
+   "id": "final.cleanup",
+   "group": "final",
+   "outcome": "passed",
+   "detail": "关掉了设置窗口和文件夹窗口，删掉了临时文件。",
+   "ms": 0
+  }
+ ],
+ "times": {
+  "catalog.scan": 1473,
+  "catalog.load": 2,
+  "catalog.rescan": 520,
+  "open.cost": 1238,
+  "open.app": 538,
+  "open.folder": 3397,
+  "setting.read": 251,
+  "setting.change": 695,
+  "setting.change.fast": 470,
+  "open.page.command": 207,
+  "page.read": 476,
+  "open.page": 792,
+  "tool.set": 549
+ },
+ "verified": [
+  "dark-mode",
+  "app-dark-mode",
+  "system-dark-mode",
+  "transparency",
+  "clipboard-history",
+  "taskbar-alignment",
+  "task-view-button",
+  "clock-seconds",
+  "accent-title-bars",
+  "accent-start-taskbar",
+  "notifications",
+  "game-mode",
+  "storage-sense",
+  "screen-off-minutes",
+  "sleep-minutes"
+ ],
+ "untestable": [
+  "brightness"
+ ]
+}

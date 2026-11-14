@@ -1,0 +1,222 @@
+{
+ "platform": "windows",
+ "system": "Windows 10.0.26100.0 (Windows_NT 10.0.26100 x64)",
+ "startedAt": 1794624911948,
+ "finishedAt": 1794624927042,
+ "items": [
+  {
+   "id": "catalog.apps",
+   "outcome": "passed",
+   "detail": "176 apps, 57 pages, 16 settings",
+   "ms": 517
+  },
+  {
+   "id": "catalog.known-app",
+   "outcome": "passed",
+   "detail": "Notepad",
+   "ms": 1
+  },
+  {
+   "id": "search.page",
+   "outcome": "passed",
+   "detail": "Bluetooth & devices",
+   "ms": 0
+  },
+  {
+   "id": "open.page",
+   "outcome": "passed",
+   "detail": "The About page of the system settings was opened.",
+   "ms": 529
+  },
+  {
+   "id": "setting.dark-mode.read",
+   "outcome": "passed",
+   "detail": "off",
+   "ms": 321
+  },
+  {
+   "id": "setting.dark-mode.write-same",
+   "outcome": "passed",
+   "detail": "off written, off read back",
+   "ms": 841
+  },
+  {
+   "id": "setting.app-dark-mode.read",
+   "outcome": "passed",
+   "detail": "off",
+   "ms": 250
+  },
+  {
+   "id": "setting.app-dark-mode.write-same",
+   "outcome": "passed",
+   "detail": "off written, off read back",
+   "ms": 725
+  },
+  {
+   "id": "setting.system-dark-mode.read",
+   "outcome": "passed",
+   "detail": "off",
+   "ms": 252
+  },
+  {
+   "id": "setting.system-dark-mode.write-same",
+   "outcome": "passed",
+   "detail": "off written, off read back",
+   "ms": 731
+  },
+  {
+   "id": "setting.transparency.read",
+   "outcome": "passed",
+   "detail": "on",
+   "ms": 252
+  },
+  {
+   "id": "setting.transparency.write-same",
+   "outcome": "passed",
+   "detail": "on written, on read back",
+   "ms": 726
+  },
+  {
+   "id": "setting.clipboard-history.read",
+   "outcome": "passed",
+   "detail": "off",
+   "ms": 258
+  },
+  {
+   "id": "setting.clipboard-history.write-same",
+   "outcome": "passed",
+   "detail": "off written, off read back",
+   "ms": 508
+  },
+  {
+   "id": "setting.brightness.read",
+   "outcome": "skipped",
+   "detail": "No value right now: none",
+   "ms": 355
+  },
+  {
+   "id": "setting.taskbar-alignment.read",
+   "outcome": "passed",
+   "detail": "center",
+   "ms": 266
+  },
+  {
+   "id": "setting.taskbar-alignment.write-same",
+   "outcome": "passed",
+   "detail": "center written, center read back",
+   "ms": 720
+  },
+  {
+   "id": "setting.task-view-button.read",
+   "outcome": "passed",
+   "detail": "on",
+   "ms": 250
+  },
+  {
+   "id": "setting.task-view-button.write-same",
+   "outcome": "passed",
+   "detail": "on written, on read back",
+   "ms": 727
+  },
+  {
+   "id": "setting.clock-seconds.read",
+   "outcome": "passed",
+   "detail": "off",
+   "ms": 256
+  },
+  {
+   "id": "setting.clock-seconds.write-same",
+   "outcome": "passed",
+   "detail": "off written, off read back",
+   "ms": 726
+  },
+  {
+   "id": "setting.accent-title-bars.read",
+   "outcome": "passed",
+   "detail": "off",
+   "ms": 253
+  },
+  {
+   "id": "setting.accent-title-bars.write-same",
+   "outcome": "passed",
+   "detail": "off written, off read back",
+   "ms": 710
+  },
+  {
+   "id": "setting.accent-start-taskbar.read",
+   "outcome": "passed",
+   "detail": "off",
+   "ms": 249
+  },
+  {
+   "id": "setting.accent-start-taskbar.write-same",
+   "outcome": "passed",
+   "detail": "off written, off read back",
+   "ms": 710
+  },
+  {
+   "id": "setting.notifications.read",
+   "outcome": "passed",
+   "detail": "on",
+   "ms": 248
+  },
+  {
+   "id": "setting.notifications.write-same",
+   "outcome": "passed",
+   "detail": "on written, on read back",
+   "ms": 504
+  },
+  {
+   "id": "setting.game-mode.read",
+   "outcome": "passed",
+   "detail": "on",
+   "ms": 249
+  },
+  {
+   "id": "setting.game-mode.write-same",
+   "outcome": "passed",
+   "detail": "on written, on read back",
+   "ms": 495
+  },
+  {
+   "id": "setting.storage-sense.read",
+   "outcome": "passed",
+   "detail": "on",
+   "ms": 253
+  },
+  {
+   "id": "setting.storage-sense.write-same",
+   "outcome": "passed",
+   "detail": "on written, on read back",
+   "ms": 502
+  },
+  {
+   "id": "setting.screen-off-minutes.read",
+   "outcome": "passed",
+   "detail": "0",
+   "ms": 194
+  },
+  {
+   "id": "setting.screen-off-minutes.write-same",
+   "outcome": "passed",
+   "detail": "0 written, 0 read back",
+   "ms": 563
+  },
+  {
+   "id": "setting.sleep-minutes.read",
+   "outcome": "passed",
+   "detail": "0",
+   "ms": 194
+  },
+  {
+   "id": "setting.sleep-minutes.write-same",
+   "outcome": "passed",
+   "detail": "0 written, 0 read back",
+   "ms": 574
+  }
+ ],
+ "passed": 34,
+ "failed": 0,
+ "skipped": 1,
+ "file": "D:\\a\\hxbot-check\\hxbot-check\\out\\home\\Downloads\\HXBot-self-test-20261114T025511Z.json"
+}
