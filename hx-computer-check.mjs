@@ -776,6 +776,7 @@ var hxRun = (command, args, options = {}) => new Promise((resolve) => {
     });
   });
 });
+var HX_WINDOWS_COMMAND_TIMEOUT_MS = 90000;
 
 // src/backend/hx-computer/search.ts
 var EXACT = 100;
@@ -999,7 +1000,6 @@ var RUNS_WHEN_OPENED = new Set([
 ]);
 var READ_BACK_WAITS_MS = [400, 1200];
 var OPEN_TIMEOUT_MS = 20000;
-var WINDOWS_COMMAND_TIMEOUT_MS = 90000;
 var RESCAN_MIN_MS = 20000;
 var MAX_URL = 2000;
 var SWITCH_ON = new Set(["on", "true", "1", "yes", "enable", "enabled", "开", "打开", "开启", "启用", "是"]);
@@ -1079,7 +1079,7 @@ class HxComputerActions {
     this.#wait = wait;
   }
   #command(command, timeoutMs) {
-    const limit = timeoutMs ?? (this.#catalog.platform === "windows" ? WINDOWS_COMMAND_TIMEOUT_MS : 20000);
+    const limit = timeoutMs ?? (this.#catalog.platform === "windows" ? HX_WINDOWS_COMMAND_TIMEOUT_MS : 20000);
     return this.#run(command.command, command.args, {
       timeoutMs: limit,
       ...command.env ? { env: command.env } : {}
@@ -1093,7 +1093,7 @@ class HxComputerActions {
       return { ...shell, code: 0 };
     if (!shell.missing)
       return shell;
-    return this.#command(hxWinStart(target), WINDOWS_COMMAND_TIMEOUT_MS);
+    return this.#command(hxWinStart(target), HX_WINDOWS_COMMAND_TIMEOUT_MS);
   }
   async find(input) {
     if (this.#catalog.platform === null)
@@ -2880,7 +2880,8 @@ async function hxSelfTest(host) {
   return report;
 }
 async function checkSetting(host, seed, check) {
-  const run = (command) => host.run(command.command, command.args, { timeoutMs: 20000, ...command.env ? { env: command.env } : {} });
+  const timeoutMs = host.catalog.platform === "windows" ? HX_WINDOWS_COMMAND_TIMEOUT_MS : 20000;
+  const run = (command) => host.run(command.command, command.args, { timeoutMs, ...command.env ? { env: command.env } : {} });
   const read = { value: null };
   await check(`setting.${seed.key}.read`, async () => {
     const result = await run(seed.read);
@@ -8515,7 +8516,8 @@ async function hxRealCheck(host) {
     return host.run(command, args, options);
   };
   const system = host.system ?? hxRealSystem(platform, run);
-  const exec = (command, timeoutMs = 30000) => run(command.command, command.args, { timeoutMs, ...command.env ? { env: command.env } : {} });
+  const commandLimit = platform === "windows" ? HX_WINDOWS_COMMAND_TIMEOUT_MS : 30000;
+  const exec = (command, timeoutMs = commandLimit) => run(command.command, command.args, { timeoutMs, ...command.env ? { env: command.env } : {} });
   const outOfTime = () => host.now() - startedAt >= budgetMs;
   const time = (name, ms) => {
     times.set(name, [...times.get(name) ?? [], Math.max(0, ms)]);
