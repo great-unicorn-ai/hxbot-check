@@ -20996,6 +20996,20 @@ async function freeModels() {
 }
 function endpoints() {
   const found = [];
+  const own = {
+    url: process.env.HX_CHECK_MODEL_URL,
+    key: process.env.HX_CHECK_MODEL_KEY,
+    model: process.env.HX_CHECK_MODEL
+  };
+  if (own.url && own.key && own.model) {
+    const base = own.url.replace(/\/+$/, "");
+    found.push({
+      name: `${own.model} (key of the check)`,
+      url: base.endsWith("/chat/completions") ? base : `${base}/chat/completions`,
+      key: own.key,
+      model: own.model
+    });
+  }
   const token = process.env.GITHUB_TOKEN;
   const owner = process.env.GITHUB_REPOSITORY_OWNER;
   if (token) {
@@ -21012,6 +21026,13 @@ var PING = {
 };
 async function firstBrain(opencode, log) {
   const tried = [];
+  const own = endpoints().filter((endpoint) => endpoint.name.endsWith("(key of the check)"));
+  if (own.length) {
+    const found = await hxFirstWorkingModel(own);
+    tried.push(...found.tried);
+    if (found.model)
+      return { brain: hxChatBrain(found.model), tried };
+  }
   if (opencode) {
     const script = process.argv[1] ?? "";
     for (const model of (await freeModels()).slice(0, 4)) {
@@ -21046,7 +21067,7 @@ async function firstBrain(opencode, log) {
       }
     }
   }
-  const found = await hxFirstWorkingModel(endpoints());
+  const found = await hxFirstWorkingModel(endpoints().filter((endpoint) => !endpoint.name.endsWith("(key of the check)")));
   tried.push(...found.tried);
   return { brain: found.model ? hxChatBrain(found.model) : null, tried };
 }
