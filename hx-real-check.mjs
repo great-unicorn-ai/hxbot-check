@@ -6984,8 +6984,8 @@ var require_public_api = __commonJS(function(exports) {
 });
 
 // scripts/hx-real-check.ts
-import { mkdir, readdir as readdir2, readFile as readFile3, writeFile as writeFile2 } from "node:fs/promises";
-import { join as join8, resolve } from "node:path";
+import { mkdir as mkdir2, readdir as readdir4, readFile as readFile3, writeFile as writeFile3 } from "node:fs/promises";
+import { join as join10, resolve } from "node:path";
 
 // src/backend/hx-check/acp-brain.ts
 import { spawn } from "node:child_process";
@@ -7552,6 +7552,354 @@ function hxChatBrain(model) {
   };
 }
 
+// src/backend/hx-check/install-run.ts
+import { execFile as execFile2 } from "node:child_process";
+import { mkdir, mkdtemp as mkdtemp2, readdir as readdir2, rename as rename2, rm as rm2, writeFile } from "node:fs/promises";
+import { homedir, tmpdir as tmpdir3 } from "node:os";
+import { basename as basename2, join as join3 } from "node:path";
+import { promisify } from "node:util";
+
+// src/backend/hx-computer/install.ts
+import { access, mkdtemp, readdir, rename, rm } from "node:fs/promises";
+import { tmpdir as tmpdir2 } from "node:os";
+import { basename, extname, join as join2 } from "node:path";
+
+// src/backend/hx-computer/runner.ts
+import { execFile } from "node:child_process";
+var DEFAULT_TIMEOUT_MS = 15000;
+var MAX_OUTPUT_BYTES = 8 * 1024 * 1024;
+function hxRunOk(result) {
+  return result.code === 0 && !result.timedOut && !result.missing;
+}
+function hxRunFailure(command, result) {
+  if (result.missing)
+    return `${command} is not on this computer`;
+  if (result.timedOut)
+    return `${command} did not answer in time`;
+  const text = (result.stderr.trim() || result.stdout.trim()).split(`
+`)[0] ?? "";
+  return `${command} ended with code ${result.code ?? "none"}${text ? `: ${text.slice(0, 300)}` : ""}`;
+}
+var hxRun = (command, args, options = {}) => new Promise((resolve) => {
+  execFile(command, [...args], {
+    timeout: options.timeoutMs ?? DEFAULT_TIMEOUT_MS,
+    maxBuffer: MAX_OUTPUT_BYTES,
+    windowsHide: true,
+    encoding: "utf8",
+    env: options.env ? { ...process.env, ...options.env } : process.env
+  }, (error, stdout, stderr) => {
+    if (!error) {
+      resolve({ code: 0, stdout, stderr, timedOut: false, missing: false });
+      return;
+    }
+    resolve({
+      code: typeof error.code === "number" ? error.code : null,
+      stdout,
+      stderr,
+      timedOut: error.killed === true,
+      missing: error.code === "ENOENT"
+    });
+  });
+});
+
+// src/backend/hx-computer/install.ts
+var HX_INSTALL_FILES = {
+  exists: (path) => access(path).then(() => true, () => false),
+  makeTemp: (prefix) => mkdtemp(join2(tmpdir2(), prefix)),
+  async findApps(folder) {
+    const found = [];
+    for (const entry of await readdir(folder, { withFileTypes: true }).catch(() => [])) {
+      if (!entry.isDirectory())
+        continue;
+      const path = join2(folder, entry.name);
+      if (entry.name.endsWith(".app"))
+        found.push(path);
+      else
+        for (const inner of await readdir(path, { withFileTypes: true }).catch(() => []))
+          if (inner.isDirectory() && inner.name.endsWith(".app"))
+            found.push(join2(path, inner.name));
+    }
+    return found;
+  },
+  rename: (from, to) => rename(from, to),
+  remove: (path) => rm(path, { recursive: true, force: true })
+};
+var LONG_MS = 300000;
+function plistValue(output) {
+  return output.trim().split(`
+`)[0]?.trim() ?? "";
+}
+async function facts(run, app) {
+  const plist = join2(app, "Contents", "Info.plist");
+  const read = async (key) => {
+    const result = await run("/usr/bin/plutil", ["-extract", key, "raw", "-o", "-", plist]);
+    return hxRunOk(result) ? plistValue(result.stdout) : "";
+  };
+  const id = await read("CFBundleIdentifier");
+  if (!id)
+    return null;
+  const version = await read("CFBundleShortVersionString") || await read("CFBundleVersion");
+  return { name: basename(app, ".app"), id, version, path: app };
+}
+async function signature(run, app) {
+  const sign = await run("/usr/bin/codesign", ["-dv", "--verbose=2", app], { timeoutMs: 60000 });
+  const text = `${sign.stdout}
+${sign.stderr}`;
+  const authority = /^Authority=(.+)$/mu.exec(text)?.[1]?.trim();
+  const team = /^TeamIdentifier=(.+)$/mu.exec(text)?.[1]?.trim() ?? "";
+  const adhoc = /Signature=adhoc/u.test(text);
+  const check = await run("/usr/sbin/spctl", ["-a", "-vv", "-t", "exec", app], { timeoutMs: 60000 });
+  const verdict = `${check.stdout}
+${check.stderr}`;
+  return {
+    authority: authority ?? (adhoc ? "ad-hoc" : hxRunOk(sign) ? "unknown" : "unsigned"),
+    team: team === "not set" ? "" : team,
+    notarized: hxRunOk(check) && /Notarized/u.test(verdict)
+  };
+}
+async function unpack(deps, source) {
+  const kind = extname(source).toLowerCase();
+  const { run, files } = deps;
+  if (kind === ".app")
+    return { app: source.replace(/\/+$/u, ""), done: async () => {} };
+  if (kind === ".zip") {
+    const folder = await files.makeTemp("hxbot-install-");
+    const unzip = await run("/usr/bin/ditto", ["-x", "-k", source, folder], { timeoutMs: LONG_MS });
+    if (!hxRunOk(unzip))
+      return { status: "failed", reason: hxRunFailure("ditto", unzip) };
+    const apps = await files.findApps(folder);
+    const done = () => files.remove(folder);
+    if (apps.length !== 1) {
+      await done();
+      return { status: "invalid", reason: `The archive holds ${apps.length} apps; give the path of one .app.` };
+    }
+    return { app: apps[0] ?? "", done };
+  }
+  if (kind === ".dmg") {
+    const mount = await files.makeTemp("hxbot-dmg-");
+    const attach = await run("/usr/bin/hdiutil", ["attach", "-nobrowse", "-readonly", "-noautoopen", "-mountpoint", mount, source], { timeoutMs: LONG_MS });
+    if (!hxRunOk(attach))
+      return { status: "failed", reason: hxRunFailure("hdiutil", attach) };
+    const done = async () => {
+      await run("/usr/bin/hdiutil", ["detach", mount, "-quiet"], { timeoutMs: 60000 });
+      await files.remove(mount).catch(() => {
+        return;
+      });
+    };
+    const apps = await files.findApps(mount);
+    if (apps.length !== 1) {
+      await done();
+      return {
+        status: "invalid",
+        reason: `The disk image holds ${apps.length} apps; open it with computer_open instead.`
+      };
+    }
+    return { app: apps[0] ?? "", done };
+  }
+  return { status: "invalid", reason: "Give the path of a .app, .zip, .dmg or .pkg file." };
+}
+async function running(run, id) {
+  const result = await run("/usr/bin/lsappinfo", ["info", "-only", "pid", "-app", id]);
+  return hxRunOk(result) && /"pid"\s*=\s*\d+/u.test(result.stdout);
+}
+function refusedByMacOS(text) {
+  return /operation not permitted|permission denied|EPERM|EACCES/iu.test(text);
+}
+async function hxInstallApp(deps, input) {
+  if (deps.platform !== "darwin")
+    return {
+      status: "unsupported",
+      reason: "On Windows, open the installer with computer_open and its path; Windows asks the user to confirm."
+    };
+  const { run, files } = deps;
+  const source = input.path.trim();
+  if (!source.startsWith("/"))
+    return { status: "invalid", reason: "Give the full path of the file." };
+  if (!await files.exists(source))
+    return { status: "not-found", reason: `There is no file at ${source}.` };
+  if (extname(source).toLowerCase() === ".pkg") {
+    const opened = await run("/usr/bin/open", [source]);
+    return hxRunOk(opened) ? {
+      status: "installer",
+      reason: "The macOS installer is open. The user follows it and gives the password there; HXBot does not type passwords."
+    } : { status: "failed", reason: hxRunFailure("open", opened) };
+  }
+  const unpacked = await unpack(deps, source);
+  if (!("app" in unpacked))
+    return unpacked;
+  try {
+    const incoming = await facts(run, unpacked.app);
+    if (!incoming)
+      return { status: "invalid", reason: `${basename(unpacked.app)} has no bundle id: it is not an app.` };
+    const signed = await signature(run, unpacked.app);
+    const applications = deps.applications ?? "/Applications";
+    const target = join2(applications, `${incoming.name}.app`);
+    const installed = await files.exists(target) ? await facts(run, target) : null;
+    if (installed && input.replace !== true)
+      return {
+        status: "confirm",
+        reason: `${incoming.name} ${installed.version} is installed. Ask the user in the chat whether to replace it with ${incoming.version}; after a yes, call again with replace: true.`,
+        installed,
+        incoming,
+        signature: signed
+      };
+    if (installed && await running(run, installed.id))
+      return {
+        status: "running",
+        reason: `${installed.name} is open. Ask the user to quit it (and save their work), then call again.`,
+        installed
+      };
+    const staging = join2(applications, `.${incoming.name}.hxbot-new.app`);
+    await files.remove(staging).catch(() => {
+      return;
+    });
+    const copy = await run("/usr/bin/ditto", [unpacked.app, staging], { timeoutMs: LONG_MS });
+    if (!hxRunOk(copy)) {
+      await files.remove(staging).catch(() => {
+        return;
+      });
+      return refusedByMacOS(copy.stderr) ? await appManagement(deps) : { status: "failed", reason: hxRunFailure("ditto", copy) };
+    }
+    const old = join2(applications, `.${incoming.name}.hxbot-old.app`);
+    if (installed) {
+      await files.remove(old).catch(() => {
+        return;
+      });
+      try {
+        await files.rename(target, old);
+      } catch (error) {
+        await files.remove(staging).catch(() => {
+          return;
+        });
+        return refusedByMacOS(String(error)) ? await appManagement(deps) : { status: "failed", reason: String(error).slice(0, 300) };
+      }
+    }
+    try {
+      await files.rename(staging, target);
+    } catch (error) {
+      if (installed)
+        await files.rename(old, target).catch(() => {
+          return;
+        });
+      await files.remove(staging).catch(() => {
+        return;
+      });
+      return refusedByMacOS(String(error)) ? await appManagement(deps) : { status: "failed", reason: String(error).slice(0, 300) };
+    }
+    if (installed)
+      await deps.trashItem(old).catch(() => files.remove(old).catch(() => {
+        return;
+      }));
+    const result = await facts(run, target);
+    if (!result || result.version !== incoming.version)
+      return {
+        status: "failed",
+        reason: `The copy in ${applications} reads ${result?.version ?? "nothing"}, not ${incoming.version}.`
+      };
+    return {
+      status: "installed",
+      app: result,
+      signature: signed,
+      replaced: installed ? { version: installed.version } : null
+    };
+  } finally {
+    await unpacked.done().catch(() => {
+      return;
+    });
+  }
+}
+async function appManagement(deps) {
+  await deps.askAppManagement?.().catch(() => {
+    return;
+  });
+  return {
+    status: "needs-permission",
+    permission: "app-management",
+    reason: "macOS asks for App Management to change an app that is there. HXBot opened Privacy & Security → App Management and turns on its switch if it can; the user gives the password or Touch ID. Then call again."
+  };
+}
+
+// src/backend/hx-check/install-run.ts
+var run = promisify(execFile2);
+var ID = "org.example.hxinstall";
+var NAME = "HXInstallCheck";
+async function makeApp(folder, version) {
+  const app = join3(folder, `${NAME}.app`);
+  await mkdir(join3(app, "Contents", "MacOS"), { recursive: true });
+  await writeFile(join3(app, "Contents", "Info.plist"), `<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0"><dict>
+<key>CFBundleIdentifier</key><string>${ID}</string>
+<key>CFBundleExecutable</key><string>hxinstall</string>
+<key>CFBundleName</key><string>${NAME}</string>
+<key>CFBundlePackageType</key><string>APPL</string>
+<key>CFBundleShortVersionString</key><string>${version}</string>
+</dict></plist>
+`, "utf8");
+  await run("/bin/cp", ["/usr/bin/true", join3(app, "Contents", "MacOS", "hxinstall")]);
+  await run("/usr/bin/codesign", ["-s", "-", "--force", app]);
+  await run("/usr/bin/xattr", ["-w", "com.apple.quarantine", "0081;00000000;HXBot check;", app]);
+  return app;
+}
+async function quarantined(path) {
+  return run("/usr/bin/xattr", ["-p", "com.apple.quarantine", path]).then(() => true, () => false);
+}
+function line(result) {
+  return JSON.stringify(result).slice(0, 600);
+}
+async function hxInstallRealCheck(input) {
+  const { items, log } = input;
+  if (input.platform !== "darwin") {
+    items.add("I1", "安装应用（computer_install）", "skip", `这台机器是 ${input.platform}，安装应用只在 Mac 上检查`);
+    return;
+  }
+  const target = `/Applications/${NAME}.app`;
+  const trash = join3(homedir(), ".Trash");
+  const work = await mkdtemp2(join3(tmpdir3(), "hxbot-install-check-"));
+  const deps = {
+    run: hxRun,
+    files: HX_INSTALL_FILES,
+    platform: "darwin",
+    trashItem: async (path) => {
+      await mkdir(trash, { recursive: true });
+      await rename2(path, join3(trash, `${basename2(path)}-${Date.now()}`));
+    }
+  };
+  try {
+    await rm2(target, { recursive: true, force: true });
+    const v1 = await makeApp(join3(work, "v1"), "1.0");
+    const v2 = await makeApp(join3(work, "v2"), "2.0");
+    const zip = join3(work, `${NAME}-2.0.zip`);
+    await run("/usr/bin/ditto", ["-c", "-k", "--keepParent", v2, zip]);
+    const v3 = await makeApp(join3(work, "v3"), "3.0");
+    const dmg = join3(work, `${NAME}-3.0.dmg`);
+    await run("/usr/bin/hdiutil", ["create", "-volname", NAME, "-srcfolder", join3(work, "v3"), "-ov", "-format", "UDZO", dmg], {
+      timeout: 120000
+    });
+    log(`test apps: ${v1}, ${zip}, ${v3} → ${dmg}`);
+    const first = await hxInstallApp(deps, { path: v1 });
+    items.check("I1", "装进“应用程序”文件夹：读回版本和签名，隔离标记保留", first.status === "installed" && first.app.version === "1.0" && first.signature.authority === "ad-hoc" && !first.signature.notarized && await quarantined(target), line(first));
+    const asked = await hxInstallApp(deps, { path: zip });
+    items.check("I2", "已经装了时先问（confirm），不动原来的", asked.status === "confirm" && asked.installed.version === "1.0" && asked.incoming.version === "2.0", line(asked));
+    const replaced = await hxInstallApp(deps, { path: zip, replace: true });
+    const leftovers = (await readdir2("/Applications")).filter((name) => name.includes("hxbot-"));
+    const inTrash = (await readdir2(trash).catch(() => [])).some((name) => name.startsWith(`.${NAME}.hxbot-old.app`));
+    items.check("I3", "同意替换后装上新版本，旧版进废纸篓，不留临时文件", replaced.status === "installed" && replaced.app.version === "2.0" && replaced.replaced?.version === "1.0" && inTrash && leftovers.length === 0, `${line(replaced)}；废纸篓里有旧版：${inTrash}；“应用程序”文件夹里的临时文件：${leftovers.join(", ") || "无"}`);
+    const fromImage = await hxInstallApp(deps, { path: dmg, replace: true });
+    const mounted = await run("/usr/bin/hdiutil", ["info"]).then((result) => result.stdout.includes("hxbot-dmg-"));
+    items.check("I4", "从磁盘映像装，装好后卸下", fromImage.status === "installed" && fromImage.app.version === "3.0" && !mounted, `${line(fromImage)}；映像还挂着：${mounted}`);
+  } catch (error) {
+    items.add("I9", "安装应用的检查没有跑完", "fail", error instanceof Error ? error.message : String(error));
+  } finally {
+    await rm2(target, { recursive: true, force: true }).catch(() => {
+      return;
+    });
+    await rm2(work, { recursive: true, force: true }).catch(() => {
+      return;
+    });
+  }
+}
+
 // src/backend/hx-check/report.ts
 class HxRealItems {
   items = [];
@@ -7777,9 +8125,9 @@ function hxScriptedModel() {
 // src/backend/hx-check/steps-run.ts
 import { spawn as spawn2 } from "node:child_process";
 import { randomUUID } from "node:crypto";
-import { readFile, writeFile } from "node:fs/promises";
-import { tmpdir as tmpdir2 } from "node:os";
-import { join as join2 } from "node:path";
+import { readFile, writeFile as writeFile2 } from "node:fs/promises";
+import { tmpdir as tmpdir4 } from "node:os";
+import { join as join4 } from "node:path";
 
 // ../hx-agent/node_modules/zod/v4/core/util.js
 function getEnumValues(entries) {
@@ -13925,7 +14273,7 @@ function advertisedJsonSchema(schema) {
 // src/backend/hx-computer/driver.ts
 import { connect } from "node:net";
 var MAX_REPLY_CHARS = 16000000;
-var DEFAULT_TIMEOUT_MS = 15000;
+var DEFAULT_TIMEOUT_MS2 = 15000;
 function hxReadDriverReply(line) {
   let parsed;
   try {
@@ -13960,7 +14308,7 @@ class HxDriverSocket {
     this.#address = address;
     this.#sessionId = sessionId;
   }
-  call(tool, args, timeoutMs = DEFAULT_TIMEOUT_MS) {
+  call(tool, args, timeoutMs = DEFAULT_TIMEOUT_MS2) {
     const turn = this.#queue.then(() => this.#send(tool, args, timeoutMs));
     this.#queue = turn.catch(() => {
       return;
@@ -14148,7 +14496,7 @@ function shown(element) {
     return false;
   return element.label.length > 0 || element.value.length > 0 || ACTIONABLE.has(hxRoleKind(element.role));
 }
-function line(element) {
+function line2(element) {
   const parts = [`[${element.index}] ${hxRoleKind(element.role)}`];
   if (element.label)
     parts.push(JSON.stringify(element.label.slice(0, 80)));
@@ -14168,7 +14516,7 @@ function hxOutline(window, maxChars = 3000) {
   for (const element of window.elements) {
     if (!shown(element))
       continue;
-    const next = `${" ".repeat(Math.min(element.depth, 6))}${line(element)}`;
+    const next = `${" ".repeat(Math.min(element.depth, 6))}${line2(element)}`;
     if (used + next.length + 1 > maxChars) {
       left += 1;
       continue;
@@ -14243,7 +14591,7 @@ function hxFindElement(window, target) {
   return { status: "found", element: best.element };
 }
 function hxCandidateLine(element) {
-  return line(element);
+  return line2(element);
 }
 
 // src/backend/hx-computer/steps.ts
@@ -14746,16 +15094,16 @@ var HX_COMPUTER_STEP_TOOL_NAMES = new Set([
   COMPUTER_LOOK_TOOL,
   COMPUTER_DO_TOOL
 ]);
-var line2 = (max) => string2().trim().min(1).max(max);
+var line3 = (max) => string2().trim().min(1).max(max);
 var point = strictObject({ x: number2().min(0).max(20000), y: number2().min(0).max(20000) });
 var target = strictObject({
-  name: union([line2(120), array(line2(120)).min(1).max(4)]).optional().describe('The label as seen, or several forms such as ["导出", "Export"].'),
-  role: line2(40).optional().describe("button, field, check, radio, menu, tab, link, row, slider, text."),
+  name: union([line3(120), array(line3(120)).min(1).max(4)]).optional().describe('The label as seen, or several forms such as ["导出", "Export"].'),
+  role: line3(40).optional().describe("button, field, check, radio, menu, tab, link, row, slider, text."),
   index: number2().int().min(0).optional().describe("An index from computer_look of the same window.")
 });
 var WINDOW_SHAPE = {
-  app: line2(80).optional().describe("The app's name. Omit for the front window."),
-  title: line2(120).optional().describe("Part of the window title."),
+  app: line3(80).optional().describe("The app's name. Omit for the front window."),
+  title: line3(120).optional().describe("Part of the window title."),
   window_id: number2().int().min(0).optional()
 };
 var STEP = strictObject({
@@ -14764,23 +15112,23 @@ var STEP = strictObject({
   target: target.optional(),
   at: point.optional().describe("Window pixels from a screenshot, only when no element fits."),
   text: string2().min(1).max(4000).optional(),
-  key: line2(30).optional().describe("Such as return, escape, tab, a, f5."),
+  key: line3(30).optional().describe("Such as return, escape, tab, a, f5."),
   modifiers: array(_enum(["cmd", "ctrl", "alt", "option", "shift", "win", "fn"])).max(4).optional(),
-  keys: array(line2(30)).min(1).max(5).optional().describe('A chord for hotkey, such as ["cmd", "s"].'),
+  keys: array(line3(30)).min(1).max(5).optional().describe('A chord for hotkey, such as ["cmd", "s"].'),
   direction: _enum(["up", "down", "left", "right"]).optional(),
   amount: number2().int().min(1).max(50).optional(),
   to: target.optional(),
   to_at: point.optional(),
-  path: array(line2(80)).min(1).max(8).optional().describe('Menu labels from the menu bar, such as ["文件", "导出为 PDF…"].'),
+  path: array(line3(80)).min(1).max(8).optional().describe('Menu labels from the menu bar, such as ["文件", "导出为 PDF…"].'),
   seconds: number2().min(0.1).max(10).optional(),
-  expect: strictObject({ name: line2(120), role: line2(40).optional(), value: string2().max(400).optional() }).optional().describe("What must be in the window after the step."),
+  expect: strictObject({ name: line3(120), role: line3(40).optional(), value: string2().max(400).optional() }).optional().describe("What must be in the window after the step."),
   confirmed: boolean2().optional().describe("Only after the user said yes in the chat to this send, payment, purchase or deletion.")
 });
 var PLAN_SHAPE = {
-  app: line2(80).optional(),
-  steps: array(line2(120)).min(1).max(12).describe("The steps in the user's language.")
+  app: line3(80).optional(),
+  steps: array(line3(120)).min(1).max(12).describe("The steps in the user's language.")
 };
-var LOOK_SHAPE = { ...WINDOW_SHAPE, query: line2(80).optional().describe("Only elements about this.") };
+var LOOK_SHAPE = { ...WINDOW_SHAPE, query: line3(80).optional().describe("Only elements about this.") };
 var DO_SHAPE = { ...WINDOW_SHAPE, steps: array(STEP).min(1).max(12) };
 var HX_COMPUTER_STEP_TOOL_DEFINITIONS = [
   {
@@ -14987,7 +15335,7 @@ function editor(platform) {
   return null;
 }
 async function startDriver(executable, platform) {
-  const address = platform === "win32" ? `\\\\.\\pipe\\hxbot-check-${randomUUID()}` : join2(tmpdir2(), `hxc-${process.pid}.sock`);
+  const address = platform === "win32" ? `\\\\.\\pipe\\hxbot-check-${randomUUID()}` : join4(tmpdir4(), `hxc-${process.pid}.sock`);
   const child = spawn2(executable, ["serve", "--socket", address, "--no-overlay"], {
     env: {
       ...process.env,
@@ -15035,8 +15383,8 @@ async function hxStepsRealCheck(input) {
       items.add("S2", "Mac 的授权（辅助功能、屏幕录制）", granted ? "pass" : "warn", text);
     } else
       items.add("S2", "授权", "skip", "Windows 不需要额外授权");
-    const file = join2(input.folder, "hxbot-check.txt");
-    await writeFile(file, `HXBot check
+    const file = join4(input.folder, "hxbot-check.txt");
+    await writeFile2(file, `HXBot check
 `, "utf8");
     app.open(file);
     const stops = new HxComputerStops;
@@ -15125,8 +15473,8 @@ ${result.text.slice(0, 300)}`);
 
 // src/backend/hx-check/team-run.ts
 import { mkdtempSync as mkdtempSync2 } from "node:fs";
-import { tmpdir as tmpdir3 } from "node:os";
-import { join as join7 } from "node:path";
+import { tmpdir as tmpdir5 } from "node:os";
+import { join as join9 } from "node:path";
 
 // packages/contracts/src/input-limits.ts
 var INPUT_LIMITS = {
@@ -17753,7 +18101,7 @@ function parseHxRoutingDecision(value) {
 import { createHash, randomUUID as randomUUID2 } from "node:crypto";
 import { mkdirSync as mkdirSync2 } from "node:fs";
 import { totalmem } from "node:os";
-import { join as join5 } from "node:path";
+import { join as join7 } from "node:path";
 
 // src/backend/hx-team/form.ts
 var HX_FORM_PARTS = [
@@ -18077,8 +18425,8 @@ function hxStoppedMessage(team, reason) {
 }
 
 // src/backend/hx-team/skills.ts
-import { readdir, readFile as readFile2, stat } from "node:fs/promises";
-import { join as join3 } from "node:path";
+import { readdir as readdir3, readFile as readFile2, stat } from "node:fs/promises";
+import { join as join5 } from "node:path";
 
 // ../hx-agent/node_modules/yaml/dist/index.js
 var composer = require_composer();
@@ -18155,13 +18503,13 @@ var MAX_DESCRIPTION = 160;
 async function folderSkills(folder, owner) {
   let names;
   try {
-    names = (await readdir(folder)).filter((name) => !name.startsWith(".")).sort();
+    names = (await readdir3(folder)).filter((name) => !name.startsWith(".")).sort();
   } catch {
     return [];
   }
   const skills = [];
   for (const name of names) {
-    const file = join3(folder, name, "SKILL.md");
+    const file = join5(folder, name, "SKILL.md");
     try {
       const facts = await stat(file);
       if (!facts.isFile() || facts.size > MAX_FILE_BYTES)
@@ -18188,7 +18536,7 @@ async function hxTeamSkills(members) {
       continue;
     seen.add(member.workspacePath);
     for (const folder of HX_WORKSPACE_SKILL_FOLDERS) {
-      for (const skill of await folderSkills(join3(member.workspacePath, folder), member.name)) {
+      for (const skill of await folderSkills(join5(member.workspacePath, folder), member.name)) {
         if (names.has(skill.name) || skills.length >= MAX_SKILLS)
           continue;
         names.add(skill.name);
@@ -18211,7 +18559,7 @@ function hxTeamSkillLines(skills, language) {
 
 // src/backend/hx-team/store.ts
 import { mkdirSync, readdirSync, readFileSync, renameSync, writeFileSync } from "node:fs";
-import { join as join4 } from "node:path";
+import { join as join6 } from "node:path";
 
 // packages/logging/src/index.ts
 var LEVEL_RANK = { trace: 10, debug: 20, info: 30, warn: 40, error: 50, silent: 60 };
@@ -18549,7 +18897,7 @@ class HxTeamStore {
         if (!name.endsWith(".json"))
           continue;
         try {
-          const team = readTeam(join4(folder, name));
+          const team = readTeam(join6(folder, name));
           if (team)
             this.#teams.set(team.id, team);
         } catch {}
@@ -18580,7 +18928,7 @@ class HxTeamStore {
     this.#teams.set(team.id, team);
     if (!this.#folder)
       return;
-    const file = join4(this.#folder, `${team.id}.json`);
+    const file = join6(this.#folder, `${team.id}.json`);
     try {
       writeFileSync(`${file}.tmp`, `${JSON.stringify(team, null, 2)}
 `);
@@ -18861,7 +19209,7 @@ Correct the arguments and retry.`);
         return refuse("A team needs at least one role.");
       const now = this.#now();
       const deadline = now + settings.teamMinutes * 60000;
-      const folderPath = join5(starter.workspacePath, words.folder, `${roomName.replace(/[\\/:*?"<>|]/gu, "-").slice(0, 40)}-${id.slice(0, 4)}`);
+      const folderPath = join7(starter.workspacePath, words.folder, `${roomName.replace(/[\\/:*?"<>|]/gu, "-").slice(0, 40)}-${id.slice(0, 4)}`);
       const folder = makeFolder(folderPath) ? folderPath : null;
       const known = port.agents();
       const skills = await hxTeamSkills([
@@ -19886,7 +20234,7 @@ async function hxWithin(promise, ms) {
 
 // src/backend/hx-auto-model/store.ts
 import { appendFileSync, existsSync, mkdirSync as mkdirSync3, readFileSync as readFileSync2, renameSync as renameSync2, writeFileSync as writeFileSync2 } from "node:fs";
-import { join as join6 } from "node:path";
+import { join as join8 } from "node:path";
 var logger2 = createHxBotLogger("hx-auto-model");
 var SETTINGS_FILE = "settings.json";
 var DECISIONS_FILE = "decisions.jsonl";
@@ -19922,7 +20270,7 @@ class HxAutoModelStore {
       }
     this.#decisions = [];
     try {
-      const file = join6(folder, DECISIONS_FILE);
+      const file = join8(folder, DECISIONS_FILE);
       if (existsSync(file))
         for (const line of readFileSync2(file, "utf8").split(`
 `)) {
@@ -19967,7 +20315,7 @@ class HxAutoModelStore {
     this.#decisions.push(decision);
     if (this.#folder) {
       try {
-        appendFileSync(join6(this.#folder, DECISIONS_FILE), `${JSON.stringify(decision)}
+        appendFileSync(join8(this.#folder, DECISIONS_FILE), `${JSON.stringify(decision)}
 `, { mode: 384 });
       } catch (error) {
         logger2.warn("HXBot could not write the auto model record.", { error: String(error) });
@@ -20026,7 +20374,7 @@ class HxAutoModelStore {
     if (!this.#folder)
       return null;
     try {
-      const file = join6(this.#folder, name);
+      const file = join8(this.#folder, name);
       return existsSync(file) ? JSON.parse(readFileSync2(file, "utf8")) : null;
     } catch (error) {
       logger2.warn("HXBot could not read an auto model file; it starts empty.", { file: name, error: String(error) });
@@ -20036,7 +20384,7 @@ class HxAutoModelStore {
   #writeJson(name, value) {
     if (!this.#folder)
       return;
-    const file = join6(this.#folder, name);
+    const file = join8(this.#folder, name);
     try {
       writeFileSync2(`${file}.tmp`, `${JSON.stringify(value, null, 2)}
 `, { mode: 384 });
@@ -20059,7 +20407,7 @@ class HxAutoModelStore {
     this.#decisions = this.#decisions.filter((decision) => now - decision.at <= KEEP_MS).slice(-KEEP_DECISIONS);
     if (!this.#folder)
       return;
-    const file = join6(this.#folder, DECISIONS_FILE);
+    const file = join8(this.#folder, DECISIONS_FILE);
     try {
       writeFileSync2(`${file}.tmp`, this.#decisions.map((decision) => `${JSON.stringify(decision)}
 `).join(""), {
@@ -20716,7 +21064,7 @@ async function hxTeamRealCheck(input) {
     hxWorldAgent("agent-check", "小审", "审稿 Reviewer", "检查事实、错字和逻辑。Checking.")
   ]);
   const teams = new HxTeams;
-  teams.open(mkdtempSync2(join7(tmpdir3(), "hx-team-check-")));
+  teams.open(mkdtempSync2(join9(tmpdir5(), "hx-team-check-")));
   teams.setPort(world);
   let keys = 0;
   const key = () => `check-${++keys}`;
@@ -21073,17 +21421,17 @@ async function firstBrain(opencode, log) {
 }
 async function merge2(folder, expected) {
   const reports = [];
-  for (const entry of await readdir2(folder, { withFileTypes: true })) {
+  for (const entry of await readdir4(folder, { withFileTypes: true })) {
     if (!entry.isDirectory())
       continue;
-    const text = await readFile3(join8(folder, entry.name, "report.json"), "utf8").catch(() => "");
+    const text = await readFile3(join10(folder, entry.name, "report.json"), "utf8").catch(() => "");
     const report = text ? hxReadRealReport(JSON.parse(text)) : null;
     if (report)
       reports.push(report);
   }
   const overview = hxRealOverview(reports, expected);
-  await writeFile2(join8(folder, "overview.md"), overview.text, "utf8");
-  await writeFile2(join8(folder, "verdict.json"), JSON.stringify({ ok: overview.ok, machines: reports.length }), "utf8");
+  await writeFile3(join10(folder, "overview.md"), overview.text, "utf8");
+  await writeFile3(join10(folder, "verdict.json"), JSON.stringify({ ok: overview.ok, machines: reports.length }), "utf8");
   return overview.ok ? 0 : 1;
 }
 async function main() {
@@ -21102,7 +21450,7 @@ async function main() {
   const selfTest = args.includes("--self-test");
   const machine = option(args, "--machine") ?? (selfTest ? "self-test" : process.platform);
   const parts = new Set((option(args, "--parts") ?? (selfTest ? "team" : "steps,team")).split(","));
-  await mkdir(out, { recursive: true });
+  await mkdir2(out, { recursive: true });
   const started = Date.now();
   const lines = [];
   const log = (line) => {
@@ -21127,6 +21475,8 @@ async function main() {
     else
       items.add("S1", "电脑操控驱动", "skip", "没有给 --driver");
   }
+  if (parts.has("install"))
+    await hxInstallRealCheck({ items, log, platform: process.platform });
   if (parts.has("team")) {
     if (brain)
       await hxTeamRealCheck({ brain, items, log });
@@ -21142,9 +21492,9 @@ async function main() {
     models: tried
   };
   await brain?.close();
-  await writeFile2(join8(out, "report.json"), JSON.stringify(report, null, 2), "utf8");
-  await writeFile2(join8(out, "summary.md"), hxRealSummary(report), "utf8");
-  await writeFile2(join8(out, "log.txt"), lines.join(`
+  await writeFile3(join10(out, "report.json"), JSON.stringify(report, null, 2), "utf8");
+  await writeFile3(join10(out, "summary.md"), hxRealSummary(report), "utf8");
+  await writeFile3(join10(out, "log.txt"), lines.join(`
 
 `), "utf8");
   process.stdout.write(`${hxRealSummary(report)}
