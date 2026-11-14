@@ -3,7 +3,8 @@
 # 固定的电脑操控驱动（cua-driver）的版本、校验值，在生成时填进来。
 #   ubuntu-latest：用真实模型走一遍协作全流程（建议卡、组队、交接单退回、插话、换人、交回、叫停）。
 #   macos-15、windows-2025：用真的驱动一步步操作文本编辑、记事本，再让真实模型自己列计划、操作、保存。
-# 模型先试 OpenCode 自带的免费模型，再试 GitHub Models（这个工作流自带的令牌，要 models: read）。
+# 模型先经 OpenCode 自己的客户端（opencode acp，版本和校验值取自 native-runtime.lock.json）用它的免费模型，
+# 再试 GitHub Models（这个工作流自带的令牌，要 models: read）。
 # 结果挂在运行页面的 Artifacts 里，也提交到分支 main-results 的 real/<编号>/。
 name: HXBot real check
 
@@ -30,11 +31,36 @@ jobs:
     permissions:
       contents: read
       models: read
+    strategy:
+      matrix:
+        include:
+          - { ocPackage: "@opencode/cli-linux-x64", ocAsset: cli-linux-x64-2.2.5.tgz, ocSha: 92690eee07a680d3cb760ca02ba43878de9eab1b4e5d5dfae8795518c53628f4, ocBinary: opencode, ocBinarySha: 8d060e1d2fbb9bb44cf09ae6ed1f3f6a7cff070b5227e2f90970132b23a92050 }
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-node@v6
         with:
           node-version: 24
+      - name: Get OpenCode (its free models answer only its own client)
+        shell: bash
+        env:
+          PKG: ${{ matrix.ocPackage }}
+          ASSET: ${{ matrix.ocAsset }}
+          SHA: ${{ matrix.ocSha }}
+          BINARY: ${{ matrix.ocBinary }}
+          BINARY_SHA: ${{ matrix.ocBinarySha }}
+        run: |
+          set -euo pipefail
+          sum() { if command -v sha256sum >/dev/null; then sha256sum < "$1" | cut -d' ' -f1; else shasum -a 256 < "$1" | cut -d' ' -f1; fi; }
+          archive="$RUNNER_TEMP/$ASSET"
+          curl -fsSL --retry 3 -o "$archive" "https://registry.npmjs.org/$PKG/-/$ASSET"
+          [ "$(sum "$archive")" = "$SHA" ] || { echo "The OpenCode archive has the wrong checksum."; exit 1; }
+          mkdir -p "$RUNNER_TEMP/opencode"
+          tar -xzf "$archive" -C "$RUNNER_TEMP/opencode"
+          found="$(find "$RUNNER_TEMP/opencode" -type f -name "$BINARY" | head -1)"
+          [ -n "$found" ] || { echo "The OpenCode archive has no $BINARY."; exit 1; }
+          [ "$(sum "$found")" = "$BINARY_SHA" ] || { echo "OpenCode has the wrong checksum."; exit 1; }
+          chmod +x "$found" || true
+          echo "OPENCODE=$found" >> "$GITHUB_ENV"
       - name: Ask GitHub Models once (what the check reads)
         continue-on-error: true
         shell: bash
@@ -48,7 +74,7 @@ jobs:
         shell: bash
         env:
           GITHUB_TOKEN: ${{ github.token }}
-        run: node hx-real-check.mjs --out out --machine ubuntu-latest --parts team
+        run: node hx-real-check.mjs --out out --machine ubuntu-latest --parts team --opencode "$OPENCODE"
       - name: Show the summary
         if: always()
         shell: bash
@@ -74,13 +100,34 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { machine: macos-15, asset: cua-driver-rs-0.34.0-darwin-universal-binary.tar.gz, sha: 940dc008e0f7c5d217d14c0f247d1ebab91b1bac965f4a649d19e8c789bdfd81, binary: cua-driver, binarySha: 47fa8722003066246ee8a828d3fe2c769f2194d6cf3ad63ae6f0becdc00d383a }
-          - { machine: windows-2025, asset: cua-driver-rs-0.34.0-windows-x86_64-binary.zip, sha: bcc520e50861c7092cf775846fec76ae386d7dcd6b5b408608b0ea4423a8b888, binary: cua-driver.exe, binarySha: 77f5cac754b42b6a8bae126414fc8f7487432ace93466967965188e24e9e53fb }
+          - { machine: macos-15, asset: cua-driver-rs-0.34.0-darwin-universal-binary.tar.gz, sha: 940dc008e0f7c5d217d14c0f247d1ebab91b1bac965f4a649d19e8c789bdfd81, binary: cua-driver, binarySha: 47fa8722003066246ee8a828d3fe2c769f2194d6cf3ad63ae6f0becdc00d383a, ocPackage: "@opencode/cli-darwin-arm64", ocAsset: cli-darwin-arm64-2.2.5.tgz, ocSha: dfd827de3281b4c3ca2b0bfc8f4beb103fa660c419d148a1a515c4344f9e9c02, ocBinary: opencode, ocBinarySha: abe4d88594bffb12b364375b8a6732d2d1f7a977195ed1a35c5c76f8e89c9e0e }
+          - { machine: windows-2025, asset: cua-driver-rs-0.34.0-windows-x86_64-binary.zip, sha: bcc520e50861c7092cf775846fec76ae386d7dcd6b5b408608b0ea4423a8b888, binary: cua-driver.exe, binarySha: 77f5cac754b42b6a8bae126414fc8f7487432ace93466967965188e24e9e53fb, ocPackage: "@opencode/cli-windows-x64", ocAsset: cli-windows-x64-2.2.5.tgz, ocSha: 7a9e1dbe80965b75ace78d512c91ce4e6c9e4683fa5a5a25b00ff0b736f1c15c, ocBinary: opencode.exe, ocBinarySha: 0c346fdaf519d2f23a31d3b6cb9d65e369a72d77cac6f027b5e0a06376ec3a43 }
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-node@v6
         with:
           node-version: 24
+      - name: Get OpenCode (its free models answer only its own client)
+        shell: bash
+        env:
+          PKG: ${{ matrix.ocPackage }}
+          ASSET: ${{ matrix.ocAsset }}
+          SHA: ${{ matrix.ocSha }}
+          BINARY: ${{ matrix.ocBinary }}
+          BINARY_SHA: ${{ matrix.ocBinarySha }}
+        run: |
+          set -euo pipefail
+          sum() { if command -v sha256sum >/dev/null; then sha256sum < "$1" | cut -d' ' -f1; else shasum -a 256 < "$1" | cut -d' ' -f1; fi; }
+          archive="$RUNNER_TEMP/$ASSET"
+          curl -fsSL --retry 3 -o "$archive" "https://registry.npmjs.org/$PKG/-/$ASSET"
+          [ "$(sum "$archive")" = "$SHA" ] || { echo "The OpenCode archive has the wrong checksum."; exit 1; }
+          mkdir -p "$RUNNER_TEMP/opencode"
+          tar -xzf "$archive" -C "$RUNNER_TEMP/opencode"
+          found="$(find "$RUNNER_TEMP/opencode" -type f -name "$BINARY" | head -1)"
+          [ -n "$found" ] || { echo "The OpenCode archive has no $BINARY."; exit 1; }
+          [ "$(sum "$found")" = "$BINARY_SHA" ] || { echo "OpenCode has the wrong checksum."; exit 1; }
+          chmod +x "$found" || true
+          echo "OPENCODE=$found" >> "$GITHUB_ENV"
       - name: Get the Computer Use driver
         shell: bash
         env:
@@ -110,7 +157,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
           MACHINE: ${{ matrix.machine }}
-        run: node hx-real-check.mjs --out out --machine "$MACHINE" --parts steps --driver "$DRIVER"
+        run: node hx-real-check.mjs --out out --machine "$MACHINE" --parts steps --driver "$DRIVER" --opencode "$OPENCODE"
       - name: Show the summary
         if: always()
         shell: bash
