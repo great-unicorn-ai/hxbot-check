@@ -35,6 +35,15 @@ jobs:
       - uses: actions/setup-node@v6
         with:
           node-version: 24
+      - name: Ask GitHub Models once (what the check reads)
+        continue-on-error: true
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          curl -sS -i --max-time 60 "https://models.github.ai/inference/chat/completions" \
+            -H "Content-Type: application/json" -H "Authorization: Bearer $GITHUB_TOKEN" \
+            -d '{"model":"openai/gpt-4.1-mini","messages":[{"role":"user","content":"Say ready."}]}' | head -c 1200; echo
       - name: Run the check
         shell: bash
         env:

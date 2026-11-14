@@ -14223,19 +14223,14 @@ class HxStepRun {
           if ("reason" in focused)
             return { stop: "failed", reason: focused.reason };
           route = focused.route;
+          if (route === "foreground" || route === "point")
+            this.#keysToFront = true;
         }
-        let typed = actionEffect(await this.#driver.call("type_text", { text: step.text, target: this.#keysTarget() }, 30000));
+        const typed = actionEffect(await this.#driver.call("type_text", { text: step.text, target: this.#keysTarget() }, 30000));
         if (!typed.worked)
           return { stop: "failed", reason: typed.reason || "The text was not typed." };
         this.#borrowed = true;
-        let landed = field ? await this.#landed(field, step.text) : null;
-        if (landed === false && !this.#keysToFront) {
-          typed = actionEffect(await this.#driver.call("type_text", { text: step.text, target: FRONT }, 30000));
-          if (!typed.worked)
-            return { stop: "failed", reason: typed.reason || "The text was not typed." };
-          this.#keysToFront = true;
-          landed = field ? await this.#landed(field, step.text) : null;
-        }
+        const landed = field ? await this.#landed(field, step.text) : null;
         if (landed === false)
           return { stop: "failed", reason: "The text did not reach the field." };
         return {
