@@ -7075,7 +7075,12 @@ function hxChatModel(endpoint, options = {}) {
         try {
           response = await send(endpoint.url, {
             method: "POST",
-            headers: { "content-type": "application/json", authorization: `Bearer ${endpoint.key}` },
+            headers: {
+              "content-type": "application/json",
+              accept: "application/json",
+              authorization: `Bearer ${endpoint.key}`,
+              ...endpoint.headers
+            },
             body,
             signal: AbortSignal.timeout(TURN_TIMEOUT_MS)
           });
@@ -7084,9 +7089,16 @@ function hxChatModel(endpoint, options = {}) {
           await wait(2000 * 2 ** attempt);
           continue;
         }
-        if (response.ok)
-          return hxReadChatAnswer(await response.json());
-        last = `${response.status} ${(await response.text()).slice(0, 300)}`;
+        const text = await response.text();
+        if (response.ok) {
+          try {
+            return hxReadChatAnswer(JSON.parse(text));
+          } catch {
+            last = `${response.status} ${response.headers.get("content-type") ?? ""}: not JSON: ${text.slice(0, 200)}`;
+            break;
+          }
+        }
+        last = `${response.status} ${text.slice(0, 300)}`;
         if (response.status !== 429 && response.status < 500)
           break;
         const after = Number(response.headers.get("retry-after"));
@@ -7122,7 +7134,8 @@ function hxGitHubModel(token, model = "openai/gpt-4.1-mini") {
     name: `GitHub Models ${model}`,
     url: "https://models.github.ai/inference/chat/completions",
     key: token,
-    model
+    model,
+    headers: { accept: "application/vnd.github+json", "x-github-api-version": "2022-11-28" }
   };
 }
 var PING_TOOL = {
@@ -13820,6 +13833,15 @@ function hxFindElement(window, target) {
   if (target.index !== undefined) {
     const element = window.elements.find((candidate) => candidate.index === target.index);
     return element ? { status: "found", element } : { status: "none", candidates: [] };
+  }
+  const names = target.name === undefined ? [] : typeof target.name === "string" ? [target.name] : target.name;
+  if (target.role && !names.some((name) => hxPlainName(name).length > 0)) {
+    const kind = hxRoleKind(target.role);
+    const fitting = window.elements.filter((element) => element.enabled && hxRoleKind(element.role) === kind);
+    const [only] = fitting;
+    if (only && fitting.length === 1)
+      return { status: "found", element: only };
+    return fitting.length ? { status: "several", candidates: fitting.slice(0, 5) } : { status: "none", candidates: [] };
   }
   const scored = window.elements.map((element) => ({ element, score: hxElementScore(element, target) })).filter((entry) => entry.score > 0).sort((a, b) => b.score - a.score);
   const best = scored[0];

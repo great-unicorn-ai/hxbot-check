@@ -83,7 +83,8 @@ jobs:
           set -euo pipefail
           archive="$RUNNER_TEMP/$ASSET"
           curl -fsSL --retry 3 -o "$archive" "https://github.com/trycua/cua/releases/download/cua-driver-rs-v0.34.0/$ASSET"
-          sum() { if command -v sha256sum >/dev/null; then sha256sum "$1" | cut -d' ' -f1; else shasum -a 256 "$1" | cut -d' ' -f1; fi; }
+          # From standard input: with a Windows path, sha256sum puts a backslash in front of the sum.
+          sum() { if command -v sha256sum >/dev/null; then sha256sum < "$1" | cut -d' ' -f1; else shasum -a 256 < "$1" | cut -d' ' -f1; fi; }
           [ "$(sum "$archive")" = "$SHA" ] || { echo "The driver archive has the wrong checksum."; exit 1; }
           mkdir -p "$RUNNER_TEMP/driver"
           case "$ASSET" in
