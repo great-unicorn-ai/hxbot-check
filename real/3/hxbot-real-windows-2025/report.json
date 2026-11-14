@@ -1,0 +1,92 @@
+{
+  "machine": "windows-2025",
+  "model": "",
+  "startedAt": "2026-11-14T17:03:08.594Z",
+  "seconds": 8.113,
+  "items": [
+    {
+      "id": "M1",
+      "title": "有可用的真实模型",
+      "status": "fail",
+      "detail": "OpenCode nemotron-3.5-super-vl-free：OpenCode nemotron-3.5-super-vl-free: 429 {\"type\":\"error\",\"error\":{\"type\":\"FreeUsageLimitError\",\"message\":\"Free usage limit reached. Free models work in OpenCode (https://opencode.ai); subscribe to Ope；OpenCode mimo-v2.6-flash-free：OpenCode mimo-v2.6-flash-free: 429 {\"type\":\"error\",\"error\":{\"type\":\"FreeUsageLimitError\",\"message\":\"Free usage limit reached. Free models work in OpenCode (https://opencode.ai); subscribe to OpenCode ；OpenCode nemotron-3.5-lightning-free：OpenCode nemotron-3.5-lightning-free: 429 {\"type\":\"error\",\"error\":{\"type\":\"FreeUsageLimitError\",\"message\":\"Free usage limit reached. Free models work in OpenCode (https://opencode.ai); subscribe to Op；OpenCode flint-40b-free：OpenCode flint-40b-free: 429 {\"type\":\"error\",\"error\":{\"type\":\"FreeUsageLimitError\",\"message\":\"Free usage limit reached. Free models work in OpenCode (https://opencode.ai); subscribe to OpenCode Go to ；GitHub Models openai/gpt-4.1-mini：GitHub Models openai/gpt-4.1-mini: 200 text/plain: not JSON: OK\r\n；GitHub Models openai/gpt-4o-mini：GitHub Models openai/gpt-4o-mini: 200 text/plain: not JSON: OK\r\n；GitHub Models openai/gpt-4.1-mini (great-unicorn-ai)：GitHub Models openai/gpt-4.1-mini (great-unicorn-ai): 200 text/plain: not JSON: OK\r\n"
+    },
+    {
+      "id": "S1",
+      "title": "电脑操控驱动启动并答复（serve --socket）",
+      "status": "pass",
+      "detail": "Cua Driver daemon listening on \\\\.\\pipe\\hxbot-check-f5e072d9-fd2e-4bf7-900d-1dc68ecd2b05\n"
+    },
+    {
+      "id": "S2",
+      "title": "授权",
+      "status": "skip",
+      "detail": "Windows 不需要额外授权"
+    },
+    {
+      "id": "S3",
+      "title": "打开 Notepad，找到它的窗口",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "S4",
+      "title": "读出窗口提纲，有可输入的文字框",
+      "status": "pass",
+      "detail": "notepad.exe — hxbot-check.txt - Notepad (pid 2092, window 131414)\n [0] field \"Text Editor\" = \"HXBot check\"\n [1] titlebar \"hxbot-check.txt - Notepad\"\n   [2] menu \"System\"\n  [3] button \"Minimize\"\n  [4] button \"Maximize\"\n  [5] button \"Close\"\n  [6] menu \"File\"\n  [7] menu \"Edit\"\n  [8] menu \"Format\"\n  [9] menu \"View\"\n  [10] menu \"Help\"\nThe driver did not read the whole window."
+    },
+    {
+      "id": "S5",
+      "title": "固定步骤：在文字框里输入并保存，文件里有这段文字",
+      "status": "fail",
+      "detail": "done；Text Editor: 15 characters [foreground, checked]；ctrl+s [keyboard]；文件：HXBot check\n"
+    },
+    {
+      "id": "S6",
+      "title": "“删除”这类步骤先停下来问（status confirm），不执行",
+      "status": "pass",
+      "detail": "\"Delete\" sends, pays, buys, deletes or publishes. Ask the user in the chat first; after a yes, repeat the step with confirmed true."
+    },
+    {
+      "id": "S7",
+      "title": "按停止键后，下一步不再执行",
+      "status": "pass",
+      "detail": "stopped"
+    },
+    {
+      "id": "S8",
+      "title": "真实模型：列计划、一步步输入并保存",
+      "status": "skip",
+      "detail": "没有可用的模型"
+    }
+  ],
+  "models": [
+    {
+      "name": "OpenCode nemotron-3.5-super-vl-free",
+      "answer": "OpenCode nemotron-3.5-super-vl-free: 429 {\"type\":\"error\",\"error\":{\"type\":\"FreeUsageLimitError\",\"message\":\"Free usage limit reached. Free models work in OpenCode (https://opencode.ai); subscribe to Ope"
+    },
+    {
+      "name": "OpenCode mimo-v2.6-flash-free",
+      "answer": "OpenCode mimo-v2.6-flash-free: 429 {\"type\":\"error\",\"error\":{\"type\":\"FreeUsageLimitError\",\"message\":\"Free usage limit reached. Free models work in OpenCode (https://opencode.ai); subscribe to OpenCode "
+    },
+    {
+      "name": "OpenCode nemotron-3.5-lightning-free",
+      "answer": "OpenCode nemotron-3.5-lightning-free: 429 {\"type\":\"error\",\"error\":{\"type\":\"FreeUsageLimitError\",\"message\":\"Free usage limit reached. Free models work in OpenCode (https://opencode.ai); subscribe to Op"
+    },
+    {
+      "name": "OpenCode flint-40b-free",
+      "answer": "OpenCode flint-40b-free: 429 {\"type\":\"error\",\"error\":{\"type\":\"FreeUsageLimitError\",\"message\":\"Free usage limit reached. Free models work in OpenCode (https://opencode.ai); subscribe to OpenCode Go to "
+    },
+    {
+      "name": "GitHub Models openai/gpt-4.1-mini",
+      "answer": "GitHub Models openai/gpt-4.1-mini: 200 text/plain: not JSON: OK\r\n"
+    },
+    {
+      "name": "GitHub Models openai/gpt-4o-mini",
+      "answer": "GitHub Models openai/gpt-4o-mini: 200 text/plain: not JSON: OK\r\n"
+    },
+    {
+      "name": "GitHub Models openai/gpt-4.1-mini (great-unicorn-ai)",
+      "answer": "GitHub Models openai/gpt-4.1-mini (great-unicorn-ai): 200 text/plain: not JSON: OK\r\n"
+    }
+  ]
+}
