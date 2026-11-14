@@ -50,7 +50,7 @@ build() { # $1 folder, $2 value, $3 entitlements
   mkdir -p "$app/Contents/MacOS" "$app/Contents/Frameworks"
   cat > "$app/Contents/Info.plist" <<PL
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0"><dict><key>CFBundleIdentifier</key><string>com.hxallai.bot</string><key>CFBundleExecutable</key><string>probe</string>
+<plist version="1.0"><dict><key>CFBundleIdentifier</key><string>org.example.hxprobe</string><key>CFBundleExecutable</key><string>probe</string>
 <key>CFBundleName</key><string>Probe</string><key>CFBundlePackageType</key><string>APPL</string><key>CFBundleShortVersionString</key><string>$2</string></dict></plist>
 PL
   printf 'int probe_value(void) { return %s; }\n' "$2" > "$1/lib.c"
@@ -82,7 +82,7 @@ DR1="$(codesign -d -r- "$A1" 2>&1 | sed -n 's/^designated => //p')"; DR2="$(code
 r dr_v1 "$DR1"; r dr_v2 "$DR2"
 r same_dr_for_two_builds "$([ -n "$DR1" ] && [ "$DR1" = "$DR2" ] && echo yes || echo no)"
 r dr_has_sha1 "$(printf '%s' "$DR1" | tr '[:lower:]' '[:upper:]' | grep -c "H\"$SHA1\"")"
-r dr_has_identifier "$(printf '%s' "$DR1" | grep -c 'identifier "com.hxallai.bot"')"
+r dr_has_identifier "$(printf '%s' "$DR1" | grep -c 'identifier "org.example.hxprobe"')"
 r runtime_flag "$(codesign -d --verbose=2 "$A1" 2>&1 | grep -c 'flags=.*runtime')"
 r team_identifier "$(codesign -d --verbose=2 "$A1" 2>&1 | sed -n 's/^TeamIdentifier=//p')"
 r run_with_ldv "$("$A1/Contents/MacOS/probe" 2>&1 | head -1)"
