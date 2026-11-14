@@ -1,0 +1,236 @@
+System Settings — Accessibility (pid 2310, window 44)
+[0] window "Accessibility"
+  [1] field
+   [2] button "Search"
+   [3] row
+   [4] row
+     [5] text "Sign in, with your Apple Account"
+   [6] row
+   [7] row
+     [8] text "Wi‑Fi"
+   [9] row
+     [10] text "Bluetooth"
+   [11] row
+     [12] text "Network"
+   [13] row
+     [14] text "Energy"
+   [15] row
+   [16] row
+     [17] text "General"
+   [18] row
+     [19] text "Accessibility"
+   [20] row
+     [21] text "Appearance"
+   [22] row
+     [23] text "Siri"
+   [24] row
+     [25] text "Control Center"
+   [26] row
+     [27] text "Desktop & Dock"
+   [28] row
+     [29] text "Displays"
+   [30] row
+     [31] text "Screen Saver"
+   [32] row
+     [33] text "Spotlight"
+   [34] row
+     [35] text "Wallpaper"
+   [36] row
+   [37] row
+     [38] text "Notifications"
+   [39] row
+     [40] text "Sound"
+   [41] row
+     [42] text "Focus"
+   [43] row
+     [44] text "Screen Time"
+   [45] row
+   [46] row
+     [47] text "Lock Screen"
+   [48] row
+     [49] text "Privacy & Security"
+   [50] row
+     [51] text "Login Password"
+   [52] row
+     [53] text "Users & Groups"
+   [54] row
+   [55] row
+     [56] text "Internet Accounts"
+   [57] row
+     [58] text "Game Center"
+   [59] row
+     [60] text "iCloud"
+   [61] row
+     [62] text "Wallet & Apple Pay"
+   [63] row
+   [64] row
+     [65] text "Keyboard"
+   [66] row
+     [67] text "Mouse"
+   [68] row
+     [69] text "Printers & Scanners"
+   [70] button
+   [71] button
+   [72] button
+   [73] button
+   [74] row
+     [75] check "ankarund_Toggle" = "1" (selected)
+   [76] row
+     [77] check "bash_Toggle" = "1" (selected)
+   [78] row
+     [79] check "hosted-compute-agent_Toggle" = "1" (selected)
+   [80] row
+     [81] check "osascript_Toggle" = "1" (selected)
+   [82] row
+     [83] check "provisioner_Toggle" = "1" (selected)
+   [84] row
+     [85] check "runprovisioner_Toggle" = "1" (selected)
+   [86] row
+     [87] check "sshd-keygen-wrapper_Toggle" = "1" (selected)
+   [88] row
+     [89] check "start_hca_Toggle" = "1" (selected)
+   [90] row
+     [91] check "Terminal_Toggle" = "1" (selected)
+   [92] row
+     [93] check "Xcode Helper_Toggle" = "1" (selected)
+  [94] button "Add"
+  [96] button "Back"
+ [97] button
+ [98] button
+ [99] button
+[100] menu
+ [101] menu "Apple"
+  [102] menu
+   [103] menu "About This Mac"
+   [104] menu "System Information"
+   [105] menu "System Settings…"
+   [106] menu "App Store"
+   [107] menu "Recent Items"
+    [108] menu
+     [109] menu "Installer"
+     [110] menu "Show “Installer” in Finder"
+     [111] menu "System Settings"
+     [112] menu "Show “System Settings” in Finder"
+     [113] menu "AnkaGuestAddons.pkg"
+     [114] menu "Show “AnkaGuestAddons.pkg” in Finder"
+     [115] menu "Clear Menu"
+   [116] menu "Force Quit…"
+   [117] menu "Force Quit System Settings"
+   [118] menu "Sleep"
+   [119] menu "Restart…"
+   [120] menu "Restart"
+   [121] menu "Shut Down…"
+   [122] menu "Shut Down"
+   [123] menu "Lock Screen"
+   [124] menu "Log Out Anka…"
+   [125] menu "Log Out Anka"
+ [126] menu "System Settings"
+  [127] menu
+   [128] menu "About System Settings"
+   [129] menu "Services"
+    [130] menu
+     [131] menu "Activity Monitor"
+     [132] menu "Allocations & Leaks"
+     [133] menu "File Activity"
+     [134] menu "System Trace"
+     [135] menu "Time Profile Active Application"
+     [136] menu "Time Profile App Under Mouse"
+     [137] menu "Time Profile Entire System"
+     [138] menu "Toggle Instruments Recording"
+     [139] menu "Services Settings…"
+   [140] menu "Hide System Settings"
+   [141] menu "Hide Others"
+   [142] menu "Quit System Settings"
+   [143] menu "Quit and Keep Windows"
+ [144] menu "Edit"
+  [145] menu
+   [146] menu "AutoFill"
+    [147] menu
+   [148] menu "Start Dictation…"
+   [149] menu "Emoji & Symbols"
+ [150] menu "View"
+  [151] menu
+   [152] menu "Back"
+   [153] menu "Search"
+   [154] menu "About"
+   [155] menu "Accessibility"
+   [156] menu "AirDrop & Handoff"
+   [157] menu "Appearance"
+   [158] menu "Apple Account"
+   [159] menu "AppleCare & Warranty"
+   [160] menu "Bluetooth"
+   [161] menu "Control Center"
+   [162] menu "Date & Time"
+   [163] menu "Desktop & Dock"
+   [164] menu "Device Management"
+   [165] menu "Displays"
+   [166] menu "Energy"
+   [167] menu "Focus"
+   [168] menu "Game Center"
+   [169] menu "iCloud"
+   [170] menu "Internet Accounts"
+   [171] menu "Keyboard"
+   [172] menu "Language & Region"
+   [173] menu "Lock Screen"
+   [174] menu "Login Items & Extensions"
+   [175] menu "Login Password"
+   [176] menu "Mouse"
+   [177] menu "Network"
+   [178] menu "Notifications"
+   [179] menu "Printers & Scanners"
+   [180] menu "Privacy & Security"
+   [181] menu "Screen Saver"
+   [182] menu "Screen Time"
+   [183] menu "Sharing"
+   [184] menu "Siri"
+   [185] menu "Software Update"
+   [186] menu "Sound"
+   [187] menu "Spotlight"
+   [188] menu "Startup Disk"
+   [189] menu "Storage"
+   [190] menu "Time Machine"
+   [191] menu "Transfer or Reset"
+   [192] menu "Users & Groups"
+   [193] menu "Wallet & Apple Pay"
+   [194] menu "Wallpaper"
+   [195] menu "Wi‑Fi"
+ [196] menu "Window"
+  [197] menu
+   [198] menu "Close"
+   [199] menu "Close All"
+   [200] menu "Minimize"
+   [201] menu "Minimize All"
+   [202] menu "Zoom"
+   [203] menu "Zoom All"
+   [204] menu "Fill"
+   [205] menu "Center"
+   [206] menu "Move & Resize"
+    [207] menu
+     [208] menu "Left"
+     [209] menu "Right"
+     [210] menu "Top"
+     [211] menu "Bottom"
+     [212] menu "Top Left"
+     [213] menu "Top Right"
+     [214] menu "Bottom Left"
+     [215] menu "Bottom Right"
+     [216] menu "Left & Right"
+     [217] menu "Left & Quarters"
+     [218] menu "Right & Left"
+     [219] menu "Right & Quarters"
+     [220] menu "Top & Bottom"
+     [221] menu "Top & Quarters"
+     [222] menu "Bottom & Top"
+     [223] menu "Bottom & Quarters"
+     [224] menu "Quarters"
+   [225] menu "Bring All to Front"
+   [226] menu "Arrange in Front"
+ [227] menu "Help"
+  [228] menu
+   [229] menu "System Settings Help"
+   [230] menu "macOS Help"
+   [231] menu "User Manual"
+   [232] menu "macOS Support"
+   [233] menu "Apple Virtual Machine 1 Specifications"
+   [234] menu "Hardware Support"
+The driver did not read the whole window.

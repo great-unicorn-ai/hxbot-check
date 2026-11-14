@@ -1,0 +1,228 @@
+System Settings — Screen & System Audio Recording (pid 1259, window 34)
+[0] window "Screen & System Audio Recording"
+   [1] row
+   [2] row
+     [3] text "Sign in, with your Apple Account"
+   [4] row
+   [5] row
+     [6] text "Software Update Available, 1 new item" = "1"
+   [7] row
+   [8] row
+     [9] text "Wi‑Fi"
+   [10] row
+     [11] text "Bluetooth"
+   [12] row
+     [13] text "Network"
+   [14] row
+     [15] text "Energy"
+   [16] row
+   [17] row
+     [18] text "General"
+   [19] row
+     [20] text "Accessibility"
+   [21] row
+     [22] text "Appearance"
+   [23] row
+     [24] text "Menu Bar"
+   [25] row
+     [26] text "Desktop & Dock"
+   [27] row
+     [28] text "Displays"
+   [29] row
+     [30] text "Spotlight"
+   [31] row
+     [32] text "Wallpaper"
+   [33] row
+     [34] text "Siri"
+   [35] row
+   [36] row
+     [37] text "Notifications"
+   [38] row
+     [39] text "Sound"
+   [40] row
+     [41] text "Focus"
+   [42] row
+     [43] text "Screen Time"
+   [44] row
+   [45] row
+     [46] text "Lock Screen"
+   [47] row
+     [48] text "Privacy & Security"
+   [49] row
+     [50] text "Login Password"
+   [51] row
+     [52] text "Users & Groups"
+   [53] row
+   [54] row
+     [55] text "Internet Accounts"
+   [56] row
+     [57] text "Game Center"
+   [58] row
+     [59] text "iCloud"
+   [60] row
+     [61] text "Wallet & Apple Pay"
+   [62] row
+   [63] row
+     [64] text "Keyboard"
+   [65] row
+     [66] text "Mouse"
+   [67] row
+     [68] text "Printers & Scanners"
+   [69] button
+   [70] button
+   [71] button
+   [72] button
+  [73] field "Search"
+   [74] button "Search"
+   [75] row
+     [76] check "bash_Toggle" = "1" (selected)
+   [77] row
+     [78] check "hosted-compute-agent_Toggle" = "1" (selected)
+   [79] row
+     [80] check "provisioner_Toggle" = "0"
+  [81] button "Add"
+   [82] row
+  [83] button "Add"
+  [85] button "Back"
+ [86] button
+ [87] button
+ [88] text "Screen & System Audio Recording"
+  [90] field "Anka"
+  [91] field "Password"
+  [92] button "Modify Settings"
+  [93] button "Cancel"
+[94] menu
+ [95] menu "Apple"
+  [96] menu
+   [97] menu "About This Mac"
+   [98] menu "System Information"
+   [99] menu "System Settings…, 1 update"
+   [100] menu "App Store"
+   [101] menu "Recent Items"
+    [102] menu
+     [103] menu "Installer"
+     [104] menu "Show “Installer” in Finder"
+     [105] menu "System Settings"
+     [106] menu "Show “System Settings” in Finder"
+     [107] menu "AnkaGuestAddons.pkg"
+     [108] menu "Show “AnkaGuestAddons.pkg” in Finder"
+     [109] menu "Macintosh HD"
+     [110] menu "Clear Menu"
+   [111] menu "Force Quit…"
+   [112] menu "Force Quit System Settings"
+   [113] menu "Sleep"
+   [114] menu "Restart…"
+   [115] menu "Restart"
+   [116] menu "Shut Down…"
+   [117] menu "Shut Down"
+   [118] menu "Lock Screen"
+   [119] menu "Log Out Anka…"
+   [120] menu "Log Out Anka"
+ [121] menu "System Settings"
+  [122] menu
+   [123] menu "About System Settings"
+   [124] menu "Services"
+    [125] menu
+     [126] menu "Activity Monitor"
+     [127] menu "Allocations & Leaks"
+     [128] menu "File Activity"
+     [129] menu "System Trace"
+     [130] menu "Time Profile Active Application"
+     [131] menu "Time Profile App Under Mouse"
+     [132] menu "Time Profile Entire System"
+     [133] menu "Toggle Instruments Recording"
+     [134] menu "Services Settings…"
+   [135] menu "Hide System Settings"
+   [136] menu "Hide Others"
+   [137] menu "Quit System Settings"
+ [138] menu "Edit"
+  [139] menu
+   [140] menu "Select All"
+   [141] menu "AutoFill"
+    [142] menu
+   [143] menu "Start Dictation…"
+   [144] menu "Emoji & Symbols"
+ [145] menu "View"
+  [146] menu
+   [147] menu "Back"
+   [148] menu "Search"
+   [149] menu "About"
+   [150] menu "Accessibility"
+   [151] menu "AirDrop & Continuity"
+   [152] menu "Appearance"
+   [153] menu "Apple Account"
+   [154] menu "AppleCare & Warranty"
+   [155] menu "Bluetooth"
+   [156] menu "Date & Time"
+   [157] menu "Desktop & Dock"
+   [158] menu "Device Management"
+   [159] menu "Displays"
+   [160] menu "Energy"
+   [161] menu "Focus"
+   [162] menu "Game Center"
+   [163] menu "iCloud"
+   [164] menu "Internet Accounts"
+   [165] menu "Keyboard"
+   [166] menu "Language & Region"
+   [167] menu "Lock Screen"
+   [168] menu "Login Items & Extensions"
+   [169] menu "Login Password"
+   [170] menu "Menu Bar"
+   [171] menu "Mouse"
+   [172] menu "Network"
+   [173] menu "Notifications"
+   [174] menu "Printers & Scanners"
+   [175] menu "Privacy & Security"
+   [176] menu "Screen Time"
+   [177] menu "Sharing"
+   [178] menu "Siri"
+   [179] menu "Software Update"
+   [180] menu "Sound"
+   [181] menu "Spotlight"
+   [182] menu "Startup Disk"
+   [183] menu "Storage"
+   [184] menu "Time Machine"
+   [185] menu "Transfer or Reset"
+   [186] menu "Users & Groups"
+   [187] menu "Wallet & Apple Pay"
+   [188] menu "Wallpaper"
+   [189] menu "Wi‑Fi"
+ [190] menu "Window"
+  [191] menu
+   [192] menu "Close All"
+   [193] menu "Minimize"
+   [194] menu "Minimize All"
+   [195] menu "Zoom"
+   [196] menu "Zoom All"
+   [197] menu "Fill"
+   [198] menu "Center"
+   [199] menu "Move & Resize"
+    [200] menu
+     [201] menu "Left"
+     [202] menu "Right"
+     [203] menu "Top"
+     [204] menu "Bottom"
+     [205] menu "Top Left"
+     [206] menu "Top Right"
+     [207] menu "Bottom Left"
+     [208] menu "Bottom Right"
+     [209] menu "Left & Right"
+     [210] menu "Left & Quarters"
+     [211] menu "Right & Left"
+     [212] menu "Right & Quarters"
+     [213] menu "Top & Bottom"
+     [214] menu "Top & Quarters"
+     [215] menu "Bottom & Top"
+     [216] menu "Bottom & Quarters"
+     [217] menu "Quarters"
+   [218] menu "Bring All to Front"
+   [219] menu "Arrange in Front"
+ [220] menu "Help"
+  [221] menu
+   [222] menu "System Settings Help"
+   [223] menu "macOS Help"
+   [224] menu "User Manual"
+   [225] menu "macOS Support"
+   [226] menu "Apple Virtual Machine 1 Specifications"
+   [227] menu "Hardware Support"
+The driver did not read the whole window.
