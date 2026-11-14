@@ -65,6 +65,10 @@ async function hxpMain() {
     const win = hxChooseWindow(listed.content, { app: "System Settings" });
     result.window = win ? { app: win.app, title: win.title } : null;
     result.pid = win?.pid ?? null;
+    // System Settings by its bundle id, whatever the language of macOS
+    const info = hxpSpawnSync("/usr/bin/lsappinfo", ["info", "-only", "pid", "-app", "com.apple.systempreferences"], { encoding: "utf8" });
+    result.lsappinfo = (info.stdout ?? "").trim().slice(0, 120);
+    result.lsappinfo_pid_same = Number((info.stdout ?? "").match(/=\s*(\d+)/u)?.[1]) === win?.pid;
     if (!win) return;
     const target = { kind: "window", pid: win.pid, window_id: win.windowId };
     const read = async () => {
@@ -77,7 +81,14 @@ async function hxpMain() {
       });
       return answer.ok ? hxReadWindow(answer.content) : null;
     };
-    const before = await read();
+    // The list of a pane loads after the window (macOS 26 Screen Recording): read again for a while.
+    let before = await read();
+    result.reads_until_switch = 1;
+    for (let attempt = 0; attempt < 15 && before && !hxpSwitch(before.elements, rowName); attempt += 1) {
+      await wait(1000);
+      before = await read();
+      result.reads_until_switch += 1;
+    }
     if (!before) {
       result.error = "no window state";
       return;
