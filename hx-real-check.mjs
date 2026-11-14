@@ -6984,8 +6984,8 @@ var require_public_api = __commonJS(function(exports) {
 });
 
 // scripts/hx-real-check.ts
-import { mkdir as mkdir2, readdir as readdir4, readFile as readFile3, writeFile as writeFile3 } from "node:fs/promises";
-import { join as join10, resolve } from "node:path";
+import { mkdir as mkdir2, readdir as readdir4, readFile as readFile4, writeFile as writeFile5 } from "node:fs/promises";
+import { join as join12, resolve } from "node:path";
 
 // src/backend/hx-check/acp-brain.ts
 import { spawn } from "node:child_process";
@@ -6995,7 +6995,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { createInterface } from "node:readline";
 
-// packages/contracts/src/runtime-values.ts
+// ../hx-v168/packages/contracts/src/runtime-values.ts
 function runtimeTag(value) {
   return Object.prototype.toString.call(value);
 }
@@ -7321,815 +7321,12 @@ async function hxMcpBridge(url, group) {
     rpc.read(line);
 }
 
-// src/backend/hx-check/chat-model.ts
-var TURN_TIMEOUT_MS = 180000;
-var RETRIES = 4;
-function hxReadChatAnswer(body) {
-  const choices = isDynamicRecord(body) && Array.isArray(body.choices) ? body.choices : [];
-  const [first] = choices;
-  const message = isDynamicRecord(first) && isDynamicRecord(first.message) ? first.message : {};
-  const text = typeof message.content === "string" ? message.content : "";
-  const wire = Array.isArray(message.tool_calls) ? message.tool_calls : [];
-  const calls = [];
-  for (const [index, item] of wire.entries()) {
-    if (!isDynamicRecord(item) || !isDynamicRecord(item.function))
-      continue;
-    const name = item.function.name;
-    if (typeof name !== "string" || !name)
-      continue;
-    const args = item.function.arguments;
-    calls.push({
-      id: typeof item.id === "string" && item.id ? item.id : `call-${index + 1}`,
-      name,
-      arguments: typeof args === "string" ? args : JSON.stringify(args ?? {})
-    });
-  }
-  return { text, calls };
-}
-function hxAssistantMessage(turn) {
-  return turn.calls.length ? {
-    role: "assistant",
-    content: turn.text || null,
-    tool_calls: turn.calls.map((call) => ({
-      id: call.id,
-      type: "function",
-      function: { name: call.name, arguments: call.arguments }
-    }))
-  } : { role: "assistant", content: turn.text };
-}
-function hxChatModel(endpoint, options = {}) {
-  const send = options.fetch ?? ((url, init) => fetch(url, init));
-  const wait = options.wait ?? ((ms) => new Promise((resolve) => setTimeout(resolve, ms)));
-  return {
-    name: endpoint.name,
-    async turn(messages, tools) {
-      const body = JSON.stringify({
-        model: endpoint.model,
-        messages,
-        ...tools.length ? {
-          tools: tools.map((tool) => ({
-            type: "function",
-            function: { name: tool.name, description: tool.description, parameters: tool.parameters }
-          }))
-        } : {},
-        temperature: 0.2
-      });
-      let last = "";
-      let url = endpoint.url;
-      for (let attempt = 0;attempt <= RETRIES; attempt += 1) {
-        let response;
-        try {
-          response = await send(url, {
-            method: "POST",
-            headers: {
-              "content-type": "application/json",
-              accept: "application/json",
-              authorization: `Bearer ${endpoint.key}`,
-              ...endpoint.headers
-            },
-            body,
-            redirect: "manual",
-            signal: AbortSignal.timeout(TURN_TIMEOUT_MS)
-          });
-        } catch (error) {
-          last = error instanceof Error ? error.message : String(error);
-          await wait(2000 * 2 ** attempt);
-          continue;
-        }
-        const location = response.headers.get("location");
-        if (response.status >= 300 && response.status < 400 && location) {
-          url = new URL(location, url).toString();
-          last = `${response.status} to ${url}`;
-          continue;
-        }
-        const text = await response.text();
-        if (response.ok) {
-          try {
-            return hxReadChatAnswer(JSON.parse(text));
-          } catch {
-            last = `${response.status} ${response.headers.get("content-type") ?? ""}: not JSON: ${text.slice(0, 200)}`;
-            break;
-          }
-        }
-        last = `${response.status} ${text.slice(0, 300)}`;
-        if (response.status !== 429 && response.status < 500)
-          break;
-        const after = Number(response.headers.get("retry-after"));
-        await wait(Number.isFinite(after) && after > 0 ? Math.min(after, 60) * 1000 : 3000 * 2 ** attempt);
-      }
-      throw new Error(`${endpoint.name}: ${last}`);
-    }
-  };
-}
-function hxOpenCodeFreeModels(catalog, key = "public") {
-  const provider = isDynamicRecord(catalog) && isDynamicRecord(catalog.opencode) ? catalog.opencode : null;
-  if (!provider || !isDynamicRecord(provider.models))
-    return [];
-  const api = typeof provider.api === "string" ? provider.api.replace(/\/+$/, "") : "https://opencode.ai/zen/v1";
-  const found = [];
-  for (const [id, model] of Object.entries(provider.models)) {
-    if (!isDynamicRecord(model) || model.tool_call !== true)
-      continue;
-    const cost = isDynamicRecord(model.cost) ? model.cost : {};
-    if (cost.input !== 0 || cost.output !== undefined && cost.output !== 0)
-      continue;
-    const npm = isDynamicRecord(model.provider) ? model.provider.npm : undefined;
-    if (npm !== undefined && npm !== "@ai-sdk/openai-compatible")
-      continue;
-    if (isDynamicRecord(model.status) || model.status === "deprecated")
-      continue;
-    found.push({ name: `OpenCode ${id}`, url: `${api}/chat/completions`, key, model: id });
-  }
-  return found;
-}
-function hxGitHubModel(token, model = "openai/gpt-4.1-mini", organization) {
-  return {
-    name: `GitHub Models ${model}${organization ? ` (${organization})` : ""}`,
-    url: organization ? `https://models.github.ai/orgs/${encodeURIComponent(organization)}/inference/chat/completions` : "https://models.github.ai/inference/chat/completions",
-    key: token,
-    model,
-    headers: { accept: "application/vnd.github+json", "x-github-api-version": "2022-11-28" }
-  };
-}
-var PING_TOOL = {
-  name: "ping",
-  description: "Answer the check. Call it once.",
-  parameters: { type: "object", properties: { word: { type: "string" } }, required: ["word"] }
-};
-async function hxFirstWorkingModel(endpoints, options = {}) {
-  const tried = [];
-  for (const endpoint of endpoints) {
-    const model = hxChatModel(endpoint, { ...options, wait: options.wait ?? (async () => {
-      return;
-    }) });
-    try {
-      const turn = await model.turn([{ role: "user", content: 'Call the tool ping with the word "ready".' }], [PING_TOOL]);
-      const call = turn.calls[0];
-      if (call?.name === PING_TOOL.name) {
-        tried.push({ name: endpoint.name, answer: "ok" });
-        return { model: hxChatModel(endpoint, options), tried };
-      }
-      tried.push({ name: endpoint.name, answer: `no tool call: ${turn.text.slice(0, 120)}` });
-    } catch (error) {
-      tried.push({
-        name: endpoint.name,
-        answer: (error instanceof Error ? error.message : String(error)).slice(0, 200)
-      });
-    }
-  }
-  return { model: null, tried };
-}
-
-// src/backend/hx-check/loop.ts
-function hxToolName(name, known) {
-  if (known.has(name))
-    return name;
-  const plain = name.replace(/^hxbot(?:\.|__|_)/, "");
-  return known.has(plain) ? plain : name;
-}
-async function hxToolLoop(input) {
-  const known = new Set(input.tools.map((tool) => tool.name));
-  const calls = [];
-  for (let turn = 0;turn < input.maxTurns; turn += 1) {
-    let answer;
-    try {
-      answer = await input.model.turn(input.history, input.tools);
-    } catch (error) {
-      return { calls, text: "", end: "error", error: error instanceof Error ? error.message : String(error) };
-    }
-    input.history.push(hxAssistantMessage(answer));
-    if (!answer.calls.length)
-      return { calls, text: answer.text, end: "stopped" };
-    for (const call of answer.calls) {
-      const name = hxToolName(call.name, known);
-      let args = null;
-      let reply;
-      try {
-        args = call.arguments.trim() ? JSON.parse(call.arguments) : {};
-      } catch {
-        args = null;
-      }
-      if (args === null)
-        reply = JSON.stringify({ status: "invalid", reason: "The arguments are not JSON." });
-      else if (!known.has(name))
-        reply = JSON.stringify({ status: "invalid", reason: `There is no tool ${call.name}.` });
-      else {
-        try {
-          reply = await input.handle(name, args);
-        } catch (error) {
-          reply = JSON.stringify({ status: "failed", reason: error instanceof Error ? error.message : String(error) });
-        }
-      }
-      calls.push({ name, args, answer: reply });
-      input.history.push({ role: "tool", tool_call_id: call.id, content: reply });
-    }
-  }
-  return { calls, text: "", end: "limit" };
-}
-
-// src/backend/hx-check/brain.ts
-function hxChatBrain(model) {
-  const histories = new Map;
-  return {
-    name: model.name,
-    async turn(input) {
-      const history = histories.get(input.session) ?? [];
-      histories.set(input.session, history);
-      if (history[0]?.role === "system")
-        history[0] = { role: "system", content: input.system };
-      else
-        history.unshift({ role: "system", content: input.system });
-      history.push({ role: "user", content: input.user });
-      return hxToolLoop({
-        model,
-        history,
-        tools: input.tools,
-        handle: input.handle,
-        maxTurns: input.maxTurns
-      });
-    },
-    async close() {}
-  };
-}
-
-// src/backend/hx-check/install-run.ts
+// src/backend/hx-check/app-run.ts
 import { execFile as execFile2 } from "node:child_process";
-import { mkdir, mkdtemp as mkdtemp2, readdir as readdir2, rename as rename2, rm as rm2, writeFile } from "node:fs/promises";
-import { homedir, tmpdir as tmpdir3 } from "node:os";
-import { basename as basename2, join as join3 } from "node:path";
+import { mkdtemp as mkdtemp2, writeFile as writeFile2 } from "node:fs/promises";
+import { tmpdir as tmpdir3 } from "node:os";
+import { join as join3 } from "node:path";
 import { promisify } from "node:util";
-
-// src/backend/hx-computer/install.ts
-import { access, mkdtemp, readdir, rename, rm } from "node:fs/promises";
-import { tmpdir as tmpdir2 } from "node:os";
-import { basename, extname, join as join2 } from "node:path";
-
-// src/backend/hx-computer/runner.ts
-import { execFile } from "node:child_process";
-var DEFAULT_TIMEOUT_MS = 15000;
-var MAX_OUTPUT_BYTES = 8 * 1024 * 1024;
-function hxRunOk(result) {
-  return result.code === 0 && !result.timedOut && !result.missing;
-}
-function hxRunFailure(command, result) {
-  if (result.missing)
-    return `${command} is not on this computer`;
-  if (result.timedOut)
-    return `${command} did not answer in time`;
-  const text = (result.stderr.trim() || result.stdout.trim()).split(`
-`)[0] ?? "";
-  return `${command} ended with code ${result.code ?? "none"}${text ? `: ${text.slice(0, 300)}` : ""}`;
-}
-var hxRun = (command, args, options = {}) => new Promise((resolve) => {
-  execFile(command, [...args], {
-    timeout: options.timeoutMs ?? DEFAULT_TIMEOUT_MS,
-    maxBuffer: MAX_OUTPUT_BYTES,
-    windowsHide: true,
-    encoding: "utf8",
-    env: options.env ? { ...process.env, ...options.env } : process.env
-  }, (error, stdout, stderr) => {
-    if (!error) {
-      resolve({ code: 0, stdout, stderr, timedOut: false, missing: false });
-      return;
-    }
-    resolve({
-      code: typeof error.code === "number" ? error.code : null,
-      stdout,
-      stderr,
-      timedOut: error.killed === true,
-      missing: error.code === "ENOENT"
-    });
-  });
-});
-
-// src/backend/hx-computer/install.ts
-var HX_INSTALL_FILES = {
-  exists: (path) => access(path).then(() => true, () => false),
-  makeTemp: (prefix) => mkdtemp(join2(tmpdir2(), prefix)),
-  async findApps(folder) {
-    const found = [];
-    for (const entry of await readdir(folder, { withFileTypes: true }).catch(() => [])) {
-      if (!entry.isDirectory())
-        continue;
-      const path = join2(folder, entry.name);
-      if (entry.name.endsWith(".app"))
-        found.push(path);
-      else
-        for (const inner of await readdir(path, { withFileTypes: true }).catch(() => []))
-          if (inner.isDirectory() && inner.name.endsWith(".app"))
-            found.push(join2(path, inner.name));
-    }
-    return found;
-  },
-  rename: (from, to) => rename(from, to),
-  remove: (path) => rm(path, { recursive: true, force: true })
-};
-var LONG_MS = 300000;
-function plistValue(output) {
-  return output.trim().split(`
-`)[0]?.trim() ?? "";
-}
-async function facts(run, app) {
-  const plist = join2(app, "Contents", "Info.plist");
-  const read = async (key) => {
-    const result = await run("/usr/bin/plutil", ["-extract", key, "raw", "-o", "-", plist]);
-    return hxRunOk(result) ? plistValue(result.stdout) : "";
-  };
-  const id = await read("CFBundleIdentifier");
-  if (!id)
-    return null;
-  const version = await read("CFBundleShortVersionString") || await read("CFBundleVersion");
-  return { name: basename(app, ".app"), id, version, path: app };
-}
-async function signature(run, app) {
-  const sign = await run("/usr/bin/codesign", ["-dv", "--verbose=2", app], { timeoutMs: 60000 });
-  const text = `${sign.stdout}
-${sign.stderr}`;
-  const authority = /^Authority=(.+)$/mu.exec(text)?.[1]?.trim();
-  const team = /^TeamIdentifier=(.+)$/mu.exec(text)?.[1]?.trim() ?? "";
-  const adhoc = /Signature=adhoc/u.test(text);
-  const check = await run("/usr/sbin/spctl", ["-a", "-vv", "-t", "exec", app], { timeoutMs: 60000 });
-  const verdict = `${check.stdout}
-${check.stderr}`;
-  return {
-    authority: authority ?? (adhoc ? "ad-hoc" : hxRunOk(sign) ? "unknown" : "unsigned"),
-    team: team === "not set" ? "" : team,
-    notarized: hxRunOk(check) && /Notarized/u.test(verdict)
-  };
-}
-async function unpack(deps, source) {
-  const kind = extname(source).toLowerCase();
-  const { run, files } = deps;
-  if (kind === ".app")
-    return { app: source.replace(/\/+$/u, ""), done: async () => {} };
-  if (kind === ".zip") {
-    const folder = await files.makeTemp("hxbot-install-");
-    const unzip = await run("/usr/bin/ditto", ["-x", "-k", source, folder], { timeoutMs: LONG_MS });
-    if (!hxRunOk(unzip))
-      return { status: "failed", reason: hxRunFailure("ditto", unzip) };
-    const apps = await files.findApps(folder);
-    const done = () => files.remove(folder);
-    if (apps.length !== 1) {
-      await done();
-      return { status: "invalid", reason: `The archive holds ${apps.length} apps; give the path of one .app.` };
-    }
-    return { app: apps[0] ?? "", done };
-  }
-  if (kind === ".dmg") {
-    const mount = await files.makeTemp("hxbot-dmg-");
-    const attach = await run("/usr/bin/hdiutil", ["attach", "-nobrowse", "-readonly", "-noautoopen", "-mountpoint", mount, source], { timeoutMs: LONG_MS });
-    if (!hxRunOk(attach))
-      return { status: "failed", reason: hxRunFailure("hdiutil", attach) };
-    const done = async () => {
-      await run("/usr/bin/hdiutil", ["detach", mount, "-quiet"], { timeoutMs: 60000 });
-      await files.remove(mount).catch(() => {
-        return;
-      });
-    };
-    const apps = await files.findApps(mount);
-    if (apps.length !== 1) {
-      await done();
-      return {
-        status: "invalid",
-        reason: `The disk image holds ${apps.length} apps; open it with computer_open instead.`
-      };
-    }
-    return { app: apps[0] ?? "", done };
-  }
-  return { status: "invalid", reason: "Give the path of a .app, .zip, .dmg or .pkg file." };
-}
-async function running(run, id) {
-  const result = await run("/usr/bin/lsappinfo", ["info", "-only", "pid", "-app", id]);
-  return hxRunOk(result) && /"pid"\s*=\s*\d+/u.test(result.stdout);
-}
-function refusedByMacOS(text) {
-  return /operation not permitted|permission denied|EPERM|EACCES/iu.test(text);
-}
-async function hxInstallApp(deps, input) {
-  if (deps.platform !== "darwin")
-    return {
-      status: "unsupported",
-      reason: "On Windows, open the installer with computer_open and its path; Windows asks the user to confirm."
-    };
-  const { run, files } = deps;
-  const source = input.path.trim();
-  if (!source.startsWith("/"))
-    return { status: "invalid", reason: "Give the full path of the file." };
-  if (!await files.exists(source))
-    return { status: "not-found", reason: `There is no file at ${source}.` };
-  if (extname(source).toLowerCase() === ".pkg") {
-    const opened = await run("/usr/bin/open", [source]);
-    return hxRunOk(opened) ? {
-      status: "installer",
-      reason: "The macOS installer is open. The user follows it and gives the password there; HXBot does not type passwords."
-    } : { status: "failed", reason: hxRunFailure("open", opened) };
-  }
-  const unpacked = await unpack(deps, source);
-  if (!("app" in unpacked))
-    return unpacked;
-  try {
-    const incoming = await facts(run, unpacked.app);
-    if (!incoming)
-      return { status: "invalid", reason: `${basename(unpacked.app)} has no bundle id: it is not an app.` };
-    const signed = await signature(run, unpacked.app);
-    const applications = deps.applications ?? "/Applications";
-    const target = join2(applications, `${incoming.name}.app`);
-    const installed = await files.exists(target) ? await facts(run, target) : null;
-    if (installed && input.replace !== true)
-      return {
-        status: "confirm",
-        reason: `${incoming.name} ${installed.version} is installed. Ask the user in the chat whether to replace it with ${incoming.version}; after a yes, call again with replace: true.`,
-        installed,
-        incoming,
-        signature: signed
-      };
-    if (installed && await running(run, installed.id))
-      return {
-        status: "running",
-        reason: `${installed.name} is open. Ask the user to quit it (and save their work), then call again.`,
-        installed
-      };
-    const staging = join2(applications, `.${incoming.name}.hxbot-new.app`);
-    await files.remove(staging).catch(() => {
-      return;
-    });
-    const copy = await run("/usr/bin/ditto", [unpacked.app, staging], { timeoutMs: LONG_MS });
-    if (!hxRunOk(copy)) {
-      await files.remove(staging).catch(() => {
-        return;
-      });
-      return refusedByMacOS(copy.stderr) ? await appManagement(deps) : { status: "failed", reason: hxRunFailure("ditto", copy) };
-    }
-    const shown = join2(applications, `${incoming.name} ${installed?.version.replace(/[/:]/gu, "-") ?? ""}.app`);
-    const old = installed && !await files.exists(shown) ? shown : join2(applications, `.${incoming.name}.hxbot-old.app`);
-    if (installed) {
-      if (old !== shown)
-        await files.remove(old).catch(() => {
-          return;
-        });
-      try {
-        await files.rename(target, old);
-      } catch (error) {
-        await files.remove(staging).catch(() => {
-          return;
-        });
-        return refusedByMacOS(String(error)) ? await appManagement(deps) : { status: "failed", reason: String(error).slice(0, 300) };
-      }
-    }
-    try {
-      await files.rename(staging, target);
-    } catch (error) {
-      if (installed)
-        await files.rename(old, target).catch(() => {
-          return;
-        });
-      await files.remove(staging).catch(() => {
-        return;
-      });
-      return refusedByMacOS(String(error)) ? await appManagement(deps) : { status: "failed", reason: String(error).slice(0, 300) };
-    }
-    if (installed)
-      await deps.trashItem(old).catch(() => files.remove(old).catch(() => {
-        return;
-      }));
-    const result = await facts(run, target);
-    if (!result || result.version !== incoming.version)
-      return {
-        status: "failed",
-        reason: `The copy in ${applications} reads ${result?.version ?? "nothing"}, not ${incoming.version}.`
-      };
-    return {
-      status: "installed",
-      app: result,
-      signature: signed,
-      replaced: installed ? { version: installed.version } : null
-    };
-  } finally {
-    await unpacked.done().catch(() => {
-      return;
-    });
-  }
-}
-async function appManagement(deps) {
-  await deps.askAppManagement?.().catch(() => {
-    return;
-  });
-  return {
-    status: "needs-permission",
-    permission: "app-management",
-    reason: "macOS asks for App Management to change an app that is there. HXBot opened Privacy & Security → App Management and turns on its switch if it can; the user gives the password or Touch ID. Then call again."
-  };
-}
-
-// src/backend/hx-check/install-run.ts
-var run = promisify(execFile2);
-var ID = "org.example.hxinstall";
-var NAME = "HXInstallCheck";
-async function makeApp(folder, version) {
-  const app = join3(folder, `${NAME}.app`);
-  await mkdir(join3(app, "Contents", "MacOS"), { recursive: true });
-  await writeFile(join3(app, "Contents", "Info.plist"), `<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0"><dict>
-<key>CFBundleIdentifier</key><string>${ID}</string>
-<key>CFBundleExecutable</key><string>hxinstall</string>
-<key>CFBundleName</key><string>${NAME}</string>
-<key>CFBundlePackageType</key><string>APPL</string>
-<key>CFBundleShortVersionString</key><string>${version}</string>
-</dict></plist>
-`, "utf8");
-  await run("/bin/cp", ["/usr/bin/true", join3(app, "Contents", "MacOS", "hxinstall")]);
-  await run("/usr/bin/codesign", ["-s", "-", "--force", app]);
-  await run("/usr/bin/xattr", ["-w", "com.apple.quarantine", "0081;00000000;HXBot check;", app]);
-  return app;
-}
-async function quarantined(path) {
-  return run("/usr/bin/xattr", ["-p", "com.apple.quarantine", path]).then(() => true, () => false);
-}
-function line(result) {
-  return JSON.stringify(result).slice(0, 600);
-}
-async function hxInstallRealCheck(input) {
-  const { items, log } = input;
-  if (input.platform !== "darwin") {
-    items.add("I1", "安装应用（computer_install）", "skip", `这台机器是 ${input.platform}，安装应用只在 Mac 上检查`);
-    return;
-  }
-  const target = `/Applications/${NAME}.app`;
-  const trash = join3(homedir(), ".Trash");
-  const work = await mkdtemp2(join3(tmpdir3(), "hxbot-install-check-"));
-  const deps = {
-    run: hxRun,
-    files: HX_INSTALL_FILES,
-    platform: "darwin",
-    trashItem: async (path) => {
-      await mkdir(trash, { recursive: true });
-      await rename2(path, join3(trash, `${basename2(path)}-${Date.now()}`));
-    }
-  };
-  try {
-    await rm2(target, { recursive: true, force: true });
-    const v1 = await makeApp(join3(work, "v1"), "1.0");
-    const v2 = await makeApp(join3(work, "v2"), "2.0");
-    const zip = join3(work, `${NAME}-2.0.zip`);
-    await run("/usr/bin/ditto", ["-c", "-k", "--keepParent", v2, zip]);
-    const v3 = await makeApp(join3(work, "v3"), "3.0");
-    const dmg = join3(work, `${NAME}-3.0.dmg`);
-    await run("/usr/bin/hdiutil", ["create", "-volname", NAME, "-srcfolder", join3(work, "v3"), "-ov", "-format", "UDZO", dmg], {
-      timeout: 120000
-    });
-    log(`test apps: ${v1}, ${zip}, ${v3} → ${dmg}`);
-    const first = await hxInstallApp(deps, { path: v1 });
-    items.check("I1", "装进“应用程序”文件夹：读回版本和签名，隔离标记保留", first.status === "installed" && first.app.version === "1.0" && first.signature.authority === "ad-hoc" && !first.signature.notarized && await quarantined(target), line(first));
-    const asked = await hxInstallApp(deps, { path: zip });
-    items.check("I2", "已经装了时先问（confirm），不动原来的", asked.status === "confirm" && asked.installed.version === "1.0" && asked.incoming.version === "2.0", line(asked));
-    const replaced = await hxInstallApp(deps, { path: zip, replace: true });
-    const leftovers = (await readdir2("/Applications")).filter((name) => name.includes("hxbot-"));
-    const inTrash = (await readdir2(trash).catch(() => [])).some((name) => name.startsWith(`${NAME} 1.0.app`));
-    items.check("I3", "同意替换后装上新版本，旧版进废纸篓，不留临时文件", replaced.status === "installed" && replaced.app.version === "2.0" && replaced.replaced?.version === "1.0" && inTrash && leftovers.length === 0, `${line(replaced)}；废纸篓里有旧版：${inTrash}；“应用程序”文件夹里的临时文件：${leftovers.join(", ") || "无"}`);
-    const fromImage = await hxInstallApp(deps, { path: dmg, replace: true });
-    const mounted = await run("/usr/bin/hdiutil", ["info"]).then((result) => result.stdout.includes("hxbot-dmg-"));
-    items.check("I4", "从磁盘映像装，装好后卸下", fromImage.status === "installed" && fromImage.app.version === "3.0" && !mounted, `${line(fromImage)}；映像还挂着：${mounted}`);
-  } catch (error) {
-    items.add("I9", "安装应用的检查没有跑完", "fail", error instanceof Error ? error.message : String(error));
-  } finally {
-    await rm2(target, { recursive: true, force: true }).catch(() => {
-      return;
-    });
-    await rm2(work, { recursive: true, force: true }).catch(() => {
-      return;
-    });
-  }
-}
-
-// src/backend/hx-check/report.ts
-class HxRealItems {
-  items = [];
-  add(id, title, status, detail = "") {
-    this.items.push({ id, title, status, detail: detail.slice(0, 1500) });
-    return status;
-  }
-  check(id, title, ok, detail = "") {
-    this.add(id, title, ok ? "pass" : "fail", detail);
-    return ok;
-  }
-}
-function hxRealCounts(items) {
-  const counts = { pass: 0, fail: 0, warn: 0, skip: 0 };
-  for (const item of items)
-    counts[item.status] += 1;
-  return counts;
-}
-var MARK = { pass: "✅", fail: "❌", warn: "⚠️", skip: "⏭️" };
-function cell(text) {
-  return text.replace(/\|/g, "\\|").replace(/\s*\n\s*/g, " ").slice(0, 400);
-}
-function order(a, b) {
-  const [, letterA = "", numberA = "0"] = /^([A-Z]+)(\d+)/u.exec(a.id) ?? [];
-  const [, letterB = "", numberB = "0"] = /^([A-Z]+)(\d+)/u.exec(b.id) ?? [];
-  return letterA.localeCompare(letterB) || Number(numberA) - Number(numberB);
-}
-function hxRealSummary(report) {
-  const counts = hxRealCounts(report.items);
-  return [
-    `## ${report.machine}`,
-    "",
-    `模型：${report.model || "没有可用的模型"}　用时 ${Math.round(report.seconds)} 秒　通过 ${counts.pass}，失败 ${counts.fail}，提醒 ${counts.warn}，跳过 ${counts.skip}`,
-    "",
-    "| | 项 | 结果 |",
-    "|---|---|---|",
-    ...[...report.items].sort(order).map((item) => `| ${MARK[item.status]} | ${item.id} ${cell(item.title)} | ${cell(item.detail)} |`),
-    "",
-    ...report.models.length ? ["试过的模型：", ...report.models.map((model) => `- ${model.name}：${cell(model.answer)}`), ""] : []
-  ].join(`
-`);
-}
-function hxReadRealReport(value) {
-  if (!isDynamicRecord(value) || typeof value.machine !== "string" || !Array.isArray(value.items))
-    return null;
-  const items = [];
-  for (const item of value.items) {
-    if (!isDynamicRecord(item))
-      continue;
-    const status = item.status;
-    if (status !== "pass" && status !== "fail" && status !== "warn" && status !== "skip")
-      continue;
-    items.push({
-      id: String(item.id ?? ""),
-      title: String(item.title ?? ""),
-      status,
-      detail: String(item.detail ?? "")
-    });
-  }
-  const models = Array.isArray(value.models) ? value.models.flatMap((model) => isDynamicRecord(model) ? [{ name: String(model.name ?? ""), answer: String(model.answer ?? "") }] : []) : [];
-  return {
-    machine: value.machine,
-    model: typeof value.model === "string" ? value.model : "",
-    startedAt: typeof value.startedAt === "string" ? value.startedAt : "",
-    seconds: typeof value.seconds === "number" ? value.seconds : 0,
-    items,
-    models
-  };
-}
-function hxRealOverview(reports, expected) {
-  const missing = expected.filter((machine) => !reports.some((report) => report.machine === machine));
-  const failed = reports.filter((report) => hxRealCounts(report.items).fail > 0);
-  const lines = [
-    "# HXBot 真实模型与真机检查",
-    "",
-    "| 机器 | 模型 | 通过 | 失败 | 提醒 | 跳过 |",
-    "|---|---|---|---|---|---|",
-    ...reports.map((report) => {
-      const counts = hxRealCounts(report.items);
-      return `| ${report.machine} | ${cell(report.model || "—")} | ${counts.pass} | ${counts.fail} | ${counts.warn} | ${counts.skip} |`;
-    }),
-    ...missing.map((machine) => `| ${machine} | 没有交回结果 | | | | |`),
-    "",
-    ...reports.map((report) => hxRealSummary(report))
-  ];
-  return { text: lines.join(`
-`), ok: missing.length === 0 && failed.length === 0 };
-}
-
-// src/backend/hx-check/scripted-model.ts
-var FORM = (goal) => [
-  `目标：${goal}`,
-  "已完成：无",
-  "文件：/check/shared/report.md",
-  "未解决：无",
-  "下一步：完成后交回结果",
-  "不要碰：别的文件"
-].join(`
-`);
-var calls = 0;
-function call(name, args) {
-  calls += 1;
-  return { text: "", calls: [{ id: `s-${calls}`, name, arguments: JSON.stringify(args) }] };
-}
-var text = (words) => ({ text: words, calls: [] });
-function lastUser(history) {
-  for (let index = history.length - 1;index >= 0; index -= 1) {
-    const message = history[index];
-    if (message?.role === "user")
-      return message.content;
-  }
-  return "";
-}
-function since(history) {
-  const out = [];
-  for (let index = history.length - 1;index >= 0; index -= 1) {
-    const message = history[index];
-    if (!message || message.role === "user")
-      break;
-    if (message.role === "tool")
-      out.unshift(message.content);
-  }
-  return out;
-}
-function statusOf(raw) {
-  try {
-    const value = JSON.parse(raw);
-    return isDynamicRecord(value) && typeof value.status === "string" ? value.status : "";
-  } catch {
-    return "";
-  }
-}
-function memberId(system, word) {
-  const line = system.split(`
-`).find((item) => word.test(item)) ?? "";
-  return /agentId ([\w-]+)/u.exec(line)?.[1] ?? "";
-}
-function hxScriptedModel() {
-  return {
-    name: "scripted (self-test)",
-    async turn(history) {
-      const system = history[0]?.role === "system" ? history[0].content : "";
-      const user = lastUser(history);
-      const tools = since(history);
-      if (system.includes("Computer Use"))
-        return text("done");
-      if (!system.includes("lead of this channel")) {
-        if (user.includes("咖啡店")) {
-          if (tools.length === 0)
-            return call("propose_plan", {
-              summary: "3 个智能体，约 40 分钟",
-              roles: [
-                { name: "研究员", kind: "do", does: "查资料", work: "data" },
-                { name: "写手", kind: "do", does: "写报告", work: "writing" },
-                { name: "审稿", kind: "check", does: "检查报告", work: "writing" }
-              ],
-              steps: [
-                { title: "查资料", role: "研究员" },
-                { title: "写报告", role: "写手" },
-                { title: "检查", role: "审稿" }
-              ]
-            });
-          if (tools.length === 1)
-            return call("start_team", {
-              goal: user,
-              roles: [
-                { name: "研究员", kind: "do", does: "查资料、做调研", work: "data" },
-                { name: "写手", kind: "do", does: "写报告", work: "writing" },
-                { name: "审稿", kind: "check", does: "检查报告", work: "writing" }
-              ],
-              steps: [
-                { title: "查资料", role: "研究员" },
-                { title: "写报告", role: "写手" },
-                { title: "检查", role: "审稿" }
-              ],
-              limits: { members: 3, minutes: 40, rounds: 10 }
-            });
-          return text("团队开始了。");
-        }
-        if (tools.length)
-          return text("好的。");
-        if (user.includes("再给 30 分钟"))
-          return call("team", { action: "limits", minutes: 70, rounds: 20 });
-        if (user.includes("跟团队说"))
-          return call("team", { action: "message", text: "报告里加一段竞争对手的价格对比。" });
-        if (user.includes("换一个人"))
-          return call("team", { action: "swap", member: "写手" });
-        if (user.includes("停一下"))
-          return call("team", { action: "stop" });
-        return text("好的。");
-      }
-      const request = /id (msg-\d+)/u.exec(system)?.[1] ?? "msg-1";
-      const assign = (word, goal) => call("channel_assign", {
-        recipientAgentId: memberId(system, word),
-        task: FORM(goal),
-        expectedResult: goal,
-        sourceMessageIds: [request]
-      });
-      const answered = tools.map(statusOf);
-      if (user.includes("【协作任务】")) {
-        if (answered.length === 0)
-          return call("team_board", { action: "read" });
-        const lastStatus = answered.at(-1);
-        if (lastStatus === "assigned")
-          return text("已分派，等结果。");
-        return assign(/写手|Writer/u, "写 300 字报告：周边人群、竞争对手和价格");
-      }
-      if (user.includes("【检查结果】")) {
-        if (answered.length === 0)
-          return call("team_done", { result: "《社区咖啡店开业调研》已完成并检查。" });
-        return text("交回了。");
-      }
-      if (user.includes("成员交回了结果")) {
-        if (answered.length === 0)
-          return assign(/审稿|Reviewer/u, "检查报告");
-        return text("已分派，等结果。");
-      }
-      return text("等待。");
-    }
-  };
-}
-
-// src/backend/hx-check/steps-run.ts
-import { spawn as spawn2 } from "node:child_process";
-import { randomUUID } from "node:crypto";
-import { readFile, writeFile as writeFile2 } from "node:fs/promises";
-import { tmpdir as tmpdir4 } from "node:os";
-import { join as join4 } from "node:path";
 
 // ../hx-agent/node_modules/zod/v4/core/util.js
 function getEnumValues(entries) {
@@ -14126,285 +13323,46 @@ function refine(fn, _params = {}) {
 function superRefine(fn, params) {
   return _superRefine(fn, params);
 }
-// src/backend/agent/advertised-json-schema.ts
-var MERGEABLE_KEYS = new Set(["type", "properties", "required", "additionalProperties"]);
-var isObject2 = (value) => typeof value === "object" && value !== null && !Array.isArray(value);
-var isBareAnyOf = (value) => isObject2(value) && Array.isArray(value.anyOf) && Object.keys(value).length === 1;
-var isObjectBranch = (value) => isObject2(value) && value.type === "object" && isObject2(value.properties) && Object.keys(value).every((key) => MERGEABLE_KEYS.has(key));
-var VALIDATION_KEYS = new Set([
-  "pattern",
-  "minLength",
-  "maxLength",
-  "minItems",
-  "maxItems",
-  "uniqueItems",
-  "minimum",
-  "maximum",
-  "exclusiveMinimum",
-  "exclusiveMaximum",
-  "multipleOf",
-  "minProperties",
-  "maxProperties"
-]);
-var SCHEMA_MAPS = new Set(["properties", "patternProperties", "definitions", "$defs"]);
-function tagValue(property) {
-  if (!isObject2(property))
-    return;
-  if (typeof property.const === "string")
-    return property.const;
-  return Array.isArray(property.enum) && property.enum.length === 1 && typeof property.enum[0] === "string" ? property.enum[0] : undefined;
+// src/backend/hx-computer/runner.ts
+import { execFile } from "node:child_process";
+var DEFAULT_TIMEOUT_MS = 15000;
+var MAX_OUTPUT_BYTES = 8 * 1024 * 1024;
+function hxRunOk(result) {
+  return result.code === 0 && !result.timedOut && !result.missing;
 }
-function mergeTaggedObjects(branches) {
-  const objects = branches.filter(isObjectBranch);
-  const [first] = objects;
-  if (first === undefined || objects.length < 2 || objects.length !== branches.length)
-    return;
-  const tag = Object.keys(first.properties).find((key) => {
-    const values = objects.map((object) => tagValue(object.properties[key]));
-    return values.every((value) => value !== undefined) && new Set(values).size === values.length;
-  });
-  if (tag === undefined)
-    return;
-  const properties = {
-    [tag]: { type: "string", enum: objects.flatMap((object) => tagValue(object.properties[tag]) ?? []) }
-  };
-  for (const object of objects) {
-    for (const [name, property] of Object.entries(object.properties)) {
-      if (name === tag)
-        continue;
-      const seen = properties[name];
-      if (seen === undefined) {
-        properties[name] = property;
-        continue;
-      }
-      const options = isBareAnyOf(seen) ? seen.anyOf : [seen];
-      const text = JSON.stringify(property);
-      if (!options.some((option) => JSON.stringify(option) === text))
-        properties[name] = { anyOf: [...options, property] };
-    }
-  }
-  const requiredOf = (object) => Array.isArray(object.required) ? object.required.filter((name) => typeof name === "string") : [];
-  const required = requiredOf(first).filter((name) => name !== tag && objects.every((object) => requiredOf(object).includes(name)));
-  return {
-    type: "object",
-    properties,
-    required: [tag, ...required],
-    ...objects.every((object) => object.additionalProperties === false) ? { additionalProperties: false } : {}
-  };
+function hxRunFailure(command, result) {
+  if (result.missing)
+    return `${command} is not on this computer`;
+  if (result.timedOut)
+    return `${command} did not answer in time`;
+  const text = (result.stderr.trim() || result.stdout.trim()).split(`
+`)[0] ?? "";
+  return `${command} ended with code ${result.code ?? "none"}${text ? `: ${text.slice(0, 300)}` : ""}`;
 }
-var VALUE_KEYS = new Set(["const", "enum", "default", "examples"]);
-function plainJson(value) {
-  if (value === null || typeof value === "boolean" || typeof value === "number" || typeof value === "string")
-    return value;
-  if (Array.isArray(value))
-    return value.flatMap((item) => plainJson(item) ?? []);
-  if (!isDynamicRecord(value))
-    return;
-  const result = {};
-  for (const [key, item] of Object.entries(value)) {
-    const copied = plainJson(item);
-    if (copied !== undefined)
-      result[key] = copied;
-  }
-  return result;
-}
-function compactMap(map) {
-  if (!isDynamicRecord(map))
-    return compact(map);
-  const result = {};
-  for (const [name, value] of Object.entries(map)) {
-    const compacted = compact(value);
-    if (compacted !== undefined)
-      result[name] = compacted;
-  }
-  return result;
-}
-function uniqueBranches(branches) {
-  const seen = new Set;
-  return branches.filter((branch) => {
-    const text = JSON.stringify(branch);
-    if (seen.has(text))
-      return false;
-    seen.add(text);
-    return true;
-  });
-}
-function compact(schema) {
-  if (schema === null || typeof schema === "boolean" || typeof schema === "number" || typeof schema === "string")
-    return schema;
-  if (Array.isArray(schema))
-    return schema.flatMap((item) => compact(item) ?? []);
-  if (!isDynamicRecord(schema))
-    return;
-  let result = {};
-  for (const [key, value] of Object.entries(schema)) {
-    if (key === "$schema" || VALIDATION_KEYS.has(key))
-      continue;
-    const compacted = VALUE_KEYS.has(key) ? plainJson(value) : SCHEMA_MAPS.has(key) ? compactMap(value) : compact(value);
-    if (compacted !== undefined)
-      result[key] = compacted;
-  }
-  if (Array.isArray(result.anyOf)) {
-    result.anyOf = uniqueBranches(result.anyOf.flatMap((branch) => isBareAnyOf(branch) ? branch.anyOf : [branch]));
-    const [only] = result.anyOf;
-    if (result.anyOf.length === 1 && isObject2(only)) {
-      const { anyOf: _anyOf, ...rest } = result;
-      result = { ...only, ...rest };
-    }
-  }
-  for (const union of ["oneOf", "anyOf"]) {
-    const branches = result[union];
-    if (!Array.isArray(branches))
-      continue;
-    const merged = mergeTaggedObjects(branches);
-    if (merged !== undefined && JSON.stringify(merged).length < JSON.stringify(branches).length) {
-      const { [union]: _union, ...rest } = result;
-      result = { ...merged, ...rest };
-    }
-    break;
-  }
-  return result;
-}
-function advertisedJsonSchema(schema) {
-  const advertised = compact(toJSONSchema(schema, { target: "draft-7", unrepresentable: "any" }));
-  if (!isObject2(advertised))
-    throw new Error("A tool input schema must be an object.");
-  return advertised;
-}
-
-// src/backend/hx-computer/driver.ts
-import { connect } from "node:net";
-var MAX_REPLY_CHARS = 16000000;
-var DEFAULT_TIMEOUT_MS2 = 15000;
-function hxReadDriverReply(line) {
-  let parsed;
-  try {
-    parsed = JSON.parse(line);
-  } catch {
-    return failed("The Computer Use driver answered with no JSON.");
-  }
-  if (!isDynamicRecord(parsed))
-    return failed("The Computer Use driver answered with no object.");
-  if (parsed.ok !== true) {
-    return failed(typeof parsed.error === "string" ? parsed.error.slice(0, 300) : "The driver refused the request.");
-  }
-  const result = isDynamicRecord(parsed.result) ? parsed.result : {};
-  const content = isDynamicRecord(result.structuredContent) ? result.structuredContent : null;
-  const items = Array.isArray(result.content) ? result.content : [];
-  const text = items.map((item) => isDynamicRecord(item) && item.type === "text" && typeof item.text === "string" ? item.text : "").filter((part) => part.length > 0).join(`
-`);
-  return { ok: true, content, text, error: null };
-}
-function failed(error) {
-  return { ok: false, content: null, text: "", error };
-}
-
-class HxDriverSocket {
-  #address;
-  #sessionId;
-  #socket = null;
-  #buffer = "";
-  #waiting = null;
-  #queue = Promise.resolve();
-  constructor(address, sessionId) {
-    this.#address = address;
-    this.#sessionId = sessionId;
-  }
-  call(tool, args, timeoutMs = DEFAULT_TIMEOUT_MS2) {
-    const turn = this.#queue.then(() => this.#send(tool, args, timeoutMs));
-    this.#queue = turn.catch(() => {
+var hxRun = (command, args, options = {}) => new Promise((resolve) => {
+  execFile(command, [...args], {
+    timeout: options.timeoutMs ?? DEFAULT_TIMEOUT_MS,
+    maxBuffer: MAX_OUTPUT_BYTES,
+    windowsHide: true,
+    encoding: "utf8",
+    env: options.env ? { ...process.env, ...options.env } : process.env
+  }, (error, stdout, stderr) => {
+    if (!error) {
+      resolve({ code: 0, stdout, stderr, timedOut: false, missing: false });
       return;
-    });
-    return turn;
-  }
-  close() {
-    this.#drop("The connection was closed.");
-  }
-  async#send(tool, args, timeoutMs) {
-    const socket = await this.#connection();
-    if (typeof socket === "string")
-      return failed(socket);
-    return new Promise((resolve) => {
-      const timer = setTimeout(() => {
-        this.#drop(`The Computer Use driver did not answer ${tool} in ${Math.round(timeoutMs / 1000)} s.`);
-      }, timeoutMs);
-      this.#waiting = { done: resolve, timer };
-      const request = { method: "call", name: tool, args, session_id: this.#sessionId, client_kind: "cli" };
-      try {
-        socket.write(`${JSON.stringify(request)}
-`);
-      } catch (error) {
-        this.#drop(error instanceof Error ? error.message : String(error));
-      }
-    });
-  }
-  #connection() {
-    const open = this.#socket;
-    if (open && !open.destroyed)
-      return Promise.resolve(open);
-    const address = this.#address();
-    if (!address)
-      return Promise.resolve("Computer Use is not running. The user turns it on in Settings → Computer Use.");
-    return new Promise((resolve) => {
-      const socket = connect(address);
-      const fail = (error) => resolve(`The Computer Use driver could not be reached: ${error.message}`);
-      socket.once("error", fail);
-      socket.once("connect", () => {
-        socket.removeListener("error", fail);
-        socket.setEncoding("utf8");
-        socket.on("data", (chunk) => this.#read(chunk));
-        socket.on("error", (error) => this.#drop(error.message));
-        socket.on("close", () => this.#drop("The Computer Use driver closed the connection."));
-        this.#socket = socket;
-        this.#buffer = "";
-        resolve(socket);
-      });
-    });
-  }
-  #read(chunk) {
-    this.#buffer += chunk;
-    let newline = this.#buffer.indexOf(`
-`);
-    while (newline >= 0) {
-      const line = this.#buffer.slice(0, newline);
-      this.#buffer = this.#buffer.slice(newline + 1);
-      const waiting = this.#waiting;
-      this.#waiting = null;
-      if (waiting) {
-        clearTimeout(waiting.timer);
-        waiting.done(hxReadDriverReply(line));
-      }
-      newline = this.#buffer.indexOf(`
-`);
     }
-    if (this.#buffer.length > MAX_REPLY_CHARS)
-      this.#drop("The Computer Use driver answered with too much.");
-  }
-  #drop(reason) {
-    const socket = this.#socket;
-    this.#socket = null;
-    this.#buffer = "";
-    const waiting = this.#waiting;
-    this.#waiting = null;
-    if (waiting) {
-      clearTimeout(waiting.timer);
-      waiting.done(failed(reason));
-    }
-    if (socket) {
-      socket.removeAllListeners();
-      socket.on("error", () => {});
-      socket.destroy();
-    }
-  }
-}
-
-// hx/computer-check/i18n-stub.ts
-function sourceText(key, params) {
-  return params ? `${key} ${JSON.stringify(params)}` : key;
-}
+    resolve({
+      code: typeof error.code === "number" ? error.code : null,
+      stdout,
+      stderr,
+      timedOut: error.killed === true,
+      missing: error.code === "ENOENT"
+    });
+  });
+});
 
 // src/backend/hx-computer/outline.ts
-var text2 = (value, max = 200) => typeof value === "string" ? value.trim().slice(0, max) : "";
+var text = (value, max = 200) => typeof value === "string" ? value.trim().slice(0, max) : "";
 var whole = (value) => typeof value === "number" && Number.isInteger(value) && value >= 0 ? value : null;
 function readFrame(value) {
   if (!isDynamicRecord(value))
@@ -14424,8 +13382,8 @@ function readElement(value) {
     index,
     token: typeof value.element_token === "string" && value.element_token.length > 0 ? value.element_token : null,
     role: value.role.slice(0, 60),
-    label: text2(value.label),
-    value: text2(value.value) || text2(value.value_description),
+    label: text(value.label),
+    value: text(value.value) || text(value.value_description),
     enabled: value.enabled !== false,
     selected: value.selected === true,
     frame: readFrame(value.frame),
@@ -14444,8 +13402,8 @@ function hxReadWindow(content) {
   return {
     pid,
     windowId,
-    app: text2(content.app_name, 120),
-    title: text2(content.window_title, 200),
+    app: text(content.app_name, 120),
+    title: text(content.window_title, 200),
     snapshotId: typeof content.snapshot_id === "string" ? content.snapshot_id : null,
     elements,
     complete: content.elements_complete !== false && content.truncated !== true
@@ -14498,7 +13456,7 @@ function shown(element) {
     return false;
   return element.label.length > 0 || element.value.length > 0 || ACTIONABLE.has(hxRoleKind(element.role));
 }
-function line2(element) {
+function line(element) {
   const parts = [`[${element.index}] ${hxRoleKind(element.role)}`];
   if (element.label)
     parts.push(JSON.stringify(element.label.slice(0, 80)));
@@ -14518,7 +13476,7 @@ function hxOutline(window, maxChars = 3000) {
   for (const element of window.elements) {
     if (!shown(element))
       continue;
-    const next = `${" ".repeat(Math.min(element.depth, 6))}${line2(element)}`;
+    const next = `${" ".repeat(Math.min(element.depth, 6))}${line(element)}`;
     if (used + next.length + 1 > maxChars) {
       left += 1;
       continue;
@@ -14593,7 +13551,7 @@ function hxFindElement(window, target) {
   return { status: "found", element: best.element };
 }
 function hxCandidateLine(element) {
-  return line2(element);
+  return line(element);
 }
 
 // src/backend/hx-computer/steps.ts
@@ -15087,6 +14045,2177 @@ class HxStepRun {
   }
 }
 
+// src/backend/hx-computer/tables.ts
+function hxParseNumber(stdout, min, max, scale = 1) {
+  const text = stdout.trim().replace(",", ".");
+  if (!/^-?\d+(\.\d+)?$/u.test(text))
+    return null;
+  const value = Math.round(Number(text) * scale);
+  return value >= min && value <= max ? String(value) : null;
+}
+
+// src/backend/hx-computer/tables-win.ts
+function page(key, uri, zh, en, pinyin, more = [], security = false) {
+  return { key, address: `ms-settings:${uri}`, zh, en, pinyin, more, security };
+}
+var HX_WIN_PAGES = [
+  page("display", "display", "屏幕", "Display", "ping mu", ["显示", "分辨率", "缩放", "显示器"]),
+  page("night-light", "nightlight", "夜间模式", "Night light", "ye jian mo shi", ["护眼"]),
+  page("sound", "sound", "声音", "Sound", "sheng yin", ["音量", "扬声器", "麦克风", "输出设备"]),
+  page("notifications", "notifications", "通知", "Notifications", "tong zhi", ["勿扰", "免打扰"]),
+  page("focus", "quiethours", "专注", "Focus", "zhuan zhu", ["专注助手", "Focus assist"]),
+  page("power", "powersleep", "电源", "Power & sleep", "dian yuan", ["睡眠", "电池", "休眠"]),
+  page("storage", "storagesense", "存储", "Storage", "cun chu", ["磁盘空间"]),
+  page("multitasking", "multitasking", "多任务处理", "Multitasking", "duo ren wu chu li", ["贴靠窗口", "虚拟桌面"]),
+  page("clipboard", "clipboard", "剪贴板", "Clipboard", "jian tie ban"),
+  page("about", "about", "系统信息", "About", "xi tong xin xi", ["关于", "电脑名称", "系统版本"]),
+  page("bluetooth", "bluetooth", "蓝牙和其他设备", "Bluetooth & devices", "lan ya", ["蓝牙"]),
+  page("printers", "printers", "打印机和扫描仪", "Printers & scanners", "da yin ji", ["打印机"]),
+  page("mouse", "mousetouchpad", "鼠标", "Mouse", "shu biao", ["指针速度", "滚轮"]),
+  page("touchpad", "devices-touchpad", "触摸板", "Touchpad", "chu mo ban"),
+  page("typing", "typing", "输入", "Typing", "shu ru", ["键盘", "输入法"]),
+  page("network", "network-status", "网络和 Internet", "Network & internet", "wang luo", ["网络"]),
+  page("wifi", "network-wifi", "WLAN", "Wi-Fi", "", ["WiFi", "无线网络", "无线局域网"]),
+  page("ethernet", "network-ethernet", "以太网", "Ethernet", "yi tai wang"),
+  page("vpn", "network-vpn", "VPN", "VPN", ""),
+  page("proxy", "network-proxy", "代理", "Proxy", "dai li", [], true),
+  page("airplane", "network-airplanemode", "飞行模式", "Airplane mode", "fei xing mo shi"),
+  page("hotspot", "network-mobilehotspot", "移动热点", "Mobile hotspot", "yi dong re dian"),
+  page("personalization", "personalization", "个性化", "Personalization", "ge xing hua"),
+  page("background", "personalization-background", "背景", "Background", "bei jing", ["壁纸", "桌面背景", "墙纸"]),
+  page("colors", "colors", "颜色", "Colors", "yan se", ["浅色模式", "主题色", "强调色"]),
+  page("lock-screen", "lockscreen", "锁屏界面", "Lock screen", "suo ping jie mian", ["锁屏"]),
+  page("themes", "themes", "主题", "Themes", "zhu ti"),
+  page("fonts", "fonts", "字体", "Fonts", "zi ti"),
+  page("taskbar", "taskbar", "任务栏", "Taskbar", "ren wu lan"),
+  page("start", "personalization-start", "开始菜单", "Start", "kai shi cai dan", ["开始"]),
+  page("apps", "appsfeatures", "安装的应用", "Installed apps", "an zhuang de ying yong", ["应用和功能", "卸载程序"]),
+  page("default-apps", "defaultapps", "默认应用", "Default apps", "mo ren ying yong", ["默认浏览器"]),
+  page("startup-apps", "startupapps", "启动应用", "Startup apps", "qi dong ying yong", ["开机启动", "启动项"], true),
+  page("your-info", "yourinfo", "账户信息", "Your info", "zhang hu xin xi"),
+  page("email-accounts", "emailandaccounts", "电子邮件和账户", "Email & accounts", "dian zi you jian he zhang hu"),
+  page("sign-in", "signinoptions", "登录选项", "Sign-in options", "deng lu xuan xiang", ["密码", "PIN", "指纹", "人脸"], true),
+  page("other-users", "otherusers", "其他用户", "Other users", "qi ta yong hu", ["家庭和其他用户"], true),
+  page("date-time", "dateandtime", "日期和时间", "Date & time", "ri qi he shi jian", ["时区"]),
+  page("language", "regionlanguage", "语言和区域", "Language & region", "yu yan he qu yu", ["系统语言"]),
+  page("speech", "speech", "语音", "Speech", "yu yin"),
+  page("game-bar", "gaming-gamebar", "游戏栏", "Game Bar", "you xi lan"),
+  page("accessibility", "easeofaccess", "辅助功能", "Accessibility", "fu zhu gong neng", ["轻松使用"]),
+  page("text-size", "easeofaccess-display", "文本大小", "Text size", "wen ben da xiao", ["字体大小"]),
+  page("mouse-pointer", "easeofaccess-mousepointer", "鼠标指针和触控", "Mouse pointer and touch", "shu biao zhi zhen"),
+  page("narrator", "easeofaccess-narrator", "讲述人", "Narrator", "jiang shu ren"),
+  page("magnifier", "easeofaccess-magnifier", "放大镜", "Magnifier", "fang da jing"),
+  page("privacy", "privacy", "隐私和安全性", "Privacy & security", "yin si he an quan xing", ["隐私"], true),
+  page("location", "privacy-location", "定位", "Location", "ding wei", [], true),
+  page("camera", "privacy-webcam", "摄像头", "Camera", "she xiang tou", ["相机权限"], true),
+  page("microphone", "privacy-microphone", "麦克风权限", "Microphone access", "mai ke feng quan xian", [], true),
+  page("windows-security", "windowsdefender", "Windows 安全中心", "Windows Security", "an quan zhong xin", ["杀毒", "防火墙", "Defender"], true),
+  page("windows-update", "windowsupdate", "Windows 更新", "Windows Update", "geng xin", ["系统更新"]),
+  page("backup", "backup", "Windows 备份", "Windows Backup", "bei fen"),
+  page("troubleshoot", "troubleshoot", "疑难解答", "Troubleshoot", "yi nan jie da"),
+  page("recovery", "recovery", "恢复", "Recovery", "hui fu", ["重置此电脑"], true),
+  page("activation", "activation", "激活", "Activation", "ji huo"),
+  page("developers", "developers", "开发者选项", "For developers", "kai fa zhe xuan xiang", [], true)
+];
+function hxPowerShellPath(env = process.env) {
+  const root = env.SystemRoot || env.windir || "C:\\Windows";
+  return `${root.replace(/[\\/]+$/u, "")}\\System32\\WindowsPowerShell\\v1.0\\powershell.exe`;
+}
+var HX_POWERSHELL = hxPowerShellPath();
+var PREAMBLE = "$ProgressPreference = 'SilentlyContinue'; try { [Console]::OutputEncoding = [System.Text.Encoding]::UTF8 } catch { }; ";
+function hxPowerShell(scriptText, env) {
+  return {
+    command: HX_POWERSHELL,
+    args: [
+      "-NoLogo",
+      "-NoProfile",
+      "-NonInteractive",
+      "-ExecutionPolicy",
+      "Bypass",
+      "-Command",
+      `${PREAMBLE}${scriptText}`
+    ],
+    ...env ? { env } : {}
+  };
+}
+var PERSONALIZE = "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize";
+var CLIPBOARD = "HKCU:\\Software\\Microsoft\\Clipboard";
+var WMI_LIMIT_SECONDS = 10;
+var BROADCAST = [
+  "try {",
+  "$hxQuote = [string][char]34;",
+  "$hxMember = '[DllImport(' + $hxQuote + 'user32.dll' + $hxQuote + ', CharSet = CharSet.Unicode)] public static extern IntPtr SendMessageTimeout(IntPtr hWnd, uint Msg, UIntPtr wParam, string lParam, uint fuFlags, uint uTimeout, out UIntPtr lpdwResult);';",
+  "Add-Type -Namespace Hx -Name Native -MemberDefinition $hxMember -ErrorAction Stop;",
+  "$hxDone = [UIntPtr]::Zero;",
+  "[void][Hx.Native]::SendMessageTimeout([IntPtr]0xffff, 0x1A, [UIntPtr]::Zero, 'ImmersiveColorSet', 2, 2000, [ref]$hxDone)",
+  "} catch { }"
+].join(" ");
+function registryRead(path, name, missing) {
+  return hxPowerShell(`$v = (Get-ItemProperty -Path '${path}' -Name '${name}' -ErrorAction SilentlyContinue).'${name}'; if ($null -eq $v) { '${missing}' } else { [string]$v }`);
+}
+function registryWrite(path, name, value, broadcast) {
+  return hxPowerShell(`if (-not (Test-Path '${path}')) { New-Item -Path '${path}' -Force | Out-Null }; Set-ItemProperty -Path '${path}' -Name '${name}' -Value ${value} -Type DWord -ErrorAction Stop${broadcast ? `; ${BROADCAST}` : ""}`);
+}
+function registrySwitch(input) {
+  const offIs = input.offIs ?? (input.onIs === 1 ? 0 : 1);
+  return {
+    key: input.key,
+    page: input.page,
+    zh: input.zh,
+    en: input.en,
+    pinyin: input.pinyin,
+    more: input.more ?? [],
+    values: { type: "switch" },
+    read: registryRead(input.path, input.name, "missing"),
+    parse: (stdout) => {
+      const text = stdout.trim();
+      if (text === String(input.onIs))
+        return "on";
+      if (text === String(offIs))
+        return "off";
+      return text === "missing" ? input.missing : null;
+    },
+    write: (value) => registryWrite(input.path, input.name, value === "on" ? input.onIs : offIs, input.broadcast)
+  };
+}
+var THEME_READINGS = {
+  "0,0": "on",
+  "1,1": "off",
+  "0,1": "apps only",
+  "1,0": "system only"
+};
+var THEME_WRITES = {
+  on: [0, 0],
+  off: [1, 1],
+  "apps only": [0, 1],
+  "system only": [1, 0]
+};
+var DARK_MODE = {
+  key: "dark-mode",
+  page: "colors",
+  zh: "深色模式",
+  en: "Dark mode",
+  pinyin: "shen se mo shi",
+  more: ["暗色模式", "黑暗模式", "深色主题", "dark theme"],
+  values: { type: "switch" },
+  read: hxPowerShell(`$p = Get-ItemProperty -Path '${PERSONALIZE}' -ErrorAction SilentlyContinue; $a = $p.AppsUseLightTheme; $s = $p.SystemUsesLightTheme; if ($null -eq $a -or $null -eq $s) { 'missing' } else { [string]$a + ',' + [string]$s }`),
+  parse: (stdout) => THEME_READINGS[stdout.trim()] ?? null,
+  write: (value) => {
+    const [apps, system] = THEME_WRITES[value] ?? [1, 1];
+    return hxPowerShell(`if (-not (Test-Path '${PERSONALIZE}')) { New-Item -Path '${PERSONALIZE}' -Force | Out-Null }; Set-ItemProperty -Path '${PERSONALIZE}' -Name 'AppsUseLightTheme' -Value ${apps} -Type DWord -ErrorAction Stop; Set-ItemProperty -Path '${PERSONALIZE}' -Name 'SystemUsesLightTheme' -Value ${system} -Type DWord -ErrorAction Stop; ${BROADCAST}`);
+  }
+};
+var FIRST_SETTINGS = [
+  DARK_MODE,
+  registrySwitch({
+    key: "app-dark-mode",
+    page: "colors",
+    zh: "应用深色模式",
+    en: "Dark mode for apps",
+    pinyin: "",
+    more: ["应用模式", "app mode"],
+    path: PERSONALIZE,
+    name: "AppsUseLightTheme",
+    onIs: 0,
+    missing: null,
+    broadcast: true
+  }),
+  registrySwitch({
+    key: "system-dark-mode",
+    page: "colors",
+    zh: "任务栏和开始菜单深色模式",
+    en: "Dark mode for the taskbar and Start",
+    pinyin: "",
+    more: ["任务栏深色", "Windows 模式", "Windows mode"],
+    path: PERSONALIZE,
+    name: "SystemUsesLightTheme",
+    onIs: 0,
+    missing: null,
+    broadcast: true
+  }),
+  registrySwitch({
+    key: "transparency",
+    page: "colors",
+    zh: "透明效果",
+    en: "Transparency effects",
+    pinyin: "tou ming xiao guo",
+    path: PERSONALIZE,
+    name: "EnableTransparency",
+    onIs: 1,
+    missing: null,
+    broadcast: true
+  }),
+  registrySwitch({
+    key: "clipboard-history",
+    page: "clipboard",
+    zh: "剪贴板历史记录",
+    en: "Clipboard history",
+    pinyin: "jian tie ban li shi ji lu",
+    path: CLIPBOARD,
+    name: "EnableClipboardHistory",
+    onIs: 1,
+    missing: "off",
+    broadcast: false
+  }),
+  {
+    key: "brightness",
+    page: "display",
+    zh: "屏幕亮度",
+    en: "Screen brightness",
+    pinyin: "ping mu liang du",
+    more: ["亮度"],
+    values: { type: "number", min: 0, max: 100 },
+    read: hxPowerShell(`try { [string](Get-CimInstance -Namespace root/WMI -ClassName WmiMonitorBrightness -OperationTimeoutSec ${WMI_LIMIT_SECONDS} -ErrorAction Stop | Select-Object -First 1).CurrentBrightness } catch { 'none' }`),
+    parse: (stdout) => hxParseNumber(stdout, 0, 100),
+    write: (value) => hxPowerShell(`$m = Get-CimInstance -Namespace root/WMI -ClassName WmiMonitorBrightnessMethods -OperationTimeoutSec ${WMI_LIMIT_SECONDS} -ErrorAction Stop | Select-Object -First 1; Invoke-CimMethod -InputObject $m -MethodName WmiSetBrightness -Arguments @{ Timeout = [uint32]1; Brightness = [byte]${Number(value)} } -OperationTimeoutSec ${WMI_LIMIT_SECONDS} -ErrorAction Stop | Out-Null`)
+  }
+];
+function registryChoice(input) {
+  const options = input.options.map(([option]) => option);
+  return {
+    key: input.key,
+    page: input.page,
+    zh: input.zh,
+    en: input.en,
+    pinyin: input.pinyin,
+    more: input.more ?? [],
+    values: { type: "choice", options },
+    read: registryRead(input.path, input.name, "missing"),
+    parse: (stdout) => {
+      const text = stdout.trim();
+      if (text === "missing")
+        return input.missing;
+      return input.options.find(([, number]) => String(number) === text)?.[0] ?? null;
+    },
+    write: (value) => {
+      const number = input.options.find(([option]) => option === value)?.[1] ?? input.options[0]?.[1] ?? 0;
+      return registryWrite(input.path, input.name, number, input.broadcast);
+    }
+  };
+}
+function powerMinutes(input) {
+  return {
+    key: input.key,
+    page: "power",
+    zh: input.zh,
+    en: input.en,
+    pinyin: input.pinyin,
+    more: input.more ?? [],
+    values: { type: "number", min: 0, max: 600 },
+    read: hxPowerShell(`$q = (powercfg /query SCHEME_CURRENT ${input.group} ${input.setting}) -join ' '; $n = [regex]::Matches($q, '0x[0-9a-fA-F]{8}'); if ($n.Count -lt 2) { 'none' } else { [string][math]::Round([Convert]::ToInt32($n[$n.Count - 2].Value, 16) / 60) }`),
+    parse: (stdout) => hxParseNumber(stdout, 0, 600),
+    write: (value) => hxPowerShell(`powercfg /change ${input.change} ${Number(value)}`)
+  };
+}
+var ADVANCED = "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced";
+var MORE_SETTINGS = [
+  registryChoice({
+    key: "taskbar-alignment",
+    page: "taskbar",
+    zh: "任务栏对齐方式",
+    en: "Taskbar alignment",
+    pinyin: "ren wu lan dui qi",
+    more: ["任务栏居中", "任务栏靠左", "开始按钮靠左"],
+    path: ADVANCED,
+    name: "TaskbarAl",
+    options: [
+      ["left", 0],
+      ["center", 1]
+    ],
+    missing: "center",
+    broadcast: true
+  }),
+  registrySwitch({
+    key: "task-view-button",
+    page: "taskbar",
+    zh: "任务栏上的任务视图按钮",
+    en: "Task view button on the taskbar",
+    pinyin: "ren wu shi tu",
+    more: ["任务视图", "task view"],
+    path: ADVANCED,
+    name: "ShowTaskViewButton",
+    onIs: 1,
+    missing: "on",
+    broadcast: true
+  }),
+  registrySwitch({
+    key: "clock-seconds",
+    page: "taskbar",
+    zh: "时钟显示秒",
+    en: "Show seconds in the clock",
+    pinyin: "shi zhong xian shi miao",
+    more: ["显示秒", "seconds"],
+    path: ADVANCED,
+    name: "ShowSecondsInSystemClock",
+    onIs: 1,
+    missing: "off",
+    broadcast: true
+  }),
+  registrySwitch({
+    key: "accent-title-bars",
+    page: "colors",
+    zh: "标题栏和窗口边框显示主题色",
+    en: "Accent color on title bars and window borders",
+    pinyin: "",
+    more: ["标题栏颜色", "窗口边框颜色"],
+    path: "HKCU:\\Software\\Microsoft\\Windows\\DWM",
+    name: "ColorPrevalence",
+    onIs: 1,
+    missing: "off",
+    broadcast: true
+  }),
+  registrySwitch({
+    key: "accent-start-taskbar",
+    page: "colors",
+    zh: "开始菜单和任务栏显示主题色",
+    en: "Accent color on Start and the taskbar",
+    pinyin: "",
+    more: ["任务栏颜色"],
+    path: PERSONALIZE,
+    name: "ColorPrevalence",
+    onIs: 1,
+    missing: "off",
+    broadcast: true
+  }),
+  registrySwitch({
+    key: "notifications",
+    page: "notifications",
+    zh: "接收通知",
+    en: "Get notifications",
+    pinyin: "jie shou tong zhi",
+    more: ["通知开关", "notifications on or off"],
+    path: "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\PushNotifications",
+    name: "ToastEnabled",
+    onIs: 1,
+    missing: "on",
+    broadcast: false
+  }),
+  registrySwitch({
+    key: "game-mode",
+    page: "game-bar",
+    zh: "游戏模式",
+    en: "Game Mode",
+    pinyin: "you xi mo shi",
+    path: "HKCU:\\Software\\Microsoft\\GameBar",
+    name: "AllowAutoGameMode",
+    onIs: 1,
+    missing: "on",
+    broadcast: false
+  }),
+  registrySwitch({
+    key: "storage-sense",
+    page: "storage",
+    zh: "存储感知",
+    en: "Storage Sense",
+    pinyin: "cun chu gan zhi",
+    more: ["自动清理"],
+    path: "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\StorageSense\\Parameters\\StoragePolicy",
+    name: "01",
+    onIs: 1,
+    missing: "off",
+    broadcast: false
+  }),
+  powerMinutes({
+    key: "screen-off-minutes",
+    zh: "多久后关闭屏幕（接通电源时，分钟）",
+    en: "Turn off the screen after (on power, minutes)",
+    pinyin: "",
+    more: ["关闭屏幕", "屏幕关闭时间", "熄屏时间"],
+    group: "SUB_VIDEO",
+    setting: "VIDEOIDLE",
+    change: "monitor-timeout-ac"
+  }),
+  powerMinutes({
+    key: "sleep-minutes",
+    zh: "多久后睡眠（接通电源时，分钟）",
+    en: "Sleep after (on power, minutes)",
+    pinyin: "",
+    more: ["睡眠时间", "自动睡眠"],
+    group: "SUB_SLEEP",
+    setting: "STANDBYIDLE",
+    change: "standby-timeout-ac"
+  })
+];
+var HX_WIN_SETTINGS = [...FIRST_SETTINGS, ...MORE_SETTINGS];
+var HX_WIN_LIST_APPS = hxPowerShell("Get-StartApps | Select-Object Name, AppID | ConvertTo-Json -Compress");
+
+// src/backend/hx-computer/app-control.ts
+var OSASCRIPT = "/usr/bin/osascript";
+var QUIT_WAIT_MS = 6000;
+var POLL_MS = 300;
+var MAC_TIMEOUT_MS = 60000;
+var WIN_TIMEOUT_MS = 90000;
+var JXA_ENV = `ObjC.import('Foundation'); ObjC.import('AppKit');
+function env(n) { const v = $.NSProcessInfo.processInfo.environment.objectForKey(n); return v.isNil() ? '' : ObjC.unwrap(v); }
+function same(a, b) { return String(a || '').toLowerCase() === String(b || '').toLowerCase(); }
+function running() {
+  const list = $.NSWorkspace.sharedWorkspace.runningApplications; const out = [];
+  for (let i = 0; i < list.count; i++) { const a = list.objectAtIndex(i); if (a.activationPolicy !== 0) continue; out.push(a); }
+  return out;
+}
+function info(a) { return { name: ObjC.unwrap(a.localizedName) || '', id: ObjC.unwrap(a.bundleIdentifier) || '', pid: a.processIdentifier, active: a.active, hidden: a.hidden }; }
+function find(want) {
+  const all = running();
+  return all.find((a) => same(ObjC.unwrap(a.bundleIdentifier), want)) || all.find((a) => same(ObjC.unwrap(a.localizedName), want))
+    || all.find((a) => same((ObjC.unwrap(a.bundleURL.lastPathComponent) || '').replace(/\\.app$/i, ''), want)) || null;
+}
+`;
+var MAC_LIST = `${JXA_ENV}JSON.stringify(running().map(info));`;
+var MAC_FIND = `${JXA_ENV}const a = find(env('HX_APP')); JSON.stringify(a ? info(a) : null);`;
+var MAC_FRONT = `${JXA_ENV}const a = find(env('HX_APP')); JSON.stringify(a ? { sent: a.activateWithOptions(1) } : null);`;
+var MAC_HIDE = `${JXA_ENV}const a = find(env('HX_APP')); JSON.stringify(a ? { sent: a.hide() } : null);`;
+var MAC_QUIT = `${JXA_ENV}const a = find(env('HX_APP')); JSON.stringify(a ? { sent: env('HX_FORCE') === '1' ? a.forceTerminate() : a.terminate() } : null);`;
+var MAC_FRONTMOST = `${JXA_ENV}const f = $.NSWorkspace.sharedWorkspace.frontmostApplication; JSON.stringify(f.isNil() ? null : info(f));`;
+var MAC_DEFAULT = `${JXA_ENV}ObjC.import('CoreServices');
+function cf(ref) { if (!ref) return ''; try { return ObjC.unwrap(ObjC.castRefToObject(ref)) || ''; } catch (e) { return ''; } }
+const scheme = env('HX_SCHEME'); const ext = env('HX_EXT'); const want = env('HX_BUNDLE');
+let uti = '';
+if (ext) uti = cf($.UTTypeCreatePreferredIdentifierForTag($('public.filename-extension'), $(ext), null));
+function read() {
+  if (scheme) return cf($.LSCopyDefaultHandlerForURLScheme($(scheme)));
+  return cf($.LSCopyDefaultRoleHandlerForContentType($(uti), 0xFFFFFFFF));
+}
+const before = read(); let code = null;
+if (want) {
+  if (scheme === 'http') { code = $.LSSetDefaultHandlerForURLScheme($('http'), $(want)); $.LSSetDefaultHandlerForURLScheme($('https'), $(want)); }
+  else if (scheme) code = $.LSSetDefaultHandlerForURLScheme($(scheme), $(want));
+  else code = $.LSSetDefaultRoleHandlerForContentType($(uti), 0xFFFFFFFF, $(want));
+  delay(1.5);
+}
+JSON.stringify({ before: before, after: read(), code: code, uti: uti });`;
+var MAC_BUNDLE = `${JXA_ENV}const want = env('HX_APP'); const ws = $.NSWorkspace.sharedWorkspace;
+let url = ws.URLForApplicationWithBundleIdentifier($(want));
+if (url.isNil()) { const p = ws.fullPathForApplication($(want)); if (!p.isNil()) url = $.NSURL.fileURLWithPath(p); }
+let out = null;
+if (!url.isNil()) { const b = $.NSBundle.bundleWithURL(url); if (!b.isNil()) out = { id: ObjC.unwrap(b.bundleIdentifier) || '', name: (ObjC.unwrap(url.lastPathComponent) || '').replace(/\\.app$/i, '') }; }
+JSON.stringify(out);`;
+var MAC_WINDOW = `${JXA_ENV}
+const pid = Number(env('HX_PID')); const place = env('HX_PLACE');
+const se = Application('System Events');
+const proc = se.processes.whose({ unixId: pid })[0];
+const win = proc.windows[0];
+const screens = $.NSScreen.screens; const mainH = screens.objectAtIndex(0).frame.size.height;
+function vis(i) { const f = screens.objectAtIndex(i).visibleFrame; return { x: f.origin.x, y: mainH - f.origin.y - f.size.height, w: f.size.width, h: f.size.height }; }
+const pos = win.position(); const size = win.size();
+const cx = pos[0] + size[0] / 2; const cy = pos[1] + size[1] / 2;
+let at = 0;
+for (let i = 0; i < screens.count; i++) { const v = vis(i); if (cx >= v.x && cx < v.x + v.w && cy >= v.y && cy < v.y + v.h) at = i; }
+let v = vis(at); let r;
+if (place === 'next-screen') { v = vis((at + 1) % screens.count); r = [v.x, v.y, Math.min(size[0], v.w), Math.min(size[1], v.h)]; }
+else if (place === 'left') r = [v.x, v.y, Math.floor(v.w / 2), v.h];
+else if (place === 'right') r = [v.x + Math.floor(v.w / 2), v.y, Math.floor(v.w / 2), v.h];
+else r = [v.x, v.y, v.w, v.h];
+win.position = [r[0], r[1]]; win.size = [r[2], r[3]];
+JSON.stringify({ want: r, now: win.position().concat(win.size()), screens: screens.count });`;
+var MAC_MENUS = `on run argv
+  set pn to item 1 of argv
+  set out to ""
+  tell application "System Events" to tell process pn
+    repeat with mbi in menu bar items of menu bar 1
+      set mname to name of mbi
+      if mname is not "Apple" then
+        try
+          repeat with mi in menu items of menu 1 of mbi
+            set iname to name of mi
+            if iname is not missing value then set out to out & mname & tab & iname & linefeed
+          end repeat
+        end try
+      end if
+    end repeat
+  end tell
+  return out
+end run`;
+var MAC_MENU = `on run argv
+  set pn to item 1 of argv
+  set mn to item 2 of argv
+  set itn to item 3 of argv
+  tell application "System Events" to tell process pn
+    set frontmost to true
+    delay 0.3
+    if (count of argv) > 3 then
+      click menu item (item 4 of argv) of menu 1 of menu item itn of menu 1 of menu bar item mn of menu bar 1
+    else
+      click menu item itn of menu 1 of menu bar item mn of menu bar 1
+    end if
+  end tell
+  return "clicked"
+end run`;
+function powerShell(script) {
+  const text = `$ProgressPreference = 'SilentlyContinue'; try { [Console]::OutputEncoding = [System.Text.Encoding]::UTF8 } catch { }; ${script}`;
+  return {
+    command: HX_POWERSHELL,
+    args: [
+      "-NoLogo",
+      "-NoProfile",
+      "-NonInteractive",
+      "-ExecutionPolicy",
+      "Bypass",
+      "-EncodedCommand",
+      Buffer.from(text, "utf16le").toString("base64")
+    ]
+  };
+}
+var WIN_USER32 = `Add-Type -Namespace HX -Name W -MemberDefinition @'
+[DllImport("user32.dll")] public static extern bool ShowWindowAsync(System.IntPtr h, int c);
+[DllImport("user32.dll")] public static extern bool SetForegroundWindow(System.IntPtr h);
+[DllImport("user32.dll")] public static extern bool MoveWindow(System.IntPtr h, int x, int y, int w, int hh, bool r);
+[DllImport("user32.dll")] public static extern bool IsIconic(System.IntPtr h);
+'@;
+`;
+var WIN_APPS = `$hxApps = @(Get-Process | Where-Object { $_.MainWindowHandle -ne 0 } | ForEach-Object {
+  $d = ''; try { $d = $_.MainModule.FileVersionInfo.FileDescription } catch { }
+  [pscustomobject]@{ name = $(if ($d) { $d } else { $_.ProcessName }); id = $_.ProcessName; pid = $_.Id; title = $_.MainWindowTitle } });
+function HxFind($want) { $w = $want.ToLower(); $hxApps | Where-Object { $_.id.ToLower() -eq $w -or $_.name.ToLower() -eq $w -or $_.title.ToLower() -eq $w -or $_.id.ToLower() -eq ($w -replace '\\.exe$','') } | Select-Object -First 1 }
+`;
+var WIN_LIST = `${WIN_APPS}ConvertTo-Json -Compress -InputObject @($hxApps)`;
+var WIN_FIND = `${WIN_APPS}$a = HxFind $env:HX_APP; if ($a) { ConvertTo-Json -Compress -InputObject $a } else { 'null' }`;
+var WIN_FRONT = `${WIN_USER32}$p = Get-Process -Id ([int]$env:HX_PID); $h = $p.MainWindowHandle;
+if ([HX.W]::IsIconic($h)) { [void][HX.W]::ShowWindowAsync($h, 9) }; $ok = [HX.W]::SetForegroundWindow($h);
+if (-not $ok) { $ok = (New-Object -ComObject WScript.Shell).AppActivate($p.Id) }; ConvertTo-Json -Compress -InputObject @{ sent = [bool]$ok }`;
+var WIN_HIDE = `${WIN_USER32}$p = Get-Process -Id ([int]$env:HX_PID); ConvertTo-Json -Compress -InputObject @{ sent = [HX.W]::ShowWindowAsync($p.MainWindowHandle, 6) }`;
+var WIN_QUIT = `$p = Get-Process -Id ([int]$env:HX_PID);
+if ($env:HX_FORCE -eq '1') { Stop-Process -Id $p.Id -Force; ConvertTo-Json -Compress -InputObject @{ sent = $true } }
+else { ConvertTo-Json -Compress -InputObject @{ sent = $p.CloseMainWindow() } }`;
+var WIN_WINDOW = `${WIN_USER32}Add-Type -AssemblyName System.Windows.Forms;
+$p = Get-Process -Id ([int]$env:HX_PID); $h = $p.MainWindowHandle; if ([HX.W]::IsIconic($h)) { [void][HX.W]::ShowWindowAsync($h, 9); Start-Sleep -Milliseconds 300 };
+$all = [System.Windows.Forms.Screen]::AllScreens; $here = [System.Windows.Forms.Screen]::FromHandle($h);
+$i = [array]::IndexOf($all, $here); if ($env:HX_PLACE -eq 'next-screen') { $here = $all[($i + 1) % $all.Length] };
+$a = $here.WorkingArea; $half = [int]($a.Width / 2);
+switch ($env:HX_PLACE) { 'left' { $r = @($a.X, $a.Y, $half, $a.Height) } 'right' { $r = @(($a.X + $half), $a.Y, $half, $a.Height) } default { $r = @($a.X, $a.Y, $a.Width, $a.Height) } };
+ConvertTo-Json -Compress -InputObject @{ sent = [HX.W]::MoveWindow($h, $r[0], $r[1], $r[2], $r[3], $true); want = $r; screens = $all.Length }`;
+var WIN_DEFAULT = `$k = $env:HX_KEY; $v = '';
+try { $v = (Get-ItemProperty -Path $k -ErrorAction Stop).ProgId } catch { };
+if ($env:HX_OPEN -eq '1') { Start-Process 'ms-settings:defaultapps' };
+ConvertTo-Json -Compress -InputObject @{ progId = $v }`;
+var WIN_ALIVE = `$p = Get-Process -Id ([int]$env:HX_PID) -ErrorAction SilentlyContinue; if ($p) { $p.MainWindowTitle + '|' + $p.Responding } else { 'gone' }`;
+var RUNNING_APP = object({
+  name: string2(),
+  id: string2(),
+  pid: number2(),
+  active: boolean2().optional(),
+  hidden: boolean2().optional(),
+  title: string2().optional()
+});
+var RUNNING_APPS = union([array(RUNNING_APP), RUNNING_APP.transform((one) => [one])]);
+var SENT = object({ sent: boolean2() });
+var PLACED = object({
+  want: array(number2()),
+  now: array(number2()).optional(),
+  sent: boolean2().optional()
+});
+var BUNDLE = object({ id: string2(), name: string2() });
+var MAC_DEFAULT_ANSWER = object({ before: string2(), after: string2() });
+var WIN_DEFAULT_ANSWER = object({
+  progId: string2().nullable().transform((value) => value ?? "")
+});
+function json(schema, result) {
+  if (!hxRunOk(result))
+    return null;
+  try {
+    const parsed = schema.safeParse(JSON.parse(result.stdout.trim() || "null"));
+    return parsed.success ? parsed.data : null;
+  } catch {
+    return null;
+  }
+}
+function macRefusal(result) {
+  if (result.timedOut)
+    return "asking";
+  const text = `${result.stderr}
+${result.stdout}`;
+  if (/-1743|Not authorized to send Apple events/iu.test(text))
+    return "automation";
+  if (/-25211|-1719|assistive access/iu.test(text))
+    return "accessibility";
+  return null;
+}
+async function needsAutomation(deps, kind) {
+  if (kind === "asking")
+    return {
+      status: "needs-permission",
+      reason: "macOS did not answer in time: it most likely asks the user whether HXBot may control this app. Tell the user to click OK (Allow) in that dialog, then call again."
+    };
+  if (kind === "automation") {
+    await deps.openAutomationPage().catch(() => {
+      return;
+    });
+    return {
+      status: "needs-permission",
+      reason: "macOS did not let HXBot control this app (Automation). The Automation page of System Settings is open: tell the user to turn on the app under HXBot there, then call again."
+    };
+  }
+  return {
+    status: "needs-permission",
+    reason: "HXBot has no Accessibility grant, which menus and windows need. Tell the user to grant it in Settings › Computer Use, then call again."
+  };
+}
+var NO_APP = (app) => ({
+  status: "not-found",
+  reason: `No running app is called ${JSON.stringify(app)}. Call with action list to see the running apps, or open the app first with computer_open.`
+});
+var IMAGE_HINT = "Use computer_look on the app's window and computer_do (a menu or a click step); a screenshot with capture_screen is the last way.";
+function riskyPath(path) {
+  return path.some((part) => hxRiskyLabel(part));
+}
+function macEnv(extra) {
+  return { timeoutMs: MAC_TIMEOUT_MS, env: extra };
+}
+async function waitGone(deps, pid) {
+  for (let waited = 0;waited < QUIT_WAIT_MS; waited += POLL_MS) {
+    await deps.sleep(POLL_MS);
+    if (deps.platform === "win32") {
+      const alive = await deps.run(powerShell(WIN_ALIVE).command, powerShell(WIN_ALIVE).args, {
+        timeoutMs: WIN_TIMEOUT_MS,
+        env: { HX_PID: String(pid) }
+      });
+      if (hxRunOk(alive) && alive.stdout.trim() === "gone")
+        return true;
+    } else {
+      const alive = await deps.run("/bin/ps", ["-p", String(pid), "-o", "pid="]);
+      if (alive.code !== 0 || alive.stdout.trim() === "")
+        return true;
+    }
+  }
+  return false;
+}
+async function hxAppControl(deps, input) {
+  if (deps.platform !== "darwin" && deps.platform !== "win32")
+    return { status: "failed", reason: "Apps are controlled on macOS and Windows only." };
+  try {
+    return deps.platform === "darwin" ? await mac2(deps, input) : await windows(deps, input);
+  } catch (error) {
+    return { status: "failed", reason: error instanceof Error ? error.message.slice(0, 300) : "It did not work." };
+  }
+}
+async function mac2(deps, input) {
+  const jxa = (script, env = {}) => deps.run(OSASCRIPT, ["-l", "JavaScript", "-e", script], macEnv(env));
+  if (input.action === "list") {
+    const apps = json(array(RUNNING_APP), await jxa(MAC_LIST));
+    return apps ? { status: "apps", apps } : { status: "failed", reason: "The running apps could not be read." };
+  }
+  if (input.action === "default")
+    return macDefault(input, jxa);
+  const want = input.app?.trim();
+  if (!want)
+    return { status: "invalid", reason: "Give app: a name from action list." };
+  const app = json(RUNNING_APP, await jxa(MAC_FIND, { HX_APP: want }));
+  if (!app)
+    return NO_APP(want);
+  const label = app.name || want;
+  const tried = [];
+  if (input.action === "front") {
+    const sent = json(SENT, await jxa(MAC_FRONT, { HX_APP: app.id || app.name }));
+    await deps.sleep(POLL_MS);
+    if (sent?.sent && await macFrontmost(jxa) === app.pid)
+      return { status: "done", action: "front", app: label, route: "direct", tried };
+    tried.push({ route: "direct", why: "macOS did not bring it to the front from the background" });
+    const opened = await deps.run("/usr/bin/open", app.id ? ["-b", app.id] : ["-a", app.name]);
+    await deps.sleep(POLL_MS * 2);
+    if (hxRunOk(opened) && await macFrontmost(jxa) === app.pid)
+      return { status: "done", action: "front", app: label, route: "command", tried };
+    tried.push({ route: "command", why: hxRunOk(opened) ? "it is still not in front" : hxRunFailure("open", opened) });
+    return { status: "use-steps", reason: `${label} did not come to the front. ${IMAGE_HINT}`, tried };
+  }
+  if (input.action === "hide") {
+    const sent = json(SENT, await jxa(MAC_HIDE, { HX_APP: app.id || app.name }));
+    await deps.sleep(POLL_MS);
+    const now = json(RUNNING_APP, await jxa(MAC_FIND, { HX_APP: app.id || app.name }));
+    if (sent?.sent && now?.hidden)
+      return { status: "done", action: "hide", app: label, route: "direct", tried };
+    tried.push({ route: "direct", why: "the app is still shown" });
+    const script = `on run argv
+  tell application "System Events" to set visible of (first process whose unix id is (item 1 of argv as integer)) to false
+end run`;
+    const hidden = await deps.run(OSASCRIPT, ["-e", script, String(app.pid)], { timeoutMs: MAC_TIMEOUT_MS });
+    const refusal = macRefusal(hidden);
+    if (refusal)
+      return needsAutomation(deps, refusal);
+    if (hxRunOk(hidden))
+      return { status: "done", action: "hide", app: label, route: "command", tried };
+    tried.push({ route: "command", why: hxRunFailure("osascript", hidden) });
+    return { status: "use-steps", reason: `${label} could not be hidden. ${IMAGE_HINT}`, tried };
+  }
+  if (input.action === "quit") {
+    if (input.force && !input.confirmed)
+      return {
+        status: "confirm",
+        reason: `Force quit loses what ${label} has not saved. Ask the user in the chat first; after a yes, call again with force and confirmed true.`
+      };
+    const sent = json(SENT, await jxa(MAC_QUIT, { HX_APP: app.id || app.name, HX_FORCE: input.force ? "1" : "" }));
+    if (sent?.sent && await waitGone(deps, app.pid))
+      return {
+        status: "done",
+        action: "quit",
+        app: label,
+        route: "direct",
+        tried,
+        detail: input.force ? "forced" : "quit normally"
+      };
+    if (sent?.sent)
+      return {
+        status: "waiting",
+        app: label,
+        reason: `${label} did not quit in ${QUIT_WAIT_MS / 1000} seconds: it most likely asks whether to save. Its own dialog is for the user; tell the user. Force quit only after the user agrees (force and confirmed true).`
+      };
+    tried.push({ route: "direct", why: "the app did not take the quit request" });
+    const script = `on run argv
+  tell application id (item 1 of argv) to quit
+end run`;
+    const quit = await deps.run(OSASCRIPT, ["-e", script, app.id], { timeoutMs: MAC_TIMEOUT_MS });
+    const refusal = macRefusal(quit);
+    if (refusal)
+      return needsAutomation(deps, refusal);
+    if (hxRunOk(quit) && await waitGone(deps, app.pid))
+      return { status: "done", action: "quit", app: label, route: "command", tried, detail: "quit normally" };
+    tried.push({ route: "command", why: hxRunOk(quit) ? "the app is still open" : hxRunFailure("osascript", quit) });
+    return {
+      status: "use-steps",
+      reason: `${label} did not quit. ${IMAGE_HINT} Its Quit command is in the app's own menu.`,
+      tried
+    };
+  }
+  if (input.action === "window") {
+    const place = input.place ?? "max";
+    tried.push({ route: "direct", why: "macOS has no system interface that places another app's window" });
+    const placed = await jxa(MAC_WINDOW, { HX_PID: String(app.pid), HX_PLACE: place });
+    const refusal = macRefusal(placed);
+    if (refusal)
+      return needsAutomation(deps, refusal);
+    const done = json(PLACED, placed);
+    if (done)
+      return {
+        status: "done",
+        action: "window",
+        app: label,
+        route: "command",
+        tried,
+        detail: `${place}: ${(done.now ?? done.want).join(", ")}`
+      };
+    tried.push({ route: "command", why: hxRunFailure("osascript", placed) });
+    return { status: "use-steps", reason: `The window of ${label} could not be placed. ${IMAGE_HINT}`, tried };
+  }
+  if (input.action === "menus") {
+    const listed = await deps.run(OSASCRIPT, ["-e", MAC_MENUS, app.name], { timeoutMs: MAC_TIMEOUT_MS });
+    const refusal = macRefusal(listed);
+    if (refusal)
+      return needsAutomation(deps, refusal);
+    if (!hxRunOk(listed))
+      return { status: "failed", reason: hxRunFailure("osascript", listed) };
+    const menus = new Map;
+    for (const line of listed.stdout.split(/\r?\n/u)) {
+      const [menu, item] = line.split("\t");
+      if (!menu || !item)
+        continue;
+      menus.set(menu, [...menus.get(menu) ?? [], item]);
+    }
+    return {
+      status: "menus",
+      app: label,
+      menus: [...menus].map(([menu, items]) => ({ menu, items: items.slice(0, 60) }))
+    };
+  }
+  if (input.action === "menu") {
+    const path = input.path ?? [];
+    if (path.length < 2 || path.length > 3)
+      return {
+        status: "invalid",
+        reason: 'Give path: the menu and the item, such as ["File", "Save"] (a third part for a submenu item).'
+      };
+    if (riskyPath(path) && !input.confirmed)
+      return {
+        status: "confirm",
+        reason: `${path.join(" › ")} sends, pays, buys, deletes or publishes. Ask the user in the chat first; after a yes, call again with confirmed true.`
+      };
+    const clicked = await deps.run(OSASCRIPT, ["-e", MAC_MENU, app.name, ...path], { timeoutMs: MAC_TIMEOUT_MS });
+    const refusal = macRefusal(clicked);
+    if (refusal)
+      return needsAutomation(deps, refusal);
+    if (hxRunOk(clicked))
+      return { status: "done", action: "menu", app: label, route: "controls", tried, detail: path.join(" › ") };
+    tried.push({ route: "controls", why: hxRunFailure("osascript", clicked) });
+    return {
+      status: "use-steps",
+      reason: `${path.join(" › ")} was not found in ${label}. Call with action menus for the exact names, or ${IMAGE_HINT}`,
+      tried
+    };
+  }
+  return { status: "invalid", reason: "Unknown action." };
+}
+async function macFrontmost(jxa) {
+  return json(RUNNING_APP, await jxa(MAC_FRONTMOST))?.pid ?? null;
+}
+var SCHEMES = { browser: "http", mail: "mailto" };
+async function macDefault(input, jxa) {
+  const kind = input.kind ?? "browser";
+  const ext = (input.type ?? "").replace(/^\./u, "").trim();
+  if (kind === "type" && !/^[A-Za-z0-9]{1,12}$/u.test(ext))
+    return { status: "invalid", reason: 'Give type: a file name extension such as "pdf".' };
+  const target = kind === "type" ? `.${ext} files` : kind === "browser" ? "web pages (http, https)" : "email (mailto)";
+  const env = kind === "type" ? { HX_EXT: ext } : { HX_SCHEME: SCHEMES[kind] };
+  let wantName = "";
+  if (input.app?.trim()) {
+    const bundle = json(BUNDLE, await jxa(MAC_BUNDLE, { HX_APP: input.app.trim() }));
+    if (!bundle?.id)
+      return { status: "not-found", reason: `No app called ${JSON.stringify(input.app)} is installed.` };
+    env.HX_BUNDLE = bundle.id;
+    wantName = bundle.name;
+  }
+  const answer = json(MAC_DEFAULT_ANSWER, await jxa(MAC_DEFAULT, env));
+  if (!answer)
+    return { status: "failed", reason: `The default app of ${target} could not be read.` };
+  if (!env.HX_BUNDLE)
+    return { status: "default", kind, target, app: answer.after || "none", route: "direct" };
+  if (answer.after.toLowerCase() === env.HX_BUNDLE.toLowerCase())
+    return { status: "default", kind, target, app: answer.after, route: "direct" };
+  return {
+    status: "confirm-dialog",
+    reason: `macOS asks the user to confirm in a dialog before ${wantName} opens ${target} (it is still ${answer.before || "the system default"}). Tell the user to click "Use ${wantName}" in that dialog, or click it with computer_look and computer_do, then call again without app to read it.`
+  };
+}
+async function windows(deps, input) {
+  const ps = (script, env = {}) => {
+    const { command, args } = powerShell(script);
+    return deps.run(command, args, { timeoutMs: WIN_TIMEOUT_MS, env });
+  };
+  if (input.action === "list") {
+    const raw = json(RUNNING_APPS, await ps(WIN_LIST));
+    if (!raw)
+      return { status: "failed", reason: "The running apps could not be read." };
+    return { status: "apps", apps: raw };
+  }
+  if (input.action === "default")
+    return winDefault(input, ps);
+  if (input.action === "menus" || input.action === "menu")
+    return {
+      status: "use-steps",
+      reason: `Menus of Windows apps go through the controls: ${IMAGE_HINT}`,
+      tried: [{ route: "command", why: "Windows has no script interface for another app's menus" }]
+    };
+  const want = input.app?.trim();
+  if (!want)
+    return { status: "invalid", reason: "Give app: a name from action list." };
+  const app = json(RUNNING_APP, await ps(WIN_FIND, { HX_APP: want }));
+  if (!app)
+    return NO_APP(want);
+  const label = app.name || want;
+  const env = { HX_PID: String(app.pid) };
+  const tried = [];
+  if (input.action === "front" || input.action === "hide") {
+    const sent = json(SENT, await ps(input.action === "front" ? WIN_FRONT : WIN_HIDE, env));
+    if (sent?.sent)
+      return { status: "done", action: input.action, app: label, route: "direct", tried };
+    tried.push({ route: "direct", why: "Windows did not take the request" });
+    return { status: "use-steps", reason: `${label}: ${IMAGE_HINT}`, tried };
+  }
+  if (input.action === "quit") {
+    if (input.force && !input.confirmed)
+      return {
+        status: "confirm",
+        reason: `Force quit loses what ${label} has not saved. Ask the user in the chat first; after a yes, call again with force and confirmed true.`
+      };
+    const sent = json(SENT, await ps(WIN_QUIT, { ...env, HX_FORCE: input.force ? "1" : "" }));
+    if (sent?.sent && await waitGone(deps, app.pid))
+      return {
+        status: "done",
+        action: "quit",
+        app: label,
+        route: "direct",
+        tried,
+        detail: input.force ? "forced" : "quit normally"
+      };
+    if (sent?.sent)
+      return {
+        status: "waiting",
+        app: label,
+        reason: `${label} did not quit in ${QUIT_WAIT_MS / 1000} seconds: it most likely asks whether to save. Its own dialog is for the user; tell the user. Force quit only after the user agrees (force and confirmed true).`
+      };
+    tried.push({ route: "direct", why: "the app has no main window to close" });
+    return { status: "use-steps", reason: `${label} did not quit. ${IMAGE_HINT}`, tried };
+  }
+  if (input.action === "window") {
+    const place = input.place ?? "max";
+    const done = json(PLACED, await ps(WIN_WINDOW, { ...env, HX_PLACE: place }));
+    if (done?.sent)
+      return {
+        status: "done",
+        action: "window",
+        app: label,
+        route: "direct",
+        tried,
+        detail: `${place}: ${done.want.join(", ")}`
+      };
+    tried.push({ route: "direct", why: "Windows did not move the window" });
+    return { status: "use-steps", reason: `The window of ${label} could not be placed. ${IMAGE_HINT}`, tried };
+  }
+  return { status: "invalid", reason: "Unknown action." };
+}
+var WIN_KEYS = {
+  browser: "HKCU:\\Software\\Microsoft\\Windows\\Shell\\Associations\\UrlAssociations\\https\\UserChoice",
+  mail: "HKCU:\\Software\\Microsoft\\Windows\\Shell\\Associations\\UrlAssociations\\mailto\\UserChoice"
+};
+async function winDefault(input, ps) {
+  const kind = input.kind ?? "browser";
+  const ext = (input.type ?? "").replace(/^\./u, "").trim();
+  if (kind === "type" && !/^[A-Za-z0-9]{1,12}$/u.test(ext))
+    return { status: "invalid", reason: 'Give type: a file name extension such as "pdf".' };
+  const key = kind === "type" ? `HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\FileExts\\.${ext}\\UserChoice` : WIN_KEYS[kind];
+  const target = kind === "type" ? `.${ext} files` : kind === "browser" ? "web pages" : "email";
+  const change = Boolean(input.app?.trim());
+  const answer = json(WIN_DEFAULT_ANSWER, await ps(WIN_DEFAULT, { HX_KEY: key, HX_OPEN: change ? "1" : "" }));
+  if (!answer)
+    return { status: "failed", reason: `The default app of ${target} could not be read.` };
+  if (!change)
+    return { status: "default", kind, target, app: answer.progId || "none", route: "direct" };
+  return {
+    status: "page",
+    reason: `Windows lets only the user change default apps, so HXBot opened Settings › Apps › Default apps (now: ${answer.progId || "none"}). Find ${input.app} there with computer_look and set it for ${target} with computer_do, or tell the user what to click.`
+  };
+}
+
+// src/backend/hx-computer/run-script.ts
+import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { tmpdir as tmpdir2 } from "node:os";
+import { join as join2 } from "node:path";
+var OUTPUT_LIMIT = 8000;
+var TIMEOUT_MS = 120000;
+var MAX_SCRIPT = 20000;
+var RISKY = /\b(delete|deleted|remove|erase|trash|empty\s+trash|send|post|publish|submit|pay|buy|purchase|checkout|transfer|uninstall|shut\s*down|restart|log\s*out|format|kill)\b|\b(Remove|Stop|Clear|Send|Format|Uninstall|Restart|Disable)-[A-Z]/iu;
+var RISKY_CJK2 = /删除|发送|付款|支付|购买|转账|发布|卸载|关机|清空|废纸篓/u;
+var ADMIN = /with\s+administrator\s+privileges|\bsudo\b|-Verb\s+RunAs|Start-Process[^\n;]*RunAs/iu;
+function hxRiskyScript(text) {
+  return RISKY.test(text) || RISKY_CJK2.test(text);
+}
+function trim(text) {
+  const clean = text.replace(/\s+$/u, "");
+  return clean.length > OUTPUT_LIMIT ? { text: `${clean.slice(0, OUTPUT_LIMIT)}…`, truncated: true } : { text: clean, truncated: false };
+}
+function automationRefused(result) {
+  return /-1743|Not authorized to send Apple events/iu.test(`${result.stderr}
+${result.stdout}`);
+}
+async function hxRunScript(deps, input) {
+  const script = input.script;
+  if (!script.trim() || script.length > MAX_SCRIPT)
+    return { status: "invalid", reason: `Give script: 1 to ${MAX_SCRIPT} characters (for a shortcut, its name).` };
+  const mac = deps.platform === "darwin";
+  if (input.language === "powershell" ? deps.platform !== "win32" : !mac)
+    return {
+      status: "invalid",
+      reason: mac ? "This is a Mac: use applescript, jxa or shortcut." : deps.platform === "win32" ? "This is Windows: use powershell." : "Scripts run on macOS and Windows only."
+    };
+  if (ADMIN.test(script))
+    return {
+      status: "refused",
+      reason: "This script needs administrator rights, which computer_run does not use. Run the command with your own shell, so that HXBot asks the user through request_access, or tell the user what to run."
+    };
+  if (hxRiskyScript(`${script}
+${input.input ?? ""}`) && !input.confirmed)
+    return {
+      status: "confirm",
+      reason: "This script may send, pay, buy, delete or publish. Ask the user in the chat first and say what it does; after a yes, call again with confirmed true."
+    };
+  const folder = await mkdtemp(join2(tmpdir2(), "hxbot-run-"));
+  try {
+    let result;
+    if (input.language === "shortcut") {
+      const args = ["run", script.trim()];
+      if (input.input !== undefined) {
+        const file = join2(folder, "input.txt");
+        await writeFile(file, input.input, "utf8");
+        args.push("--input-path", file);
+      }
+      args.push("--output-path", join2(folder, "output.txt"));
+      result = await deps.run("/usr/bin/shortcuts", args, { timeoutMs: TIMEOUT_MS });
+      if (hxRunOk(result)) {
+        const output = await readFile(join2(folder, "output.txt"), "utf8").catch(() => "");
+        result = { ...result, stdout: output || result.stdout };
+      }
+    } else if (input.language === "powershell") {
+      const text = `$ProgressPreference = 'SilentlyContinue'; try { [Console]::OutputEncoding = [System.Text.Encoding]::UTF8 } catch { }; ${script}`;
+      result = await deps.run(HX_POWERSHELL, [
+        "-NoLogo",
+        "-NoProfile",
+        "-NonInteractive",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-EncodedCommand",
+        Buffer.from(text, "utf16le").toString("base64")
+      ], { timeoutMs: TIMEOUT_MS });
+    } else {
+      const file = join2(folder, input.language === "jxa" ? "script.js" : "script.applescript");
+      await writeFile(file, script, "utf8");
+      result = await deps.run("/usr/bin/osascript", ["-l", input.language === "jxa" ? "JavaScript" : "AppleScript", file], { timeoutMs: TIMEOUT_MS });
+    }
+    if (mac && automationRefused(result)) {
+      await deps.openAutomationPage().catch(() => {
+        return;
+      });
+      return {
+        status: "needs-permission",
+        reason: "macOS did not let HXBot control that app (Automation). The Automation page of System Settings is open: tell the user to turn on the app under HXBot there, then run the script again."
+      };
+    }
+    if (!hxRunOk(result)) {
+      const { text } = trim(result.stdout);
+      return {
+        status: "failed",
+        reason: hxRunFailure(input.language, result),
+        ...text ? { output: text } : {}
+      };
+    }
+    const { text, truncated } = trim(result.stdout);
+    return { status: "ran", language: input.language, output: text, truncated };
+  } finally {
+    await rm(folder, { recursive: true, force: true }).catch(() => {
+      return;
+    });
+  }
+}
+
+// src/backend/hx-check/app-run.ts
+var run = promisify(execFile2);
+function line2(result) {
+  return JSON.stringify(result).slice(0, 600);
+}
+var sleep = (ms) => new Promise((done) => setTimeout(done, ms));
+async function hxAppRealCheck(input) {
+  const { items, log, platform } = input;
+  if (platform !== "darwin" && platform !== "win32") {
+    items.add("A1", "应用命令（computer_app）", "skip", `这台机器是 ${platform}，应用命令只在 Mac、Windows 上检查`);
+    return;
+  }
+  let automationPage = 0;
+  const deps = {
+    run: hxRun,
+    platform,
+    sleep,
+    openAutomationPage: async () => {
+      automationPage += 1;
+    }
+  };
+  const scripts = { run: hxRun, platform, openAutomationPage: deps.openAutomationPage };
+  const mac = platform === "darwin";
+  const appName = mac ? "TextEdit" : "notepad";
+  const work = await mkdtemp2(join3(tmpdir3(), "hxbot-app-check-"));
+  const file = join3(work, "hxbot-app-check.txt");
+  await writeFile2(file, `HXBot app check
+`, "utf8");
+  const open = async () => {
+    if (mac)
+      await run("/usr/bin/open", ["-a", "TextEdit", file]);
+    else
+      await run("cmd.exe", ["/c", "start", "", "notepad.exe", file]);
+    for (let i = 0;i < 40; i++) {
+      await sleep(500);
+      const listed = await hxAppControl(deps, { action: "list" });
+      if (listed.status === "apps" && listed.apps.some((app) => app.name === appName || app.id.toLowerCase() === appName.toLowerCase() || app.id === "com.apple.TextEdit"))
+        return true;
+    }
+    return false;
+  };
+  try {
+    const listed = await hxAppControl(deps, { action: "list" });
+    items.check("A1", "列出正在运行的应用", listed.status === "apps" && listed.apps.length > 0 && (!mac || listed.apps.some((app) => app.id === "com.apple.finder")), listed.status === "apps" ? listed.apps.map((app) => app.name).slice(0, 12).join("、") : line2(listed));
+    const opened = await open();
+    log(`opened ${appName}: ${opened}`);
+    const front = await hxAppControl(deps, { action: "front", app: appName });
+    items.check("A2", `打开文件后把${mac ? "文本编辑" : "记事本"}切到前台`, opened && front.status === "done", line2(front));
+    const placed = await hxAppControl(deps, { action: "window", app: appName, place: "left" });
+    items.add("A3", "窗口放到左半边", placed.status === "done" ? "pass" : placed.status === "needs-permission" ? "warn" : "fail", line2(placed));
+    if (mac) {
+      const menus = await hxAppControl(deps, { action: "menus", app: appName });
+      const hasEdit = menus.status === "menus" && menus.menus.some((menu) => menu.menu === "Edit");
+      const clicked = hasEdit ? await hxAppControl(deps, { action: "menu", app: appName, path: ["Edit", "Select All"] }) : menus;
+      const risky = await hxAppControl(deps, { action: "menu", app: appName, path: ["Edit", "Delete"] });
+      items.add("A4", "读菜单、点“编辑 › 全选”；“删除”这类菜单命令先问", hasEdit && clicked.status === "done" && risky.status === "confirm" ? "pass" : menus.status === "needs-permission" ? "warn" : "fail", `${line2(menus).slice(0, 300)}；${line2(clicked).slice(0, 200)}；${line2(risky).slice(0, 200)}`);
+    } else {
+      const menus = await hxAppControl(deps, { action: "menus", app: appName });
+      items.check("A4", "Windows 的菜单交给逐步操作（use-steps）", menus.status === "use-steps", line2(menus));
+    }
+    const hidden = await hxAppControl(deps, { action: "hide", app: appName });
+    items.check("A5", "隐藏（Windows：最小化）", hidden.status === "done", line2(hidden));
+    const quit = await hxAppControl(deps, { action: "quit", app: appName });
+    items.check("A6", "正常退出并核对已经退出", quit.status === "done" && quit.action === "quit", line2(quit));
+    const script = mac ? await hxRunScript(scripts, {
+      language: "jxa",
+      script: "ObjC.import('Foundation'); $.NSProcessInfo.processInfo.operatingSystemVersionString.js"
+    }) : await hxRunScript(scripts, { language: "powershell", script: "[Environment]::OSVersion.VersionString" });
+    items.check("A7", `在 HXBot 里运行一段${mac ? " JXA " : " PowerShell "}脚本，读回输出`, script.status === "ran" && /version|windows|\d+\.\d+/iu.test(script.output), line2(script));
+    await open();
+    const edit = mac ? await hxRunScript(scripts, {
+      language: "applescript",
+      script: `tell application "TextEdit"
+  set text of document 1 to "HXBot app check, not saved"
+end tell`
+    }) : await hxRunScript(scripts, {
+      language: "powershell",
+      script: "$s = New-Object -ComObject WScript.Shell; $p = Get-Process notepad | Select-Object -First 1; [void]$s.AppActivate($p.Id); Start-Sleep -Milliseconds 800; $s.SendKeys('HXBot not saved'); 'typed'"
+    });
+    if (edit.status !== "ran") {
+      items.add("A8", "有没保存的改动时退出：应用自己问，强制退出先问", edit.status === "needs-permission" || edit.status === "failed" && edit.reason.includes("did not answer in time") ? "warn" : "fail", `改不了文件内容（${edit.status}；GitHub 的机器上没有人点“自动化”授权框）：${line2(edit)}；打开自动化页 ${automationPage} 次`);
+      await hxAppControl(deps, { action: "quit", app: appName, force: true, confirmed: true });
+    } else {
+      await sleep(800);
+      const asks = await hxAppControl(deps, { action: "quit", app: appName });
+      const unasked = await hxAppControl(deps, { action: "quit", app: appName, force: true });
+      const forced = asks.status === "waiting" ? await hxAppControl(deps, { action: "quit", app: appName, force: true, confirmed: true }) : asks;
+      const ok = asks.status === "waiting" && unasked.status === "confirm" && forced.status === "done" || asks.status === "done" && !mac;
+      items.add("A8", "有没保存的改动时退出：应用自己问（waiting），强制退出没同意先问，同意后退出", ok ? "pass" : "fail", `${line2(asks).slice(0, 250)}；${line2(unasked).slice(0, 150)}；${line2(forced).slice(0, 200)}`);
+    }
+    const browser = await hxAppControl(deps, { action: "default", kind: "browser" });
+    items.check("A9", "读默认浏览器", browser.status === "default" && browser.app !== "", line2(browser));
+  } catch (error) {
+    items.add("A99", "应用命令的检查没有跑完", "fail", error instanceof Error ? error.message : String(error));
+  }
+}
+
+// src/backend/hx-check/chat-model.ts
+var TURN_TIMEOUT_MS = 180000;
+var RETRIES = 4;
+function hxReadChatAnswer(body) {
+  const choices = isDynamicRecord(body) && Array.isArray(body.choices) ? body.choices : [];
+  const [first] = choices;
+  const message = isDynamicRecord(first) && isDynamicRecord(first.message) ? first.message : {};
+  const text = typeof message.content === "string" ? message.content : "";
+  const wire = Array.isArray(message.tool_calls) ? message.tool_calls : [];
+  const calls = [];
+  for (const [index, item] of wire.entries()) {
+    if (!isDynamicRecord(item) || !isDynamicRecord(item.function))
+      continue;
+    const name = item.function.name;
+    if (typeof name !== "string" || !name)
+      continue;
+    const args = item.function.arguments;
+    calls.push({
+      id: typeof item.id === "string" && item.id ? item.id : `call-${index + 1}`,
+      name,
+      arguments: typeof args === "string" ? args : JSON.stringify(args ?? {})
+    });
+  }
+  return { text, calls };
+}
+function hxAssistantMessage(turn) {
+  return turn.calls.length ? {
+    role: "assistant",
+    content: turn.text || null,
+    tool_calls: turn.calls.map((call) => ({
+      id: call.id,
+      type: "function",
+      function: { name: call.name, arguments: call.arguments }
+    }))
+  } : { role: "assistant", content: turn.text };
+}
+function hxChatModel(endpoint, options = {}) {
+  const send = options.fetch ?? ((url, init) => fetch(url, init));
+  const wait = options.wait ?? ((ms) => new Promise((resolve) => setTimeout(resolve, ms)));
+  return {
+    name: endpoint.name,
+    async turn(messages, tools) {
+      const body = JSON.stringify({
+        model: endpoint.model,
+        messages,
+        ...tools.length ? {
+          tools: tools.map((tool) => ({
+            type: "function",
+            function: { name: tool.name, description: tool.description, parameters: tool.parameters }
+          }))
+        } : {},
+        temperature: 0.2
+      });
+      let last = "";
+      let url = endpoint.url;
+      for (let attempt = 0;attempt <= RETRIES; attempt += 1) {
+        let response;
+        try {
+          response = await send(url, {
+            method: "POST",
+            headers: {
+              "content-type": "application/json",
+              accept: "application/json",
+              authorization: `Bearer ${endpoint.key}`,
+              ...endpoint.headers
+            },
+            body,
+            redirect: "manual",
+            signal: AbortSignal.timeout(TURN_TIMEOUT_MS)
+          });
+        } catch (error) {
+          last = error instanceof Error ? error.message : String(error);
+          await wait(2000 * 2 ** attempt);
+          continue;
+        }
+        const location = response.headers.get("location");
+        if (response.status >= 300 && response.status < 400 && location) {
+          url = new URL(location, url).toString();
+          last = `${response.status} to ${url}`;
+          continue;
+        }
+        const text = await response.text();
+        if (response.ok) {
+          try {
+            return hxReadChatAnswer(JSON.parse(text));
+          } catch {
+            last = `${response.status} ${response.headers.get("content-type") ?? ""}: not JSON: ${text.slice(0, 200)}`;
+            break;
+          }
+        }
+        last = `${response.status} ${text.slice(0, 300)}`;
+        if (response.status !== 429 && response.status < 500)
+          break;
+        const after = Number(response.headers.get("retry-after"));
+        await wait(Number.isFinite(after) && after > 0 ? Math.min(after, 60) * 1000 : 3000 * 2 ** attempt);
+      }
+      throw new Error(`${endpoint.name}: ${last}`);
+    }
+  };
+}
+function hxOpenCodeFreeModels(catalog, key = "public") {
+  const provider = isDynamicRecord(catalog) && isDynamicRecord(catalog.opencode) ? catalog.opencode : null;
+  if (!provider || !isDynamicRecord(provider.models))
+    return [];
+  const api = typeof provider.api === "string" ? provider.api.replace(/\/+$/, "") : "https://opencode.ai/zen/v1";
+  const found = [];
+  for (const [id, model] of Object.entries(provider.models)) {
+    if (!isDynamicRecord(model) || model.tool_call !== true)
+      continue;
+    const cost = isDynamicRecord(model.cost) ? model.cost : {};
+    if (cost.input !== 0 || cost.output !== undefined && cost.output !== 0)
+      continue;
+    const npm = isDynamicRecord(model.provider) ? model.provider.npm : undefined;
+    if (npm !== undefined && npm !== "@ai-sdk/openai-compatible")
+      continue;
+    if (isDynamicRecord(model.status) || model.status === "deprecated")
+      continue;
+    found.push({ name: `OpenCode ${id}`, url: `${api}/chat/completions`, key, model: id });
+  }
+  return found;
+}
+function hxGitHubModel(token, model = "openai/gpt-4.1-mini", organization) {
+  return {
+    name: `GitHub Models ${model}${organization ? ` (${organization})` : ""}`,
+    url: organization ? `https://models.github.ai/orgs/${encodeURIComponent(organization)}/inference/chat/completions` : "https://models.github.ai/inference/chat/completions",
+    key: token,
+    model,
+    headers: { accept: "application/vnd.github+json", "x-github-api-version": "2022-11-28" }
+  };
+}
+var PING_TOOL = {
+  name: "ping",
+  description: "Answer the check. Call it once.",
+  parameters: { type: "object", properties: { word: { type: "string" } }, required: ["word"] }
+};
+async function hxFirstWorkingModel(endpoints, options = {}) {
+  const tried = [];
+  for (const endpoint of endpoints) {
+    const model = hxChatModel(endpoint, { ...options, wait: options.wait ?? (async () => {
+      return;
+    }) });
+    try {
+      const turn = await model.turn([{ role: "user", content: 'Call the tool ping with the word "ready".' }], [PING_TOOL]);
+      const call = turn.calls[0];
+      if (call?.name === PING_TOOL.name) {
+        tried.push({ name: endpoint.name, answer: "ok" });
+        return { model: hxChatModel(endpoint, options), tried };
+      }
+      tried.push({ name: endpoint.name, answer: `no tool call: ${turn.text.slice(0, 120)}` });
+    } catch (error) {
+      tried.push({
+        name: endpoint.name,
+        answer: (error instanceof Error ? error.message : String(error)).slice(0, 200)
+      });
+    }
+  }
+  return { model: null, tried };
+}
+
+// src/backend/hx-check/loop.ts
+function hxToolName(name, known) {
+  if (known.has(name))
+    return name;
+  const plain = name.replace(/^hxbot(?:\.|__|_)/, "");
+  return known.has(plain) ? plain : name;
+}
+async function hxToolLoop(input) {
+  const known = new Set(input.tools.map((tool) => tool.name));
+  const calls = [];
+  for (let turn = 0;turn < input.maxTurns; turn += 1) {
+    let answer;
+    try {
+      answer = await input.model.turn(input.history, input.tools);
+    } catch (error) {
+      return { calls, text: "", end: "error", error: error instanceof Error ? error.message : String(error) };
+    }
+    input.history.push(hxAssistantMessage(answer));
+    if (!answer.calls.length)
+      return { calls, text: answer.text, end: "stopped" };
+    for (const call of answer.calls) {
+      const name = hxToolName(call.name, known);
+      let args = null;
+      let reply;
+      try {
+        args = call.arguments.trim() ? JSON.parse(call.arguments) : {};
+      } catch {
+        args = null;
+      }
+      if (args === null)
+        reply = JSON.stringify({ status: "invalid", reason: "The arguments are not JSON." });
+      else if (!known.has(name))
+        reply = JSON.stringify({ status: "invalid", reason: `There is no tool ${call.name}.` });
+      else {
+        try {
+          reply = await input.handle(name, args);
+        } catch (error) {
+          reply = JSON.stringify({ status: "failed", reason: error instanceof Error ? error.message : String(error) });
+        }
+      }
+      calls.push({ name, args, answer: reply });
+      input.history.push({ role: "tool", tool_call_id: call.id, content: reply });
+    }
+  }
+  return { calls, text: "", end: "limit" };
+}
+
+// src/backend/hx-check/brain.ts
+function hxChatBrain(model) {
+  const histories = new Map;
+  return {
+    name: model.name,
+    async turn(input) {
+      const history = histories.get(input.session) ?? [];
+      histories.set(input.session, history);
+      if (history[0]?.role === "system")
+        history[0] = { role: "system", content: input.system };
+      else
+        history.unshift({ role: "system", content: input.system });
+      history.push({ role: "user", content: input.user });
+      return hxToolLoop({
+        model,
+        history,
+        tools: input.tools,
+        handle: input.handle,
+        maxTurns: input.maxTurns
+      });
+    },
+    async close() {}
+  };
+}
+
+// src/backend/hx-check/install-run.ts
+import { execFile as execFile3 } from "node:child_process";
+import { mkdir, mkdtemp as mkdtemp4, readdir as readdir2, rename as rename2, rm as rm3, writeFile as writeFile3 } from "node:fs/promises";
+import { homedir, tmpdir as tmpdir5 } from "node:os";
+import { basename as basename2, join as join5 } from "node:path";
+import { promisify as promisify2 } from "node:util";
+
+// src/backend/hx-computer/install.ts
+import { access, mkdtemp as mkdtemp3, readdir, rename, rm as rm2 } from "node:fs/promises";
+import { tmpdir as tmpdir4 } from "node:os";
+import { basename, extname, join as join4 } from "node:path";
+var HX_INSTALL_FILES = {
+  exists: (path) => access(path).then(() => true, () => false),
+  makeTemp: (prefix) => mkdtemp3(join4(tmpdir4(), prefix)),
+  async findApps(folder) {
+    const found = [];
+    for (const entry of await readdir(folder, { withFileTypes: true }).catch(() => [])) {
+      if (!entry.isDirectory())
+        continue;
+      const path = join4(folder, entry.name);
+      if (entry.name.endsWith(".app"))
+        found.push(path);
+      else
+        for (const inner of await readdir(path, { withFileTypes: true }).catch(() => []))
+          if (inner.isDirectory() && inner.name.endsWith(".app"))
+            found.push(join4(path, inner.name));
+    }
+    return found;
+  },
+  rename: (from, to) => rename(from, to),
+  remove: (path) => rm2(path, { recursive: true, force: true })
+};
+var LONG_MS = 300000;
+function plistValue(output) {
+  return output.trim().split(`
+`)[0]?.trim() ?? "";
+}
+async function facts(run, app) {
+  const plist = join4(app, "Contents", "Info.plist");
+  const read = async (key) => {
+    const result = await run("/usr/bin/plutil", ["-extract", key, "raw", "-o", "-", plist]);
+    return hxRunOk(result) ? plistValue(result.stdout) : "";
+  };
+  const id = await read("CFBundleIdentifier");
+  if (!id)
+    return null;
+  const version = await read("CFBundleShortVersionString") || await read("CFBundleVersion");
+  return { name: basename(app, ".app"), id, version, path: app };
+}
+async function signature(run, app) {
+  const sign = await run("/usr/bin/codesign", ["-dv", "--verbose=2", app], { timeoutMs: 60000 });
+  const text = `${sign.stdout}
+${sign.stderr}`;
+  const authority = /^Authority=(.+)$/mu.exec(text)?.[1]?.trim();
+  const team = /^TeamIdentifier=(.+)$/mu.exec(text)?.[1]?.trim() ?? "";
+  const adhoc = /Signature=adhoc/u.test(text);
+  const check = await run("/usr/sbin/spctl", ["-a", "-vv", "-t", "exec", app], { timeoutMs: 60000 });
+  const verdict = `${check.stdout}
+${check.stderr}`;
+  return {
+    authority: authority ?? (adhoc ? "ad-hoc" : hxRunOk(sign) ? "unknown" : "unsigned"),
+    team: team === "not set" ? "" : team,
+    notarized: hxRunOk(check) && /Notarized/u.test(verdict)
+  };
+}
+async function unpack(deps, source) {
+  const kind = extname(source).toLowerCase();
+  const { run, files } = deps;
+  if (kind === ".app")
+    return { app: source.replace(/\/+$/u, ""), done: async () => {} };
+  if (kind === ".zip") {
+    const folder = await files.makeTemp("hxbot-install-");
+    const unzip = await run("/usr/bin/ditto", ["-x", "-k", source, folder], { timeoutMs: LONG_MS });
+    if (!hxRunOk(unzip))
+      return { status: "failed", reason: hxRunFailure("ditto", unzip) };
+    const apps = await files.findApps(folder);
+    const done = () => files.remove(folder);
+    if (apps.length !== 1) {
+      await done();
+      return { status: "invalid", reason: `The archive holds ${apps.length} apps; give the path of one .app.` };
+    }
+    return { app: apps[0] ?? "", done };
+  }
+  if (kind === ".dmg") {
+    const mount = await files.makeTemp("hxbot-dmg-");
+    const attach = await run("/usr/bin/hdiutil", ["attach", "-nobrowse", "-readonly", "-noautoopen", "-mountpoint", mount, source], { timeoutMs: LONG_MS });
+    if (!hxRunOk(attach))
+      return { status: "failed", reason: hxRunFailure("hdiutil", attach) };
+    const done = async () => {
+      await run("/usr/bin/hdiutil", ["detach", mount, "-quiet"], { timeoutMs: 60000 });
+      await files.remove(mount).catch(() => {
+        return;
+      });
+    };
+    const apps = await files.findApps(mount);
+    if (apps.length !== 1) {
+      await done();
+      return {
+        status: "invalid",
+        reason: `The disk image holds ${apps.length} apps; open it with computer_open instead.`
+      };
+    }
+    return { app: apps[0] ?? "", done };
+  }
+  return { status: "invalid", reason: "Give the path of a .app, .zip, .dmg or .pkg file." };
+}
+async function running(run, id) {
+  const result = await run("/usr/bin/lsappinfo", ["info", "-only", "pid", "-app", id]);
+  return hxRunOk(result) && /"pid"\s*=\s*\d+/u.test(result.stdout);
+}
+function refusedByMacOS(text) {
+  return /operation not permitted|permission denied|EPERM|EACCES/iu.test(text);
+}
+async function hxInstallApp(deps, input) {
+  if (deps.platform !== "darwin")
+    return {
+      status: "unsupported",
+      reason: "On Windows, open the installer with computer_open and its path; Windows asks the user to confirm."
+    };
+  const { run, files } = deps;
+  const source = input.path.trim();
+  if (!source.startsWith("/"))
+    return { status: "invalid", reason: "Give the full path of the file." };
+  if (!await files.exists(source))
+    return { status: "not-found", reason: `There is no file at ${source}.` };
+  if (extname(source).toLowerCase() === ".pkg") {
+    const opened = await run("/usr/bin/open", [source]);
+    return hxRunOk(opened) ? {
+      status: "installer",
+      reason: "The macOS installer is open. The user follows it and gives the password there; HXBot does not type passwords."
+    } : { status: "failed", reason: hxRunFailure("open", opened) };
+  }
+  const unpacked = await unpack(deps, source);
+  if (!("app" in unpacked))
+    return unpacked;
+  try {
+    const incoming = await facts(run, unpacked.app);
+    if (!incoming)
+      return { status: "invalid", reason: `${basename(unpacked.app)} has no bundle id: it is not an app.` };
+    const signed = await signature(run, unpacked.app);
+    const applications = deps.applications ?? "/Applications";
+    const target = join4(applications, `${incoming.name}.app`);
+    const installed = await files.exists(target) ? await facts(run, target) : null;
+    if (installed && input.replace !== true)
+      return {
+        status: "confirm",
+        reason: `${incoming.name} ${installed.version} is installed. Ask the user in the chat whether to replace it with ${incoming.version}; after a yes, call again with replace: true.`,
+        installed,
+        incoming,
+        signature: signed
+      };
+    if (installed && await running(run, installed.id))
+      return {
+        status: "running",
+        reason: `${installed.name} is open. Ask the user to quit it (and save their work), then call again.`,
+        installed
+      };
+    const staging = join4(applications, `.${incoming.name}.hxbot-new.app`);
+    await files.remove(staging).catch(() => {
+      return;
+    });
+    const copy = await run("/usr/bin/ditto", [unpacked.app, staging], { timeoutMs: LONG_MS });
+    if (!hxRunOk(copy)) {
+      await files.remove(staging).catch(() => {
+        return;
+      });
+      return refusedByMacOS(copy.stderr) ? await appManagement(deps) : { status: "failed", reason: hxRunFailure("ditto", copy) };
+    }
+    const shown = join4(applications, `${incoming.name} ${installed?.version.replace(/[/:]/gu, "-") ?? ""}.app`);
+    const old = installed && !await files.exists(shown) ? shown : join4(applications, `.${incoming.name}.hxbot-old.app`);
+    if (installed) {
+      if (old !== shown)
+        await files.remove(old).catch(() => {
+          return;
+        });
+      try {
+        await files.rename(target, old);
+      } catch (error) {
+        await files.remove(staging).catch(() => {
+          return;
+        });
+        return refusedByMacOS(String(error)) ? await appManagement(deps) : { status: "failed", reason: String(error).slice(0, 300) };
+      }
+    }
+    try {
+      await files.rename(staging, target);
+    } catch (error) {
+      if (installed)
+        await files.rename(old, target).catch(() => {
+          return;
+        });
+      await files.remove(staging).catch(() => {
+        return;
+      });
+      return refusedByMacOS(String(error)) ? await appManagement(deps) : { status: "failed", reason: String(error).slice(0, 300) };
+    }
+    if (installed)
+      await deps.trashItem(old).catch(() => files.remove(old).catch(() => {
+        return;
+      }));
+    const result = await facts(run, target);
+    if (!result || result.version !== incoming.version)
+      return {
+        status: "failed",
+        reason: `The copy in ${applications} reads ${result?.version ?? "nothing"}, not ${incoming.version}.`
+      };
+    return {
+      status: "installed",
+      app: result,
+      signature: signed,
+      replaced: installed ? { version: installed.version } : null
+    };
+  } finally {
+    await unpacked.done().catch(() => {
+      return;
+    });
+  }
+}
+async function appManagement(deps) {
+  await deps.askAppManagement?.().catch(() => {
+    return;
+  });
+  return {
+    status: "needs-permission",
+    permission: "app-management",
+    reason: "macOS asks for App Management to change an app that is there. HXBot opened Privacy & Security → App Management and turns on its switch if it can; the user gives the password or Touch ID. Then call again."
+  };
+}
+
+// src/backend/hx-check/install-run.ts
+var run2 = promisify2(execFile3);
+var ID = "org.example.hxinstall";
+var NAME = "HXInstallCheck";
+async function makeApp(folder, version) {
+  const app = join5(folder, `${NAME}.app`);
+  await mkdir(join5(app, "Contents", "MacOS"), { recursive: true });
+  await writeFile3(join5(app, "Contents", "Info.plist"), `<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0"><dict>
+<key>CFBundleIdentifier</key><string>${ID}</string>
+<key>CFBundleExecutable</key><string>hxinstall</string>
+<key>CFBundleName</key><string>${NAME}</string>
+<key>CFBundlePackageType</key><string>APPL</string>
+<key>CFBundleShortVersionString</key><string>${version}</string>
+</dict></plist>
+`, "utf8");
+  await run2("/bin/cp", ["/usr/bin/true", join5(app, "Contents", "MacOS", "hxinstall")]);
+  await run2("/usr/bin/codesign", ["-s", "-", "--force", app]);
+  await run2("/usr/bin/xattr", ["-w", "com.apple.quarantine", "0081;00000000;HXBot check;", app]);
+  return app;
+}
+async function quarantined(path) {
+  return run2("/usr/bin/xattr", ["-p", "com.apple.quarantine", path]).then(() => true, () => false);
+}
+function line3(result) {
+  return JSON.stringify(result).slice(0, 600);
+}
+async function hxInstallRealCheck(input) {
+  const { items, log } = input;
+  if (input.platform !== "darwin") {
+    items.add("I1", "安装应用（computer_install）", "skip", `这台机器是 ${input.platform}，安装应用只在 Mac 上检查`);
+    return;
+  }
+  const target = `/Applications/${NAME}.app`;
+  const trash = join5(homedir(), ".Trash");
+  const work = await mkdtemp4(join5(tmpdir5(), "hxbot-install-check-"));
+  const deps = {
+    run: hxRun,
+    files: HX_INSTALL_FILES,
+    platform: "darwin",
+    trashItem: async (path) => {
+      await mkdir(trash, { recursive: true });
+      await rename2(path, join5(trash, `${basename2(path)}-${Date.now()}`));
+    }
+  };
+  try {
+    await rm3(target, { recursive: true, force: true });
+    const v1 = await makeApp(join5(work, "v1"), "1.0");
+    const v2 = await makeApp(join5(work, "v2"), "2.0");
+    const zip = join5(work, `${NAME}-2.0.zip`);
+    await run2("/usr/bin/ditto", ["-c", "-k", "--keepParent", v2, zip]);
+    const v3 = await makeApp(join5(work, "v3"), "3.0");
+    const dmg = join5(work, `${NAME}-3.0.dmg`);
+    await run2("/usr/bin/hdiutil", ["create", "-volname", NAME, "-srcfolder", join5(work, "v3"), "-ov", "-format", "UDZO", dmg], {
+      timeout: 120000
+    });
+    log(`test apps: ${v1}, ${zip}, ${v3} → ${dmg}`);
+    const first = await hxInstallApp(deps, { path: v1 });
+    items.check("I1", "装进“应用程序”文件夹：读回版本和签名，隔离标记保留", first.status === "installed" && first.app.version === "1.0" && first.signature.authority === "ad-hoc" && !first.signature.notarized && await quarantined(target), line3(first));
+    const asked = await hxInstallApp(deps, { path: zip });
+    items.check("I2", "已经装了时先问（confirm），不动原来的", asked.status === "confirm" && asked.installed.version === "1.0" && asked.incoming.version === "2.0", line3(asked));
+    const replaced = await hxInstallApp(deps, { path: zip, replace: true });
+    const leftovers = (await readdir2("/Applications")).filter((name) => name.includes("hxbot-"));
+    const inTrash = (await readdir2(trash).catch(() => [])).some((name) => name.startsWith(`${NAME} 1.0.app`));
+    items.check("I3", "同意替换后装上新版本，旧版进废纸篓，不留临时文件", replaced.status === "installed" && replaced.app.version === "2.0" && replaced.replaced?.version === "1.0" && inTrash && leftovers.length === 0, `${line3(replaced)}；废纸篓里有旧版：${inTrash}；“应用程序”文件夹里的临时文件：${leftovers.join(", ") || "无"}`);
+    const fromImage = await hxInstallApp(deps, { path: dmg, replace: true });
+    const mounted = await run2("/usr/bin/hdiutil", ["info"]).then((result) => result.stdout.includes("hxbot-dmg-"));
+    items.check("I4", "从磁盘映像装，装好后卸下", fromImage.status === "installed" && fromImage.app.version === "3.0" && !mounted, `${line3(fromImage)}；映像还挂着：${mounted}`);
+  } catch (error) {
+    items.add("I9", "安装应用的检查没有跑完", "fail", error instanceof Error ? error.message : String(error));
+  } finally {
+    await rm3(target, { recursive: true, force: true }).catch(() => {
+      return;
+    });
+    await rm3(work, { recursive: true, force: true }).catch(() => {
+      return;
+    });
+  }
+}
+
+// src/backend/hx-check/report.ts
+class HxRealItems {
+  items = [];
+  add(id, title, status, detail = "") {
+    this.items.push({ id, title, status, detail: detail.slice(0, 1500) });
+    return status;
+  }
+  check(id, title, ok, detail = "") {
+    this.add(id, title, ok ? "pass" : "fail", detail);
+    return ok;
+  }
+}
+function hxRealCounts(items) {
+  const counts = { pass: 0, fail: 0, warn: 0, skip: 0 };
+  for (const item of items)
+    counts[item.status] += 1;
+  return counts;
+}
+var MARK = { pass: "✅", fail: "❌", warn: "⚠️", skip: "⏭️" };
+function cell(text) {
+  return text.replace(/\|/g, "\\|").replace(/\s*\n\s*/g, " ").slice(0, 400);
+}
+function order(a, b) {
+  const [, letterA = "", numberA = "0"] = /^([A-Z]+)(\d+)/u.exec(a.id) ?? [];
+  const [, letterB = "", numberB = "0"] = /^([A-Z]+)(\d+)/u.exec(b.id) ?? [];
+  return letterA.localeCompare(letterB) || Number(numberA) - Number(numberB);
+}
+function hxRealSummary(report) {
+  const counts = hxRealCounts(report.items);
+  return [
+    `## ${report.machine}`,
+    "",
+    `模型：${report.model || "没有可用的模型"}　用时 ${Math.round(report.seconds)} 秒　通过 ${counts.pass}，失败 ${counts.fail}，提醒 ${counts.warn}，跳过 ${counts.skip}`,
+    "",
+    "| | 项 | 结果 |",
+    "|---|---|---|",
+    ...[...report.items].sort(order).map((item) => `| ${MARK[item.status]} | ${item.id} ${cell(item.title)} | ${cell(item.detail)} |`),
+    "",
+    ...report.models.length ? ["试过的模型：", ...report.models.map((model) => `- ${model.name}：${cell(model.answer)}`), ""] : []
+  ].join(`
+`);
+}
+function hxReadRealReport(value) {
+  if (!isDynamicRecord(value) || typeof value.machine !== "string" || !Array.isArray(value.items))
+    return null;
+  const items = [];
+  for (const item of value.items) {
+    if (!isDynamicRecord(item))
+      continue;
+    const status = item.status;
+    if (status !== "pass" && status !== "fail" && status !== "warn" && status !== "skip")
+      continue;
+    items.push({
+      id: String(item.id ?? ""),
+      title: String(item.title ?? ""),
+      status,
+      detail: String(item.detail ?? "")
+    });
+  }
+  const models = Array.isArray(value.models) ? value.models.flatMap((model) => isDynamicRecord(model) ? [{ name: String(model.name ?? ""), answer: String(model.answer ?? "") }] : []) : [];
+  return {
+    machine: value.machine,
+    model: typeof value.model === "string" ? value.model : "",
+    startedAt: typeof value.startedAt === "string" ? value.startedAt : "",
+    seconds: typeof value.seconds === "number" ? value.seconds : 0,
+    items,
+    models
+  };
+}
+function hxRealOverview(reports, expected) {
+  const missing = expected.filter((machine) => !reports.some((report) => report.machine === machine));
+  const failed = reports.filter((report) => hxRealCounts(report.items).fail > 0);
+  const lines = [
+    "# HXBot 真实模型与真机检查",
+    "",
+    "| 机器 | 模型 | 通过 | 失败 | 提醒 | 跳过 |",
+    "|---|---|---|---|---|---|",
+    ...reports.map((report) => {
+      const counts = hxRealCounts(report.items);
+      return `| ${report.machine} | ${cell(report.model || "—")} | ${counts.pass} | ${counts.fail} | ${counts.warn} | ${counts.skip} |`;
+    }),
+    ...missing.map((machine) => `| ${machine} | 没有交回结果 | | | | |`),
+    "",
+    ...reports.map((report) => hxRealSummary(report))
+  ];
+  return { text: lines.join(`
+`), ok: missing.length === 0 && failed.length === 0 };
+}
+
+// src/backend/hx-check/scripted-model.ts
+var FORM = (goal) => [
+  `目标：${goal}`,
+  "已完成：无",
+  "文件：/check/shared/report.md",
+  "未解决：无",
+  "下一步：完成后交回结果",
+  "不要碰：别的文件"
+].join(`
+`);
+var calls = 0;
+function call(name, args) {
+  calls += 1;
+  return { text: "", calls: [{ id: `s-${calls}`, name, arguments: JSON.stringify(args) }] };
+}
+var text2 = (words) => ({ text: words, calls: [] });
+function lastUser(history) {
+  for (let index = history.length - 1;index >= 0; index -= 1) {
+    const message = history[index];
+    if (message?.role === "user")
+      return message.content;
+  }
+  return "";
+}
+function since(history) {
+  const out = [];
+  for (let index = history.length - 1;index >= 0; index -= 1) {
+    const message = history[index];
+    if (!message || message.role === "user")
+      break;
+    if (message.role === "tool")
+      out.unshift(message.content);
+  }
+  return out;
+}
+function statusOf(raw) {
+  try {
+    const value = JSON.parse(raw);
+    return isDynamicRecord(value) && typeof value.status === "string" ? value.status : "";
+  } catch {
+    return "";
+  }
+}
+function memberId(system, word) {
+  const line = system.split(`
+`).find((item) => word.test(item)) ?? "";
+  return /agentId ([\w-]+)/u.exec(line)?.[1] ?? "";
+}
+function hxScriptedModel() {
+  return {
+    name: "scripted (self-test)",
+    async turn(history) {
+      const system = history[0]?.role === "system" ? history[0].content : "";
+      const user = lastUser(history);
+      const tools = since(history);
+      if (system.includes("Computer Use"))
+        return text2("done");
+      if (!system.includes("lead of this channel")) {
+        if (user.includes("咖啡店")) {
+          if (tools.length === 0)
+            return call("propose_plan", {
+              summary: "3 个智能体，约 40 分钟",
+              roles: [
+                { name: "研究员", kind: "do", does: "查资料", work: "data" },
+                { name: "写手", kind: "do", does: "写报告", work: "writing" },
+                { name: "审稿", kind: "check", does: "检查报告", work: "writing" }
+              ],
+              steps: [
+                { title: "查资料", role: "研究员" },
+                { title: "写报告", role: "写手" },
+                { title: "检查", role: "审稿" }
+              ]
+            });
+          if (tools.length === 1)
+            return call("start_team", {
+              goal: user,
+              roles: [
+                { name: "研究员", kind: "do", does: "查资料、做调研", work: "data" },
+                { name: "写手", kind: "do", does: "写报告", work: "writing" },
+                { name: "审稿", kind: "check", does: "检查报告", work: "writing" }
+              ],
+              steps: [
+                { title: "查资料", role: "研究员" },
+                { title: "写报告", role: "写手" },
+                { title: "检查", role: "审稿" }
+              ],
+              limits: { members: 3, minutes: 40, rounds: 10 }
+            });
+          return text2("团队开始了。");
+        }
+        if (tools.length)
+          return text2("好的。");
+        if (user.includes("再给 30 分钟"))
+          return call("team", { action: "limits", minutes: 70, rounds: 20 });
+        if (user.includes("跟团队说"))
+          return call("team", { action: "message", text: "报告里加一段竞争对手的价格对比。" });
+        if (user.includes("换一个人"))
+          return call("team", { action: "swap", member: "写手" });
+        if (user.includes("停一下"))
+          return call("team", { action: "stop" });
+        return text2("好的。");
+      }
+      const request = /id (msg-\d+)/u.exec(system)?.[1] ?? "msg-1";
+      const assign = (word, goal) => call("channel_assign", {
+        recipientAgentId: memberId(system, word),
+        task: FORM(goal),
+        expectedResult: goal,
+        sourceMessageIds: [request]
+      });
+      const answered = tools.map(statusOf);
+      if (user.includes("【协作任务】")) {
+        if (answered.length === 0)
+          return call("team_board", { action: "read" });
+        const lastStatus = answered.at(-1);
+        if (lastStatus === "assigned")
+          return text2("已分派，等结果。");
+        return assign(/写手|Writer/u, "写 300 字报告：周边人群、竞争对手和价格");
+      }
+      if (user.includes("【检查结果】")) {
+        if (answered.length === 0)
+          return call("team_done", { result: "《社区咖啡店开业调研》已完成并检查。" });
+        return text2("交回了。");
+      }
+      if (user.includes("成员交回了结果")) {
+        if (answered.length === 0)
+          return assign(/审稿|Reviewer/u, "检查报告");
+        return text2("已分派，等结果。");
+      }
+      return text2("等待。");
+    }
+  };
+}
+
+// src/backend/hx-check/steps-run.ts
+import { spawn as spawn2 } from "node:child_process";
+import { randomUUID } from "node:crypto";
+import { readFile as readFile2, writeFile as writeFile4 } from "node:fs/promises";
+import { tmpdir as tmpdir6 } from "node:os";
+import { join as join6 } from "node:path";
+
+// src/backend/agent/advertised-json-schema.ts
+var MERGEABLE_KEYS = new Set(["type", "properties", "required", "additionalProperties"]);
+var isObject2 = (value) => typeof value === "object" && value !== null && !Array.isArray(value);
+var isBareAnyOf = (value) => isObject2(value) && Array.isArray(value.anyOf) && Object.keys(value).length === 1;
+var isObjectBranch = (value) => isObject2(value) && value.type === "object" && isObject2(value.properties) && Object.keys(value).every((key) => MERGEABLE_KEYS.has(key));
+var VALIDATION_KEYS = new Set([
+  "pattern",
+  "minLength",
+  "maxLength",
+  "minItems",
+  "maxItems",
+  "uniqueItems",
+  "minimum",
+  "maximum",
+  "exclusiveMinimum",
+  "exclusiveMaximum",
+  "multipleOf",
+  "minProperties",
+  "maxProperties"
+]);
+var SCHEMA_MAPS = new Set(["properties", "patternProperties", "definitions", "$defs"]);
+function tagValue(property) {
+  if (!isObject2(property))
+    return;
+  if (typeof property.const === "string")
+    return property.const;
+  return Array.isArray(property.enum) && property.enum.length === 1 && typeof property.enum[0] === "string" ? property.enum[0] : undefined;
+}
+function mergeTaggedObjects(branches) {
+  const objects = branches.filter(isObjectBranch);
+  const [first] = objects;
+  if (first === undefined || objects.length < 2 || objects.length !== branches.length)
+    return;
+  const tag = Object.keys(first.properties).find((key) => {
+    const values = objects.map((object) => tagValue(object.properties[key]));
+    return values.every((value) => value !== undefined) && new Set(values).size === values.length;
+  });
+  if (tag === undefined)
+    return;
+  const properties = {
+    [tag]: { type: "string", enum: objects.flatMap((object) => tagValue(object.properties[tag]) ?? []) }
+  };
+  for (const object of objects) {
+    for (const [name, property] of Object.entries(object.properties)) {
+      if (name === tag)
+        continue;
+      const seen = properties[name];
+      if (seen === undefined) {
+        properties[name] = property;
+        continue;
+      }
+      const options = isBareAnyOf(seen) ? seen.anyOf : [seen];
+      const text = JSON.stringify(property);
+      if (!options.some((option) => JSON.stringify(option) === text))
+        properties[name] = { anyOf: [...options, property] };
+    }
+  }
+  const requiredOf = (object) => Array.isArray(object.required) ? object.required.filter((name) => typeof name === "string") : [];
+  const required = requiredOf(first).filter((name) => name !== tag && objects.every((object) => requiredOf(object).includes(name)));
+  return {
+    type: "object",
+    properties,
+    required: [tag, ...required],
+    ...objects.every((object) => object.additionalProperties === false) ? { additionalProperties: false } : {}
+  };
+}
+var VALUE_KEYS = new Set(["const", "enum", "default", "examples"]);
+function plainJson(value) {
+  if (value === null || typeof value === "boolean" || typeof value === "number" || typeof value === "string")
+    return value;
+  if (Array.isArray(value))
+    return value.flatMap((item) => plainJson(item) ?? []);
+  if (!isDynamicRecord(value))
+    return;
+  const result = {};
+  for (const [key, item] of Object.entries(value)) {
+    const copied = plainJson(item);
+    if (copied !== undefined)
+      result[key] = copied;
+  }
+  return result;
+}
+function compactMap(map) {
+  if (!isDynamicRecord(map))
+    return compact(map);
+  const result = {};
+  for (const [name, value] of Object.entries(map)) {
+    const compacted = compact(value);
+    if (compacted !== undefined)
+      result[name] = compacted;
+  }
+  return result;
+}
+function uniqueBranches(branches) {
+  const seen = new Set;
+  return branches.filter((branch) => {
+    const text = JSON.stringify(branch);
+    if (seen.has(text))
+      return false;
+    seen.add(text);
+    return true;
+  });
+}
+function compact(schema) {
+  if (schema === null || typeof schema === "boolean" || typeof schema === "number" || typeof schema === "string")
+    return schema;
+  if (Array.isArray(schema))
+    return schema.flatMap((item) => compact(item) ?? []);
+  if (!isDynamicRecord(schema))
+    return;
+  let result = {};
+  for (const [key, value] of Object.entries(schema)) {
+    if (key === "$schema" || VALIDATION_KEYS.has(key))
+      continue;
+    const compacted = VALUE_KEYS.has(key) ? plainJson(value) : SCHEMA_MAPS.has(key) ? compactMap(value) : compact(value);
+    if (compacted !== undefined)
+      result[key] = compacted;
+  }
+  if (Array.isArray(result.anyOf)) {
+    result.anyOf = uniqueBranches(result.anyOf.flatMap((branch) => isBareAnyOf(branch) ? branch.anyOf : [branch]));
+    const [only] = result.anyOf;
+    if (result.anyOf.length === 1 && isObject2(only)) {
+      const { anyOf: _anyOf, ...rest } = result;
+      result = { ...only, ...rest };
+    }
+  }
+  for (const union of ["oneOf", "anyOf"]) {
+    const branches = result[union];
+    if (!Array.isArray(branches))
+      continue;
+    const merged = mergeTaggedObjects(branches);
+    if (merged !== undefined && JSON.stringify(merged).length < JSON.stringify(branches).length) {
+      const { [union]: _union, ...rest } = result;
+      result = { ...merged, ...rest };
+    }
+    break;
+  }
+  return result;
+}
+function advertisedJsonSchema(schema) {
+  const advertised = compact(toJSONSchema(schema, { target: "draft-7", unrepresentable: "any" }));
+  if (!isObject2(advertised))
+    throw new Error("A tool input schema must be an object.");
+  return advertised;
+}
+
+// src/backend/hx-computer/driver.ts
+import { connect } from "node:net";
+var MAX_REPLY_CHARS = 16000000;
+var DEFAULT_TIMEOUT_MS2 = 15000;
+function hxReadDriverReply(line) {
+  let parsed;
+  try {
+    parsed = JSON.parse(line);
+  } catch {
+    return failed("The Computer Use driver answered with no JSON.");
+  }
+  if (!isDynamicRecord(parsed))
+    return failed("The Computer Use driver answered with no object.");
+  if (parsed.ok !== true) {
+    return failed(typeof parsed.error === "string" ? parsed.error.slice(0, 300) : "The driver refused the request.");
+  }
+  const result = isDynamicRecord(parsed.result) ? parsed.result : {};
+  const content = isDynamicRecord(result.structuredContent) ? result.structuredContent : null;
+  const items = Array.isArray(result.content) ? result.content : [];
+  const text = items.map((item) => isDynamicRecord(item) && item.type === "text" && typeof item.text === "string" ? item.text : "").filter((part) => part.length > 0).join(`
+`);
+  return { ok: true, content, text, error: null };
+}
+function failed(error) {
+  return { ok: false, content: null, text: "", error };
+}
+
+class HxDriverSocket {
+  #address;
+  #sessionId;
+  #socket = null;
+  #buffer = "";
+  #waiting = null;
+  #queue = Promise.resolve();
+  constructor(address, sessionId) {
+    this.#address = address;
+    this.#sessionId = sessionId;
+  }
+  call(tool, args, timeoutMs = DEFAULT_TIMEOUT_MS2) {
+    const turn = this.#queue.then(() => this.#send(tool, args, timeoutMs));
+    this.#queue = turn.catch(() => {
+      return;
+    });
+    return turn;
+  }
+  close() {
+    this.#drop("The connection was closed.");
+  }
+  async#send(tool, args, timeoutMs) {
+    const socket = await this.#connection();
+    if (typeof socket === "string")
+      return failed(socket);
+    return new Promise((resolve) => {
+      const timer = setTimeout(() => {
+        this.#drop(`The Computer Use driver did not answer ${tool} in ${Math.round(timeoutMs / 1000)} s.`);
+      }, timeoutMs);
+      this.#waiting = { done: resolve, timer };
+      const request = { method: "call", name: tool, args, session_id: this.#sessionId, client_kind: "cli" };
+      try {
+        socket.write(`${JSON.stringify(request)}
+`);
+      } catch (error) {
+        this.#drop(error instanceof Error ? error.message : String(error));
+      }
+    });
+  }
+  #connection() {
+    const open = this.#socket;
+    if (open && !open.destroyed)
+      return Promise.resolve(open);
+    const address = this.#address();
+    if (!address)
+      return Promise.resolve("Computer Use is not running. The user turns it on in Settings → Computer Use.");
+    return new Promise((resolve) => {
+      const socket = connect(address);
+      const fail = (error) => resolve(`The Computer Use driver could not be reached: ${error.message}`);
+      socket.once("error", fail);
+      socket.once("connect", () => {
+        socket.removeListener("error", fail);
+        socket.setEncoding("utf8");
+        socket.on("data", (chunk) => this.#read(chunk));
+        socket.on("error", (error) => this.#drop(error.message));
+        socket.on("close", () => this.#drop("The Computer Use driver closed the connection."));
+        this.#socket = socket;
+        this.#buffer = "";
+        resolve(socket);
+      });
+    });
+  }
+  #read(chunk) {
+    this.#buffer += chunk;
+    let newline = this.#buffer.indexOf(`
+`);
+    while (newline >= 0) {
+      const line = this.#buffer.slice(0, newline);
+      this.#buffer = this.#buffer.slice(newline + 1);
+      const waiting = this.#waiting;
+      this.#waiting = null;
+      if (waiting) {
+        clearTimeout(waiting.timer);
+        waiting.done(hxReadDriverReply(line));
+      }
+      newline = this.#buffer.indexOf(`
+`);
+    }
+    if (this.#buffer.length > MAX_REPLY_CHARS)
+      this.#drop("The Computer Use driver answered with too much.");
+  }
+  #drop(reason) {
+    const socket = this.#socket;
+    this.#socket = null;
+    this.#buffer = "";
+    const waiting = this.#waiting;
+    this.#waiting = null;
+    if (waiting) {
+      clearTimeout(waiting.timer);
+      waiting.done(failed(reason));
+    }
+    if (socket) {
+      socket.removeAllListeners();
+      socket.on("error", () => {});
+      socket.destroy();
+    }
+  }
+}
+
+// hx/computer-check/i18n-stub.ts
+function sourceText(key, params) {
+  return params ? `${key} ${JSON.stringify(params)}` : key;
+}
+
 // src/backend/hx-computer/step-tools.ts
 var COMPUTER_PLAN_TOOL = "computer_plan";
 var COMPUTER_LOOK_TOOL = "computer_look";
@@ -15096,16 +16225,16 @@ var HX_COMPUTER_STEP_TOOL_NAMES = new Set([
   COMPUTER_LOOK_TOOL,
   COMPUTER_DO_TOOL
 ]);
-var line3 = (max) => string2().trim().min(1).max(max);
+var line4 = (max) => string2().trim().min(1).max(max);
 var point = strictObject({ x: number2().min(0).max(20000), y: number2().min(0).max(20000) });
 var target = strictObject({
-  name: union([line3(120), array(line3(120)).min(1).max(4)]).optional().describe('The label as seen, or several forms such as ["导出", "Export"].'),
-  role: line3(40).optional().describe("button, field, check, radio, menu, tab, link, row, slider, text."),
+  name: union([line4(120), array(line4(120)).min(1).max(4)]).optional().describe('The label as seen, or several forms such as ["导出", "Export"].'),
+  role: line4(40).optional().describe("button, field, check, radio, menu, tab, link, row, slider, text."),
   index: number2().int().min(0).optional().describe("An index from computer_look of the same window.")
 });
 var WINDOW_SHAPE = {
-  app: line3(80).optional().describe("The app's name. Omit for the front window."),
-  title: line3(120).optional().describe("Part of the window title."),
+  app: line4(80).optional().describe("The app's name. Omit for the front window."),
+  title: line4(120).optional().describe("Part of the window title."),
   window_id: number2().int().min(0).optional()
 };
 var STEP = strictObject({
@@ -15114,23 +16243,23 @@ var STEP = strictObject({
   target: target.optional(),
   at: point.optional().describe("Window pixels from a screenshot, only when no element fits."),
   text: string2().min(1).max(4000).optional(),
-  key: line3(30).optional().describe("Such as return, escape, tab, a, f5."),
+  key: line4(30).optional().describe("Such as return, escape, tab, a, f5."),
   modifiers: array(_enum(["cmd", "ctrl", "alt", "option", "shift", "win", "fn"])).max(4).optional(),
-  keys: array(line3(30)).min(1).max(5).optional().describe('A chord for hotkey, such as ["cmd", "s"].'),
+  keys: array(line4(30)).min(1).max(5).optional().describe('A chord for hotkey, such as ["cmd", "s"].'),
   direction: _enum(["up", "down", "left", "right"]).optional(),
   amount: number2().int().min(1).max(50).optional(),
   to: target.optional(),
   to_at: point.optional(),
-  path: array(line3(80)).min(1).max(8).optional().describe('Menu labels from the menu bar, such as ["文件", "导出为 PDF…"].'),
+  path: array(line4(80)).min(1).max(8).optional().describe('Menu labels from the menu bar, such as ["文件", "导出为 PDF…"].'),
   seconds: number2().min(0.1).max(10).optional(),
-  expect: strictObject({ name: line3(120), role: line3(40).optional(), value: string2().max(400).optional() }).optional().describe("What must be in the window after the step."),
+  expect: strictObject({ name: line4(120), role: line4(40).optional(), value: string2().max(400).optional() }).optional().describe("What must be in the window after the step."),
   confirmed: boolean2().optional().describe("Only after the user said yes in the chat to this send, payment, purchase or deletion.")
 });
 var PLAN_SHAPE = {
-  app: line3(80).optional(),
-  steps: array(line3(120)).min(1).max(12).describe("The steps in the user's language.")
+  app: line4(80).optional(),
+  steps: array(line4(120)).min(1).max(12).describe("The steps in the user's language.")
 };
-var LOOK_SHAPE = { ...WINDOW_SHAPE, query: line3(80).optional().describe("Only elements about this.") };
+var LOOK_SHAPE = { ...WINDOW_SHAPE, query: line4(80).optional().describe("Only elements about this.") };
 var DO_SHAPE = { ...WINDOW_SHAPE, steps: array(STEP).min(1).max(12) };
 var HX_COMPUTER_STEP_TOOL_DEFINITIONS = [
   {
@@ -15337,7 +16466,7 @@ function editor(platform) {
   return null;
 }
 async function startDriver(executable, platform) {
-  const address = platform === "win32" ? `\\\\.\\pipe\\hxbot-check-${randomUUID()}` : join4(tmpdir4(), `hxc-${process.pid}.sock`);
+  const address = platform === "win32" ? `\\\\.\\pipe\\hxbot-check-${randomUUID()}` : join6(tmpdir6(), `hxc-${process.pid}.sock`);
   const child = spawn2(executable, ["serve", "--socket", address, "--no-overlay"], {
     env: {
       ...process.env,
@@ -15385,8 +16514,8 @@ async function hxStepsRealCheck(input) {
       items.add("S2", "Mac 的授权（辅助功能、屏幕录制）", granted ? "pass" : "warn", text);
     } else
       items.add("S2", "授权", "skip", "Windows 不需要额外授权");
-    const file = join4(input.folder, "hxbot-check.txt");
-    await writeFile2(file, `HXBot check
+    const file = join6(input.folder, "hxbot-check.txt");
+    await writeFile4(file, `HXBot check
 `, "utf8");
     app.open(file);
     const stops = new HxComputerStops;
@@ -15408,7 +16537,7 @@ async function hxStepsRealCheck(input) {
     ];
     const typed = await run.run(steps);
     await wait(2000);
-    const afterSteps = await readFile(file, "utf8").catch(() => "");
+    const afterSteps = await readFile2(file, "utf8").catch(() => "");
     items.check("S5", "固定步骤：在文字框里输入并保存，文件里有这段文字", typed.status === "done" && afterSteps.includes(token), `${typed.status}${typed.stoppedAt ? `：${typed.stoppedAt.reason}` : ""}；${typed.steps.map((step) => `${step.what} [${step.route}${step.checked ? ", checked" : ""}]`).join("；")}；文件：${afterSteps.slice(0, 200)}`);
     const risky = await run.run([{ act: "menu", path: ["Edit", "Delete"] }]);
     items.check("S6", "“删除”这类步骤先停下来问（status confirm），不执行", risky.status === "confirm", risky.stoppedAt?.reason ?? risky.status);
@@ -15460,7 +16589,7 @@ ${result.calls.map((call) => `${call.name} ${JSON.stringify(call.args).slice(0, 
 `)}
 ${result.text.slice(0, 300)}`);
     await wait(2000);
-    const afterModel = await readFile(file, "utf8").catch(() => "");
+    const afterModel = await readFile2(file, "utf8").catch(() => "");
     const planned = result.calls.findIndex((call) => call.name === "computer_plan");
     const did = result.calls.findIndex((call) => call.name === "computer_do");
     items.add("S8", "真实模型先列计划（computer_plan）再做（computer_do）", planned >= 0 && did > planned ? "pass" : did >= 0 ? "warn" : "fail", result.calls.map((call) => call.name).join(" → ") || result.text.slice(0, 300));
@@ -15475,10 +16604,10 @@ ${result.text.slice(0, 300)}`);
 
 // src/backend/hx-check/team-run.ts
 import { mkdtempSync as mkdtempSync2 } from "node:fs";
-import { tmpdir as tmpdir5 } from "node:os";
-import { join as join9 } from "node:path";
+import { tmpdir as tmpdir7 } from "node:os";
+import { join as join11 } from "node:path";
 
-// packages/contracts/src/input-limits.ts
+// ../hx-v168/packages/contracts/src/input-limits.ts
 var INPUT_LIMITS = {
   identifier: 128,
   vaultLoginId: 520,
@@ -15595,7 +16724,7 @@ var AVATAR_IMAGE_LIMITS = {
 // src/backend/channel-replies.ts
 var CHANNEL_REPLY_LIMIT = 2;
 var CHANNEL_REPLY_CHARACTERS = 2000;
-// packages/contracts/src/agent-providers.ts
+// ../hx-v168/packages/contracts/src/agent-providers.ts
 var AGENT_PROVIDERS = [
   "codex",
   "claude",
@@ -16046,7 +17175,7 @@ function isFreeOpencodeModel(id, name) {
   return FREE_TIER_MODEL_IDS.has(id.trim().toLowerCase()) || isFreeOpencodeModelName(name);
 }
 
-// packages/contracts/src/ipc-bounded-values.ts
+// ../hx-v168/packages/contracts/src/ipc-bounded-values.ts
 function isBoundedString(value, maximum) {
   return isString(value) && value.length <= maximum;
 }
@@ -16056,18 +17185,18 @@ function isNullableBoundedString(value, maximum) {
 function integerInRange(value, minimum, maximum) {
   return isNumber(value) && Number.isInteger(value) && value >= minimum && value <= maximum;
 }
-// packages/contracts/src/ipc-agent-identity.ts
+// ../hx-v168/packages/contracts/src/ipc-agent-identity.ts
 var AVATAR_HUES = [0, 30, 55, 100, 150, 185, 215, 245, 280, 320];
 function isAgentModel(value) {
   return isString(value) && value.length > 0 && value.length <= 160 && /^[A-Za-z0-9][A-Za-z0-9._:/[\],=-]*$/.test(value);
 }
-// packages/contracts/src/ipc-conversation-messages.ts
+// ../hx-v168/packages/contracts/src/ipc-conversation-messages.ts
 var import_emoji_regex = __toESM(require_emoji_regex(), 1);
 
-// packages/contracts/src/ipc-agent-instructions.ts
+// ../hx-v168/packages/contracts/src/ipc-agent-instructions.ts
 var AGENT_INSTRUCTIONS_READ_LIMIT = INPUT_LIMITS.agentInstructionsFile * 8;
 
-// packages/contracts/src/attachment-files.ts
+// ../hx-v168/packages/contracts/src/attachment-files.ts
 var IMAGE_ATTACHMENT_EXTENSIONS = ["png", "jpg", "jpeg", "gif", "webp", "avif"];
 var MEDIA_ATTACHMENT_EXTENSIONS = ["mp3", "mov"];
 var ARCHIVE_ATTACHMENT_EXTENSIONS = ["zip"];
@@ -16172,7 +17301,7 @@ var SUPPORTED_EXTENSIONS = new Set(ATTACHMENT_FILE_EXTENSIONS);
 var EXTENSIONLESS_TEXT_FILES = new Set(["dockerfile", "makefile", "procfile"]);
 var OPENABLE_EXTENSIONS = new Set(OPENABLE_ATTACHMENT_EXTENSIONS);
 
-// packages/contracts/src/ipc-decoding.ts
+// ../hx-v168/packages/contracts/src/ipc-decoding.ts
 function guardedDecoder(guard, label) {
   return (value) => {
     if (!guard(value))
@@ -16181,7 +17310,7 @@ function guardedDecoder(guard, label) {
   };
 }
 
-// packages/contracts/src/ipc-attachments.ts
+// ../hx-v168/packages/contracts/src/ipc-attachments.ts
 var WORKSPACE_DIRECTORY_LIMIT = 500;
 var WORKSPACE_DIRECTORY_ENTRY_KINDS = ["file", "directory"];
 function isWorkspaceDirectoryEntry(value) {
@@ -16192,11 +17321,11 @@ function isWorkspaceDirectory(value) {
 }
 var decodeWorkspaceDirectory = guardedDecoder(isWorkspaceDirectory, "workspace directory");
 
-// packages/contracts/src/ipc-conversation-plan.ts
+// ../hx-v168/packages/contracts/src/ipc-conversation-plan.ts
 var STEP_TEXT_LIMIT = INPUT_LIMITS.promptQuestion;
 var EXPLANATION_LIMIT = INPUT_LIMITS.promptQuestion;
 
-// packages/contracts/src/ui-blocks.ts
+// ../hx-v168/packages/contracts/src/ui-blocks.ts
 var UI_BLOCK_LIMITS = {
   specJson: 64000,
   responseJson: 16000,
@@ -16221,17 +17350,17 @@ var UI_BLOCK_LIMITS = {
 };
 var LEGACY_KEY_IDS = new Set(["botId", "recipientBotId", "recipientBotIds", "senderBotId"]);
 
-// packages/contracts/src/ipc-conversation-messages.ts
+// ../hx-v168/packages/contracts/src/ipc-conversation-messages.ts
 var RGI_EMOJI_PATTERN = import_emoji_regex.default();
-// packages/contracts/src/ipc-agent-status.ts
+// ../hx-v168/packages/contracts/src/ipc-agent-status.ts
 var DEFAULT_PROVIDER_ACCOUNT_ID = "default";
 var PROVIDER_ACCOUNT_ID = /^(?:default|a[0-9a-f]{16})$/u;
 function isProviderAccountId(value) {
   return typeof value === "string" && PROVIDER_ACCOUNT_ID.test(value);
 }
-// packages/contracts/src/ipc-agent-analytics.ts
+// ../hx-v168/packages/contracts/src/ipc-agent-analytics.ts
 var dateFormatters = new Map;
-// packages/contracts/src/ipc-team-host.ts
+// ../hx-v168/packages/contracts/src/ipc-team-host.ts
 var SERVER_MUTE_DURATIONS_MS = [
   15 * 60000,
   60 * 60000,
@@ -16240,9 +17369,9 @@ var SERVER_MUTE_DURATIONS_MS = [
   24 * 60 * 60000
 ];
 
-// packages/contracts/src/ipc-agent-runtime.ts
+// ../hx-v168/packages/contracts/src/ipc-agent-runtime.ts
 var AGENT_RUNTIME_SNAPSHOT_BYTES_LIMIT = 256 * 1024;
-// packages/contracts/src/ipc-agent-import.ts
+// ../hx-v168/packages/contracts/src/ipc-agent-import.ts
 var HERMES_EXPORT_SKILL_ID = "hxbot-export";
 var HERMES_SKILL_COMMAND = `/skills install ${HERMES_EXPORT_SKILL_ID}`;
 var AGENT_IMPORT_LIMITS = {
@@ -16254,11 +17383,11 @@ var AGENT_IMPORT_LIMITS = {
   message: 500,
   warnings: 200
 };
-// packages/contracts/src/ipc-agent-memories.ts
+// ../hx-v168/packages/contracts/src/ipc-agent-memories.ts
 var AGENT_MEMORY_LIMITS = [INPUT_LIMITS.agentMemories, 128, 256, 512];
-// packages/contracts/src/validation.ts
+// ../hx-v168/packages/contracts/src/validation.ts
 var ACCOUNT_NAME_ALLOWED_FORMAT_CHARACTERS = new Set(["‌", "‍"]);
-// packages/contracts/src/ipc-routines.ts
+// ../hx-v168/packages/contracts/src/ipc-routines.ts
 var ROUTINE_MINIMUM_INTERVAL_MINUTES = 3;
 function isRoutineSchedule(value) {
   if (!isDynamicRecord(value) || !isString(value.kind))
@@ -16328,7 +17457,7 @@ function isRoutineRunFields(value) {
 function isRoutineMissedRuns(value) {
   return isDynamicRecord(value) && Number.isSafeInteger(value.count) && Number(value.count) >= 1 && (value.until === null || isString(value.until));
 }
-// packages/contracts/src/ipc-app-auth.ts
+// ../hx-v168/packages/contracts/src/ipc-app-auth.ts
 var UPDATE_BUSY_PHASES = ["checking", "downloading", "installing"];
 var UPDATE_ACTIVE_PHASES = [
   "available",
@@ -16338,14 +17467,14 @@ var UPDATE_ACTIVE_PHASES = [
 ];
 var BUSY_PHASES = new Set(UPDATE_BUSY_PHASES);
 var ACTIVE_PHASES = new Set(UPDATE_ACTIVE_PHASES);
-// packages/contracts/src/ipc-mcp-servers.ts
+// ../hx-v168/packages/contracts/src/ipc-mcp-servers.ts
 var MCP_SIGN_IN_TIMEOUT_MS = 5 * 60 * 1000;
 var LOOPBACK_HOSTS = new Set(["127.0.0.1", "localhost"]);
 
-// packages/contracts/src/ipc-skills.ts
+// ../hx-v168/packages/contracts/src/ipc-skills.ts
 var SKILL_DESCRIPTION_MAX_LENGTH = 1024;
 
-// packages/contracts/src/ipc-browser-dock.ts
+// ../hx-v168/packages/contracts/src/ipc-browser-dock.ts
 var BROWSER_DOCK_LIMITS = {
   skills: 500,
   skillText: 4096,
@@ -16356,7 +17485,7 @@ var BROWSER_DOCK_LIMITS = {
   replyBody: INPUT_LIMITS.messageText,
   label: 600
 };
-// packages/contracts/src/ipc-conversation-events.ts
+// ../hx-v168/packages/contracts/src/ipc-conversation-events.ts
 var MODEL_SWITCH_ITEM_TYPE_PREFIX = "model-switch:";
 var MODEL_SWITCH_ITEM_TYPES = {
   "usage-limit": `${MODEL_SWITCH_ITEM_TYPE_PREFIX}usage-limit`,
@@ -16365,7 +17494,7 @@ var MODEL_SWITCH_ITEM_TYPES = {
   "provider-error-ended": `${MODEL_SWITCH_ITEM_TYPE_PREFIX}provider-error-ended`,
   auto: `${MODEL_SWITCH_ITEM_TYPE_PREFIX}auto`
 };
-// packages/contracts/src/ipc-endpoints.ts
+// ../hx-v168/packages/contracts/src/ipc-endpoints.ts
 function request() {
   return (channel) => ({ kind: "request", channel });
 }
@@ -17319,7 +18448,7 @@ var IPC_ENDPOINTS = {
     event: event()("remote-desktop:event")
   }
 };
-// packages/contracts/src/ipc-events.ts
+// ../hx-v168/packages/contracts/src/ipc-events.ts
 var EVENT_DELIVERY_ID_MAX_LENGTH = 512;
 function isEventStatus(value) {
   return isDynamicRecord(value) && typeof value.supported === "boolean" && typeof value.connected === "boolean";
@@ -17395,13 +18524,13 @@ function isEventRoutineRun(value) {
   return isRoutineRunFields(value) && isDynamicRecord(value) && (value.deliveryId === undefined || value.deliveryId === null || isString(value.deliveryId)) && (value.requestMessageId === undefined || value.requestMessageId === null || isString(value.requestMessageId));
 }
 var decodeEventRoutineRuns = decodeList2(isEventRoutineRun, "Invalid routine run response.");
-// packages/contracts/src/ipc-instance-transfer.ts
+// ../hx-v168/packages/contracts/src/ipc-instance-transfer.ts
 var INSTANCE_TRANSFER_LIMITS = {
   archiveBytes: 2 * 1024 ** 3 - 1,
   files: 50000,
   appVersion: 64
 };
-// packages/contracts/src/team-protocol/admin-wire.ts
+// ../hx-v168/packages/contracts/src/team-protocol/admin-wire.ts
 var string3 = (maximum) => (value) => {
   if (!isString(value) || value.length > maximum)
     throw new Error("Invalid admin text.");
@@ -17444,7 +18573,7 @@ function adminRoute(request, response) {
   return { request, response: (status, value) => status >= 400 ? errorEnvelope(value) : response(value) };
 }
 
-// packages/contracts/src/team-protocol/machine-resources-v1.ts
+// ../hx-v168/packages/contracts/src/team-protocol/machine-resources-v1.ts
 var MACHINE_RESOURCES_ROUTES = {
   metrics: "/v1/admin/host/machine/metrics",
   alerts: "/v1/admin/host/machine/alerts",
@@ -17471,13 +18600,13 @@ var MACHINE_RESOURCES_CODECS = new Map([
   [MACHINE_RESOURCES_ROUTES.alerts, adminRoute(empty, alerts)],
   [MACHINE_RESOURCES_ROUTES.updateAlerts, adminRoute(alerts, alerts)]
 ]);
-// packages/contracts/src/signal-protocol/telegram-route.ts
+// ../hx-v168/packages/contracts/src/signal-protocol/telegram-route.ts
 var TELEGRAM_ROUTE_TTL_SECONDS = 5 * 60;
 var TELEGRAM_UPDATE_BYTES_LIMIT = 64 * 1024;
 var TELEGRAM_FILE_BYTES_LIMIT = 20 * 1024 * 1024;
 var TELEGRAM_FILE_TOKEN_TTL_SECONDS = 2 * 60;
 var TELEGRAM_LINK_CODE_TTL_SECONDS = 15 * 60;
-// packages/contracts/src/team-protocol/provider-host-sign-in-v1.ts
+// ../hx-v168/packages/contracts/src/team-protocol/provider-host-sign-in-v1.ts
 var PROVIDER_HOST_SIGN_IN_ROUTES = {
   start: "/v1/admin/providers/host-sign-in/start",
   status: "/v1/admin/providers/host-sign-in/status",
@@ -17497,9 +18626,9 @@ var PROVIDER_HOST_SIGN_IN_CODECS = new Map([
   ],
   [PROVIDER_HOST_SIGN_IN_ROUTES.cancel, adminRoute(byProvider, empty)]
 ]);
-// packages/contracts/src/ipc-provider-detection.ts
+// ../hx-v168/packages/contracts/src/ipc-provider-detection.ts
 var LOOPBACK_HOSTS2 = new Set(["localhost", "127.0.0.1", "[::1]"]);
-// packages/contracts/src/ipc-voice.ts
+// ../hx-v168/packages/contracts/src/ipc-voice.ts
 var LOCAL_VOICE_MODEL_IDS = [
   "parakeet-tdt-0.6b-v3",
   "parakeet-unified-en-0.6b",
@@ -17523,12 +18652,12 @@ var SPEECH_SPEED_CYCLE = [
   ...SPEECH_SPEEDS.filter((speed) => speed >= 1),
   ...SPEECH_SPEEDS.filter((speed) => speed < 1)
 ];
-// packages/contracts/src/signal-protocol/github-route.ts
+// ../hx-v168/packages/contracts/src/signal-protocol/github-route.ts
 var GITHUB_ROUTE_TTL_SECONDS = 5 * 60;
 var GITHUB_DELIVERY_BODY_BYTES_LIMIT = 512 * 1024;
-// packages/contracts/src/ipc-workflows.ts
+// ../hx-v168/packages/contracts/src/ipc-workflows.ts
 var WORKFLOW_AUTO_VERSION_INTERVAL_MS = 5 * 60000;
-// packages/team-client/src/routine-schedule.ts
+// ../hx-v168/packages/team-client/src/routine-schedule.ts
 var MINIMUM_INTERVAL_MS = ROUTINE_MINIMUM_INTERVAL_MINUTES * 60000;
 var MAX_SEARCH_DAYS = 366 * 5;
 var formatterCache = new Map;
@@ -17702,7 +18831,7 @@ var CHANNEL_TOOL_DEFINITIONS = [
   }
 ];
 
-// packages/contracts/src/hx-auto-model.ts
+// ../hx-v168/packages/contracts/src/hx-auto-model.ts
 var HX_WORK_TYPES = [
   "chat",
   "writing",
@@ -18103,7 +19232,7 @@ function parseHxRoutingDecision(value) {
 import { createHash, randomUUID as randomUUID2 } from "node:crypto";
 import { mkdirSync as mkdirSync2 } from "node:fs";
 import { totalmem } from "node:os";
-import { join as join7 } from "node:path";
+import { join as join9 } from "node:path";
 
 // src/backend/hx-team/form.ts
 var HX_FORM_PARTS = [
@@ -18427,8 +19556,8 @@ function hxStoppedMessage(team, reason) {
 }
 
 // src/backend/hx-team/skills.ts
-import { readdir as readdir3, readFile as readFile2, stat } from "node:fs/promises";
-import { join as join5 } from "node:path";
+import { readdir as readdir3, readFile as readFile3, stat } from "node:fs/promises";
+import { join as join7 } from "node:path";
 
 // ../hx-agent/node_modules/yaml/dist/index.js
 var composer = require_composer();
@@ -18511,12 +19640,12 @@ async function folderSkills(folder, owner) {
   }
   const skills = [];
   for (const name of names) {
-    const file = join5(folder, name, "SKILL.md");
+    const file = join7(folder, name, "SKILL.md");
     try {
       const facts = await stat(file);
       if (!facts.isFile() || facts.size > MAX_FILE_BYTES)
         continue;
-      const checked = readSkillFrontmatter(await readFile2(file, "utf8"), name);
+      const checked = readSkillFrontmatter(await readFile3(file, "utf8"), name);
       if (checked.problem !== undefined)
         continue;
       skills.push({
@@ -18538,7 +19667,7 @@ async function hxTeamSkills(members) {
       continue;
     seen.add(member.workspacePath);
     for (const folder of HX_WORKSPACE_SKILL_FOLDERS) {
-      for (const skill of await folderSkills(join5(member.workspacePath, folder), member.name)) {
+      for (const skill of await folderSkills(join7(member.workspacePath, folder), member.name)) {
         if (names.has(skill.name) || skills.length >= MAX_SKILLS)
           continue;
         names.add(skill.name);
@@ -18561,9 +19690,9 @@ function hxTeamSkillLines(skills, language) {
 
 // src/backend/hx-team/store.ts
 import { mkdirSync, readdirSync, readFileSync, renameSync, writeFileSync } from "node:fs";
-import { join as join6 } from "node:path";
+import { join as join8 } from "node:path";
 
-// packages/logging/src/index.ts
+// ../hx-v168/packages/logging/src/index.ts
 var LEVEL_RANK = { trace: 10, debug: 20, info: 30, warn: 40, error: 50, silent: 60 };
 var LOG_LEVELS = ["trace", "debug", "info", "warn", "error", "silent"];
 var SECRET_LABEL = `[A-Za-z0-9_.-]{0,64}(?:password|passwd|passphrase|secret|token|credential|authorization|cookie|api[_-]?key|private[_-]?key|signing[_-]?key)[A-Za-z0-9_.-]{0,64}`;
@@ -18899,7 +20028,7 @@ class HxTeamStore {
         if (!name.endsWith(".json"))
           continue;
         try {
-          const team = readTeam(join6(folder, name));
+          const team = readTeam(join8(folder, name));
           if (team)
             this.#teams.set(team.id, team);
         } catch {}
@@ -18930,7 +20059,7 @@ class HxTeamStore {
     this.#teams.set(team.id, team);
     if (!this.#folder)
       return;
-    const file = join6(this.#folder, `${team.id}.json`);
+    const file = join8(this.#folder, `${team.id}.json`);
     try {
       writeFileSync(`${file}.tmp`, `${JSON.stringify(team, null, 2)}
 `);
@@ -19211,7 +20340,7 @@ Correct the arguments and retry.`);
         return refuse("A team needs at least one role.");
       const now = this.#now();
       const deadline = now + settings.teamMinutes * 60000;
-      const folderPath = join7(starter.workspacePath, words.folder, `${roomName.replace(/[\\/:*?"<>|]/gu, "-").slice(0, 40)}-${id.slice(0, 4)}`);
+      const folderPath = join9(starter.workspacePath, words.folder, `${roomName.replace(/[\\/:*?"<>|]/gu, "-").slice(0, 40)}-${id.slice(0, 4)}`);
       const folder = makeFolder(folderPath) ? folderPath : null;
       const known = port.agents();
       const skills = await hxTeamSkills([
@@ -20236,7 +21365,7 @@ async function hxWithin(promise, ms) {
 
 // src/backend/hx-auto-model/store.ts
 import { appendFileSync, existsSync, mkdirSync as mkdirSync3, readFileSync as readFileSync2, renameSync as renameSync2, writeFileSync as writeFileSync2 } from "node:fs";
-import { join as join8 } from "node:path";
+import { join as join10 } from "node:path";
 var logger2 = createHxBotLogger("hx-auto-model");
 var SETTINGS_FILE = "settings.json";
 var DECISIONS_FILE = "decisions.jsonl";
@@ -20272,7 +21401,7 @@ class HxAutoModelStore {
       }
     this.#decisions = [];
     try {
-      const file = join8(folder, DECISIONS_FILE);
+      const file = join10(folder, DECISIONS_FILE);
       if (existsSync(file))
         for (const line of readFileSync2(file, "utf8").split(`
 `)) {
@@ -20317,7 +21446,7 @@ class HxAutoModelStore {
     this.#decisions.push(decision);
     if (this.#folder) {
       try {
-        appendFileSync(join8(this.#folder, DECISIONS_FILE), `${JSON.stringify(decision)}
+        appendFileSync(join10(this.#folder, DECISIONS_FILE), `${JSON.stringify(decision)}
 `, { mode: 384 });
       } catch (error) {
         logger2.warn("HXBot could not write the auto model record.", { error: String(error) });
@@ -20376,7 +21505,7 @@ class HxAutoModelStore {
     if (!this.#folder)
       return null;
     try {
-      const file = join8(this.#folder, name);
+      const file = join10(this.#folder, name);
       return existsSync(file) ? JSON.parse(readFileSync2(file, "utf8")) : null;
     } catch (error) {
       logger2.warn("HXBot could not read an auto model file; it starts empty.", { file: name, error: String(error) });
@@ -20386,7 +21515,7 @@ class HxAutoModelStore {
   #writeJson(name, value) {
     if (!this.#folder)
       return;
-    const file = join8(this.#folder, name);
+    const file = join10(this.#folder, name);
     try {
       writeFileSync2(`${file}.tmp`, `${JSON.stringify(value, null, 2)}
 `, { mode: 384 });
@@ -20409,7 +21538,7 @@ class HxAutoModelStore {
     this.#decisions = this.#decisions.filter((decision) => now - decision.at <= KEEP_MS).slice(-KEEP_DECISIONS);
     if (!this.#folder)
       return;
-    const file = join8(this.#folder, DECISIONS_FILE);
+    const file = join10(this.#folder, DECISIONS_FILE);
     try {
       writeFileSync2(`${file}.tmp`, this.#decisions.map((decision) => `${JSON.stringify(decision)}
 `).join(""), {
@@ -21066,7 +22195,7 @@ async function hxTeamRealCheck(input) {
     hxWorldAgent("agent-check", "小审", "审稿 Reviewer", "检查事实、错字和逻辑。Checking.")
   ]);
   const teams = new HxTeams;
-  teams.open(mkdtempSync2(join9(tmpdir5(), "hx-team-check-")));
+  teams.open(mkdtempSync2(join11(tmpdir7(), "hx-team-check-")));
   teams.setPort(world);
   let keys = 0;
   const key = () => `check-${++keys}`;
@@ -21426,14 +22555,14 @@ async function merge2(folder, expected) {
   for (const entry of await readdir4(folder, { withFileTypes: true })) {
     if (!entry.isDirectory())
       continue;
-    const text = await readFile3(join10(folder, entry.name, "report.json"), "utf8").catch(() => "");
+    const text = await readFile4(join12(folder, entry.name, "report.json"), "utf8").catch(() => "");
     const report = text ? hxReadRealReport(JSON.parse(text)) : null;
     if (report)
       reports.push(report);
   }
   const overview = hxRealOverview(reports, expected);
-  await writeFile3(join10(folder, "overview.md"), overview.text, "utf8");
-  await writeFile3(join10(folder, "verdict.json"), JSON.stringify({ ok: overview.ok, machines: reports.length }), "utf8");
+  await writeFile5(join12(folder, "overview.md"), overview.text, "utf8");
+  await writeFile5(join12(folder, "verdict.json"), JSON.stringify({ ok: overview.ok, machines: reports.length }), "utf8");
   return overview.ok ? 0 : 1;
 }
 async function main() {
@@ -21479,6 +22608,8 @@ async function main() {
   }
   if (parts.has("install"))
     await hxInstallRealCheck({ items, log, platform: process.platform });
+  if (parts.has("apps"))
+    await hxAppRealCheck({ items, log, platform: process.platform });
   if (parts.has("team")) {
     if (brain)
       await hxTeamRealCheck({ brain, items, log });
@@ -21494,9 +22625,9 @@ async function main() {
     models: tried
   };
   await brain?.close();
-  await writeFile3(join10(out, "report.json"), JSON.stringify(report, null, 2), "utf8");
-  await writeFile3(join10(out, "summary.md"), hxRealSummary(report), "utf8");
-  await writeFile3(join10(out, "log.txt"), lines.join(`
+  await writeFile5(join12(out, "report.json"), JSON.stringify(report, null, 2), "utf8");
+  await writeFile5(join12(out, "summary.md"), hxRealSummary(report), "utf8");
+  await writeFile5(join12(out, "log.txt"), lines.join(`
 
 `), "utf8");
   process.stdout.write(`${hxRealSummary(report)}
