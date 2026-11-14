@@ -1,0 +1,30 @@
+{
+  "machine": "ubuntu-latest",
+  "model": "",
+  "startedAt": "2026-11-14T22:31:47.481Z",
+  "seconds": 0.359,
+  "items": [
+    {
+      "id": "M1",
+      "title": "有可用的真实模型",
+      "status": "skip",
+      "detail": "没有配模型（仓库 Secret HX_CHECK_MODEL_URL、HX_CHECK_MODEL_KEY、HX_CHECK_MODEL）；GitHub Models openai/gpt-4.1-mini：GitHub Models openai/gpt-4.1-mini: 200 text/plain: not JSON: OK\r\n；GitHub Models openai/gpt-4.1-mini (great-unicorn-ai)：GitHub Models openai/gpt-4.1-mini (great-unicorn-ai): 200 text/plain: not JSON: OK\r\n"
+    },
+    {
+      "id": "T1",
+      "title": "协作全流程",
+      "status": "skip",
+      "detail": "没有可用的模型"
+    }
+  ],
+  "models": [
+    {
+      "name": "GitHub Models openai/gpt-4.1-mini",
+      "answer": "GitHub Models openai/gpt-4.1-mini: 200 text/plain: not JSON: OK\r\n"
+    },
+    {
+      "name": "GitHub Models openai/gpt-4.1-mini (great-unicorn-ai)",
+      "answer": "GitHub Models openai/gpt-4.1-mini (great-unicorn-ai): 200 text/plain: not JSON: OK\r\n"
+    }
+  ]
+}

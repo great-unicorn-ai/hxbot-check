@@ -1,0 +1,78 @@
+{
+  "machine": "windows-2025",
+  "model": "",
+  "startedAt": "2026-11-14T22:32:00.702Z",
+  "seconds": 4.98,
+  "items": [
+    {
+      "id": "M1",
+      "title": "有可用的真实模型",
+      "status": "skip",
+      "detail": "没有配模型（仓库 Secret HX_CHECK_MODEL_URL、HX_CHECK_MODEL_KEY、HX_CHECK_MODEL）；GitHub Models openai/gpt-4.1-mini：GitHub Models openai/gpt-4.1-mini: 200 text/plain: not JSON: OK\r\n；GitHub Models openai/gpt-4.1-mini (great-unicorn-ai)：GitHub Models openai/gpt-4.1-mini (great-unicorn-ai): 200 text/plain: not JSON: OK\r\n"
+    },
+    {
+      "id": "S1",
+      "title": "电脑操控驱动启动并答复（serve --socket）",
+      "status": "pass",
+      "detail": "Cua Driver daemon listening on \\\\.\\pipe\\hxbot-check-613918de-06ed-4775-8b35-1b999de5098c\n"
+    },
+    {
+      "id": "S2",
+      "title": "授权",
+      "status": "skip",
+      "detail": "Windows 不需要额外授权"
+    },
+    {
+      "id": "S3",
+      "title": "打开 Notepad，找到它的窗口",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "S4",
+      "title": "读出窗口提纲，有可输入的文字框",
+      "status": "pass",
+      "detail": "notepad.exe — hxbot-check.txt - Notepad (pid 7724, window 328018)\n [0] field \"Text Editor\" = \"HXBot check\"\n [1] titlebar \"hxbot-check.txt - Notepad\"\n   [2] menu \"System\"\n  [3] button \"Minimize\"\n  [4] button \"Maximize\"\n  [5] button \"Close\"\n  [6] menu \"File\"\n  [7] menu \"Edit\"\n  [8] menu \"Format\"\n  [9] menu \"View\"\n  [10] menu \"Help\"\nThe driver did not read the whole window."
+    },
+    {
+      "id": "S5",
+      "title": "固定步骤：在文字框里输入并保存，文件里有这段文字",
+      "status": "pass",
+      "detail": "done；Text Editor: 15 characters [foreground, checked]；ctrl+s [keyboard]；文件：HXBot check\n HXBot-f4ad4543"
+    },
+    {
+      "id": "S6",
+      "title": "“删除”这类步骤先停下来问（status confirm），不执行",
+      "status": "pass",
+      "detail": "\"Delete\" sends, pays, buys, deletes or publishes. Ask the user in the chat first; after a yes, repeat the step with confirmed true."
+    },
+    {
+      "id": "S7",
+      "title": "按停止键后，下一步不再执行",
+      "status": "pass",
+      "detail": "stopped"
+    },
+    {
+      "id": "S8",
+      "title": "真实模型：列计划、一步步输入并保存",
+      "status": "skip",
+      "detail": "没有可用的模型"
+    },
+    {
+      "id": "I1",
+      "title": "安装应用（computer_install）",
+      "status": "skip",
+      "detail": "这台机器是 win32，安装应用只在 Mac 上检查"
+    }
+  ],
+  "models": [
+    {
+      "name": "GitHub Models openai/gpt-4.1-mini",
+      "answer": "GitHub Models openai/gpt-4.1-mini: 200 text/plain: not JSON: OK\r\n"
+    },
+    {
+      "name": "GitHub Models openai/gpt-4.1-mini (great-unicorn-ai)",
+      "answer": "GitHub Models openai/gpt-4.1-mini (great-unicorn-ai): 200 text/plain: not JSON: OK\r\n"
+    }
+  ]
+}
