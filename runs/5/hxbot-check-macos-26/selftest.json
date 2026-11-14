@@ -1,0 +1,234 @@
+{
+ "platform": "mac",
+ "system": "macOS 26.7.2 (Darwin 25.6.0 arm64)",
+ "startedAt": 1794630766269,
+ "finishedAt": 1794630775831,
+ "items": [
+  {
+   "id": "catalog.apps",
+   "outcome": "passed",
+   "detail": "107 apps, 40 pages, 16 settings",
+   "ms": 779
+  },
+  {
+   "id": "catalog.known-app",
+   "outcome": "passed",
+   "detail": "Finder",
+   "ms": 1
+  },
+  {
+   "id": "search.page",
+   "outcome": "passed",
+   "detail": "Bluetooth",
+   "ms": 0
+  },
+  {
+   "id": "open.page",
+   "outcome": "passed",
+   "detail": "The About page of the system settings was opened.",
+   "ms": 59
+  },
+  {
+   "id": "setting.dark-mode.read",
+   "outcome": "passed",
+   "detail": "off",
+   "ms": 138
+  },
+  {
+   "id": "setting.dark-mode.write-same",
+   "outcome": "passed",
+   "detail": "off written, off read back",
+   "ms": 1622
+  },
+  {
+   "id": "setting.volume.read",
+   "outcome": "passed",
+   "detail": "100",
+   "ms": 247
+  },
+  {
+   "id": "setting.volume.write-same",
+   "outcome": "passed",
+   "detail": "100 written, 100 read back",
+   "ms": 847
+  },
+  {
+   "id": "setting.mute.read",
+   "outcome": "passed",
+   "detail": "off",
+   "ms": 299
+  },
+  {
+   "id": "setting.mute.write-same",
+   "outcome": "passed",
+   "detail": "off written, off read back",
+   "ms": 818
+  },
+  {
+   "id": "setting.alert-volume.read",
+   "outcome": "passed",
+   "detail": "100",
+   "ms": 316
+  },
+  {
+   "id": "setting.alert-volume.write-same",
+   "outcome": "passed",
+   "detail": "100 written, 100 read back",
+   "ms": 458
+  },
+  {
+   "id": "setting.input-volume.read",
+   "outcome": "passed",
+   "detail": "100",
+   "ms": 389
+  },
+  {
+   "id": "setting.input-volume.write-same",
+   "outcome": "passed",
+   "detail": "100 written, 100 read back",
+   "ms": 573
+  },
+  {
+   "id": "setting.dock-autohide.read",
+   "outcome": "passed",
+   "detail": "off",
+   "ms": 203
+  },
+  {
+   "id": "setting.dock-autohide.write-same",
+   "outcome": "passed",
+   "detail": "off written, off read back",
+   "ms": 339
+  },
+  {
+   "id": "setting.dock-magnification.read",
+   "outcome": "passed",
+   "detail": "off",
+   "ms": 143
+  },
+  {
+   "id": "setting.dock-magnification.write-same",
+   "outcome": "passed",
+   "detail": "off written, off read back",
+   "ms": 205
+  },
+  {
+   "id": "setting.dock-recents.read",
+   "outcome": "passed",
+   "detail": "on",
+   "ms": 76
+  },
+  {
+   "id": "setting.dock-recents.write-same",
+   "outcome": "passed",
+   "detail": "on written, on read back",
+   "ms": 168
+  },
+  {
+   "id": "setting.menu-bar-autohide.read",
+   "outcome": "passed",
+   "detail": "off",
+   "ms": 68
+  },
+  {
+   "id": "setting.menu-bar-autohide.write-same",
+   "outcome": "passed",
+   "detail": "off written, off read back",
+   "ms": 144
+  },
+  {
+   "id": "setting.dock-position.read",
+   "outcome": "passed",
+   "detail": "bottom",
+   "ms": 68
+  },
+  {
+   "id": "setting.dock-position.write-same",
+   "outcome": "passed",
+   "detail": "bottom written, bottom read back",
+   "ms": 141
+  },
+  {
+   "id": "setting.dock-minimize-effect.read",
+   "outcome": "passed",
+   "detail": "genie",
+   "ms": 64
+  },
+  {
+   "id": "setting.dock-minimize-effect.write-same",
+   "outcome": "passed",
+   "detail": "genie written, genie read back",
+   "ms": 145
+  },
+  {
+   "id": "setting.dock-size.read",
+   "outcome": "passed",
+   "detail": "31",
+   "ms": 63
+  },
+  {
+   "id": "setting.dock-size.write-same",
+   "outcome": "passed",
+   "detail": "31 written, 30 read back",
+   "ms": 134
+  },
+  {
+   "id": "setting.dock-indicators.read",
+   "outcome": "passed",
+   "detail": "on",
+   "ms": 60
+  },
+  {
+   "id": "setting.dock-indicators.write-same",
+   "outcome": "passed",
+   "detail": "on written, on read back",
+   "ms": 142
+  },
+  {
+   "id": "setting.dock-minimize-into-app.read",
+   "outcome": "passed",
+   "detail": "off",
+   "ms": 69
+  },
+  {
+   "id": "setting.dock-minimize-into-app.write-same",
+   "outcome": "passed",
+   "detail": "off written, off read back",
+   "ms": 141
+  },
+  {
+   "id": "setting.dock-launch-animation.read",
+   "outcome": "passed",
+   "detail": "on",
+   "ms": 73
+  },
+  {
+   "id": "setting.dock-launch-animation.write-same",
+   "outcome": "passed",
+   "detail": "on written, on read back",
+   "ms": 131
+  },
+  {
+   "id": "setting.dock-magnification-size.read",
+   "outcome": "passed",
+   "detail": "100",
+   "ms": 63
+  },
+  {
+   "id": "setting.dock-magnification-size.write-same",
+   "outcome": "passed",
+   "detail": "100 written, 100 read back",
+   "ms": 149
+  },
+  {
+   "id": "mac.settings-pages",
+   "outcome": "skipped",
+   "detail": "37 of 40 page addresses are settings panes of this Mac; not checked, part of System Settings itself: com.apple.systempreferences.AppleIDSettings; not among the panes of this Mac: com.apple.ScreenSaver-Settings.extension com.apple.Passwords-Settings.extension; panes of this Mac: com.apple.Accessibility-Settings.extension com.apple.AccessibilitySettingsWidgetExtension com.apple.AccountsUISettings.AppIntents com.apple.AirDrop-Handoff-Settings.extension com.apple.Appearance-Settings.extension com.apple.AppleAccountIntents com.apple.AppleMediaServicesUI.ComposeReviewExtension com.apple.Arabesque com.apple.AskTo.AskToTestResponseUIExtension com.apple.AskToExtension com.apple.AskToViewExtension com.apple.Battery-Settings.extension com.apple.BiometricsAndPasswordSettingsAppIntentsExtension com.apple.BlackPowderInferenceExtension com.apple.BluetoothSettings com.apple.BluetoothSettingsApp.BluetoothSettingsAppIntentsWidget com.apple.CD-DVD-Settings.extension com.apple.ClassKit-Settings.extension com.apple.ClassKit.ClassKitAppIntents com.apple.Classroom-Settings.extension com.apple.ClassroomDeviceExpert com.apple.ConfigurationProfiles.FollowUp com.apple.ControlCenter-Settings.extension com.apple.CoreMotionFoundationModelExtension com.apple.Coverage-Settings.extension com.apple.Date-Time-Settings.extension com.apple.Desktop-Settings.extension com.apple.DiagnosticExtensions.StorageDESDXC com.apple.DiagnosticExtensions.StorageDESSD com.apple.DifferentialPrivacy.TelemetryAggregator com.apple.Displays-Settings.extension com.apple.ExtensionsSettings.DefaultExtensionEnablement com.apple.ExtensionsSettings.LegacyPluginEnablementExtension com.apple.FaceTime.FaceTimeNotificationExtension com.apple.Family-Settings.extension com.apple.FamilyExtensionHost.FamilyOutOfProcessUIExtension com.apple.Flurry com.apple.Focus-Settings.extension com.apple.FollowUpSettings.FollowUpSettingsExtension com.apple.Game-Center-Settings.extension com.apple.Game-Controller-Settings.extension com.apple.GameCenter.Settings.DeviceExpertExtension com.apple.GameCenterDiagnosticExtension com.apple.GenerativeFunctions.GenerativeExperiencesSafetyInferenceProvider com.apple.GenerativePlaygroundApp.remoteUIExtension com.apple.HeadphoneSettings com.apple.Home.PrivacySettingsExtension com.apple.HomeAppIntentsExtension com.apple.HostInferenceProviderService com.apple.HydraUSDAppIntents com.apple.ImagePlayground.NonUIExtension com.apple.InferenceProviderService com.apple.Internet-Accounts-Settings.extension com.apple.Keyboard-Settings.extension com.apple.LighthouseBitacoraFramework.BitacoraWorker com.apple.Localization-Settings.extension com.apple.Lock-Screen-Settings.extension com.apple.LoginItems-Settings.extension com.apple.MADViewServiceExtension com.apple.MediaExtensions-Settings com.apple.MediaMLPluginApp.MediaMLExtension com.apple.MediaRemoteAppIntentsExtension com.apple.MobileAddressBook.RemoteCatalystPosterExtension com.apple.Mouse-Settings.extension com.apple.NeptuneOneExtension com.apple.Network-Settings.extension com.apple.NetworkEndpointPickerUI.DDUIExtension com.apple.NetworkExtensionSettingsUI.NESettingsUIExtension com.apple.NewDeviceOutreach.NewDeviceOutreachIntents com.apple.Notifications-Settings.extension com.apple.PaperKit.extension.ui com.apple.Passwords.PasswordManagerAppIntentsExtension com.apple.Passwords.PasswordSettingsAppIntentsExtension com.apple.PhotosUIPrivate.PhotosPosterProvider com.apple.PlatformSSO.AccessKey com.apple.PlatformSSOToken com.apple.Print-Scan-Settings.extension com.apple.Profiles-Settings.extension com.apple.Profiles-Settings.intents com.apple.Screen-Time-Settings.extension com.apple.ScreenSaver.Computer-Name com.apple.ScreenSaver.Drift com.apple.ScreenSaver.Hello com.apple.ScreenSaver.Monterey com.apple.ScreenSaver.Ventura com.apple.ScreenSaver.iLife-Slideshow-Extension com.apple.SecurityImprovements-Settings.extension com.apple.Sharing-Settings.extension com.apple.Shell com.apple.Siri-Settings.extension com.apple.SiriMetrics.SiriTurnRestatementExtension com.apple.Software-Update-Settings.extension com.apple.SoftwareUpdate.SoftwareUpdateSettingsWidget com.apple.Sound-Settings.SoundIntents com.apple.Sound-Settings.extension com.apple.Spotlight-Settings.extension com.apple.Spotlight-Settings.extension.SpotlightSettingsIntentsExtension com.apple.Startup-Disk-Settings.extension com.apple.StartupDisk.StartupDiskWidgetExtension com.apple.SystemExtensions-Settings.extension com.apple.SystemProfiler.AboutExtension com.apple.Time-Machine-Settings-Intents.extension com.apple.Time-Machine-Settings.extension com.apple.Touch-ID-Settings.extension com.apple.Trackpad-Settings.extension com.apple.Transfer-Reset-Settings.extension com.apple.Translate.TranslationAppIntentsExtension com.apple.Translation.TranslationAPIExtension com.apple.Translation.TranslationAPISupportExtension com.apple.TransparencySettingsIntents com.apple.Users-Groups-Settings.extension com.apple.VPNAppIntentWidget com.apple.VisualGeneration.inference com.apple.WalletSettingsExtension com.apple.Wallpaper-Settings.extension com.apple.WordOfTheDay com.apple.WritingTools.WritingToolsAppIntentsExtension com.apple.aiml.RepackagingWorker com.apple.aiml.UnilogTelemetryWorker com.apple.aiml.mlpt.FedStats.MLHostPlugin com.apple.aiml.mlpt.FedStats.MLHostPluginClassA com.apple.aiml.mlpt.FedStats.MLHostPluginClassB com.apple.batteryui.BatterySettingsIntents com.apple.calendar.EventKitUIRemoteUIExtension com.apple.calls.PhoneAppIntentsExtension com.apple.cloudml.inference.PrivateMLClientInferenceProviderService com.apple.cloudos.PCCAgentClientExtension com.apple.contacts.ContactsAppIntentsExtension com.apple.controlcenter.ControlCenterSettingsIntents com.apple.desktopsettings.DesktopSettingsIntents com.apple.donotdisturb.DoNotDisturbAppIntents com.apple.extensionkit.AppExtensionManagement com.apple.family.FamilyIntents com.apple.findmy.FindMyCoreFollowUpExtension com.apple.findmy.FindMyIntents com.apple.findmy.FindMyUIAdaptor.Extension com.apple.fskit.ModuleEnablement com.apple.fskit.exfat com.apple.fskit.ftp com.apple.fskit.msdos com.apple.gamecenter.GameCenterUIService.GameCenterMessageExtension com.apple.games.ChallengesMessageExtension com.apple.generativeassistanttools.GenerativeAssistantExtension com.apple.generativeassistanttools.settingsextension.GenerativeAssistantSettingsExtension com.apple.intelligenceflow.IntelligenceFlowAppIntentsExtension com.apple.intelligenceplatform.IntelligencePlatform.IntelligencePlatformDataActionsAppIntentsExtension com.apple.lighthouse.BiomeSELFIngestor com.apple.lighthouse.IFTelemetrySELFIngestor com.apple.lighthouse.IFTranscriptSELFIngestor com.apple.lighthouse.InferenceExtension com.apple.lighthouse.PnROnDeviceWorker com.apple.lighthouse.SiriCoreMetricsWorker com.apple.mapkit.private.RemoteUI com.apple.mlhost.CloudWorker com.apple.mlhost.SampleWorker com.apple.mlhost.TelemetryWorker com.apple.mobileslideshow.photo-picker com.apple.mobileslideshow.photospicker com.apple.mobiletimer.ClockAppIntents com.apple.notifications.NotificationsSettingsIntents com.apple.omniSearch.SearchToolDiagnosticExtension com.apple.omniSearch.SearchToolExtension com.apple.parsec.SafariBrowsingAssistantWorker com.apple.poirot.MessagesAnalyticsWorker com.apple.priml.PFLMLHostPlugins.AVCPlugin com.apple.priml.PFLMLHostPlugins.FedAutoEvalPlugin com.apple.priml.PFLMLHostPlugins.PrivateEvolutionPlugin com.apple.priml.PFLMLHostPlugins.SiriAutoEvalPlugin com.apple.priml.PFLMLHostPlugins.SiriMASPFLPush com.apple.priml.PRIMLCKPreemptivePing com.apple.priml.pfl.Vermillion com.apple.proactive.AppleIntelligenceReportingSELFIngestor com.apple.quicklook.thumbnail.AudiovisualExtension com.apple.quicklook.thumbnail.CalendarExtension com.apple.quicklook.thumbnail.ClippingsExtension com.apple.quicklook.thumbnail.ContactExtension com.apple.quicklook.thumbnail.FontExtension com.apple.quicklook.thumbnail.ImageExtension com.apple.quicklook.thumbnail.OfficeExtension com.apple.quicklook.thumbnail.PackageExtension com.apple.qu",
+   "ms": 188
+  }
+ ],
+ "passed": 36,
+ "failed": 0,
+ "skipped": 1,
+ "file": "/Users/runner/work/hxbot-check/hxbot-check/out/home/Downloads/HXBot-self-test-20261114T043246Z.json"
+}
