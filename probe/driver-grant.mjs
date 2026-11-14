@@ -32,6 +32,19 @@ function hxpRows(elements) {
   return rows;
 }
 
+/** The switch of an app: System Settings labels it "<app name>_Toggle" (macOS 15 and 26). */
+function hxpSwitch(elements, name) {
+  const wanted = [hxPlainName(`${name}_Toggle`), hxPlainName(name)];
+  return elements.find((element) => hxRoleKind(element.role) === "check" && wanted.includes(hxPlainName(element.label))) ?? null;
+}
+
+/** Every app switch by its app name. */
+function hxpSwitches(elements) {
+  return elements
+    .filter((element) => hxRoleKind(element.role) === "check" && /_Toggle$/u.test(element.label))
+    .map((element) => ({ name: element.label.replace(/_Toggle$/u, ""), check: element }));
+}
+
 function hxpState(rows) {
   return Object.fromEntries(rows.filter((row) => row.check).map((row) => [row.name, row.check.value]));
 }
@@ -70,11 +83,12 @@ async function hxpMain() {
       return;
     }
     hxpWrite(hxpJoin(out, "outline-before.txt"), hxOutline(before, 30000));
-    const rowsBefore = hxpRows(before.elements);
+    const rowsBefore = hxpSwitches(before.elements);
     result.rows_before = hxpState(rowsBefore);
-    const row = rowsBefore.find((candidate) => hxPlainName(candidate.name) === hxPlainName(rowName));
-    result.row_found = Boolean(row);
-    result.switch_found = Boolean(row?.check);
+    result.rows_by_text = hxpState(hxpRows(before.elements));
+    const check = hxpSwitch(before.elements, rowName);
+    const row = check ? { check } : null;
+    result.switch_found = Boolean(check);
     if (!row?.check) return;
     result.switch = { index: row.check.index, role: row.check.role, value: row.check.value, token: Boolean(row.check.token) };
     for (const mode of ["background", "foreground"]) {
@@ -87,7 +101,7 @@ async function hxpMain() {
     const after = await read();
     if (after) {
       hxpWrite(hxpJoin(out, "outline-after.txt"), hxOutline(after, 30000));
-      const state = hxpState(hxpRows(after.elements));
+      const state = hxpState(hxpSwitches(after.elements));
       result.rows_after = state;
       result.changed = Object.keys(result.rows_before).filter((name) => state[name] !== result.rows_before[name]);
       result.only_that_row_changed = result.changed.length === 1 && hxPlainName(result.changed[0]) === hxPlainName(rowName);
@@ -103,7 +117,7 @@ async function hxpMain() {
         await wait(2500);
         const back = await read();
         if (back) {
-          const state2 = hxpState(hxpRows(back.elements));
+          const state2 = hxpState(hxpSwitches(back.elements));
           result.rows_after_cancel = state2;
           result.back_as_before = Object.keys(result.rows_before).every((name) => state2[name] === result.rows_before[name]);
         }
