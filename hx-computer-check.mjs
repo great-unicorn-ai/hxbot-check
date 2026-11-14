@@ -23,6 +23,721 @@ function isDynamicRecord(value) {
 import { stat } from "node:fs/promises";
 import { extname, isAbsolute } from "node:path";
 
+// src/backend/hx-computer/tables.ts
+function hxSeedTolerance(seed) {
+  return seed.tolerance ?? 1;
+}
+var HX_COMBINED_SEPARATOR = "@@";
+function hxParseSwitch(stdout) {
+  const text = stdout.trim().toLowerCase();
+  if (text === "true")
+    return "on";
+  if (text === "false")
+    return "off";
+  return null;
+}
+function hxParseNumber(stdout, min, max, scale = 1) {
+  const text = stdout.trim().replace(",", ".");
+  if (!/^-?\d+(\.\d+)?$/u.test(text))
+    return null;
+  const value = Math.round(Number(text) * scale);
+  return value >= min && value <= max ? String(value) : null;
+}
+function hxParseChoice(stdout, options) {
+  const text = stdout.trim().toLowerCase();
+  return options.includes(text) ? text : null;
+}
+
+// src/backend/hx-computer/tables-mac.ts
+function page(key, pane, zh, en, pinyin, more = [], security = false) {
+  return { key, address: `x-apple.systempreferences:${pane}`, zh, en, pinyin, more, security };
+}
+var HX_MAC_PAGES = [
+  page("wifi", "com.apple.wifi-settings-extension", "无线局域网", "Wi-Fi", "wu xian ju yu wang", [
+    "WiFi",
+    "WLAN",
+    "无线网络"
+  ]),
+  page("bluetooth", "com.apple.BluetoothSettings", "蓝牙", "Bluetooth", "lan ya"),
+  page("network", "com.apple.Network-Settings.extension", "网络", "Network", "wang luo", [
+    "以太网",
+    "DNS",
+    "代理",
+    "VPN"
+  ]),
+  page("notifications", "com.apple.Notifications-Settings.extension", "通知", "Notifications", "tong zhi"),
+  page("sound", "com.apple.Sound-Settings.extension", "声音", "Sound", "sheng yin", ["扬声器", "麦克风", "输出设备"]),
+  page("focus", "com.apple.Focus-Settings.extension", "专注模式", "Focus", "zhuan zhu mo shi", [
+    "勿扰模式",
+    "Do Not Disturb"
+  ]),
+  page("screen-time", "com.apple.Screen-Time-Settings.extension", "屏幕使用时间", "Screen Time", "ping mu shi yong shi jian"),
+  page("appearance", "com.apple.Appearance-Settings.extension", "外观", "Appearance", "wai guan", [
+    "浅色模式",
+    "强调色"
+  ]),
+  page("accessibility", "com.apple.Accessibility-Settings.extension", "辅助功能", "Accessibility", "fu zhu gong neng", [
+    "旁白",
+    "缩放"
+  ]),
+  page("control-center", "com.apple.ControlCenter-Settings.extension", "控制中心", "Control Center", "kong zhi zhong xin", ["菜单栏"]),
+  page("siri", "com.apple.Siri-Settings.extension", "Siri 与聚焦", "Siri & Spotlight", "", [
+    "Siri",
+    "聚焦",
+    "Spotlight"
+  ]),
+  page("privacy", "com.apple.settings.PrivacySecurity.extension", "隐私与安全性", "Privacy & Security", "yin si yu an quan xing", ["防火墙", "文件保险箱", "定位服务", "屏幕录制", "自动化"], true),
+  page("desktop-dock", "com.apple.Desktop-Settings.extension", "桌面与程序坞", "Desktop & Dock", "zhuo mian yu cheng xu wu", ["Dock", "程序坞", "台前调度", "默认浏览器"]),
+  page("displays", "com.apple.Displays-Settings.extension", "显示器", "Displays", "xian shi qi", [
+    "分辨率",
+    "亮度",
+    "夜览",
+    "屏幕"
+  ]),
+  page("wallpaper", "com.apple.Wallpaper-Settings.extension", "墙纸", "Wallpaper", "qiang zhi", ["壁纸", "桌面背景"]),
+  page("screen-saver", "com.apple.ScreenSaver-Settings.extension", "屏幕保护程序", "Screen Saver", "ping mu bao hu cheng xu", ["屏保"]),
+  page("battery", "com.apple.Battery-Settings.extension", "电池", "Battery", "dian chi", [
+    "节能",
+    "低电量模式",
+    "Energy Saver"
+  ]),
+  page("lock-screen", "com.apple.Lock-Screen-Settings.extension", "锁定屏幕", "Lock Screen", "suo ding ping mu", [
+    "自动锁定",
+    "锁屏"
+  ]),
+  page("touch-id", "com.apple.Touch-ID-Settings.extension", "触控 ID 与密码", "Touch ID & Password", "chu kong id yu mi ma", ["登录密码", "指纹"], true),
+  page("users", "com.apple.Users-Groups-Settings.extension", "用户与群组", "Users & Groups", "yong hu yu qun zu", [], true),
+  page("passwords", "com.apple.Passwords-Settings.extension", "密码", "Passwords", "mi ma", [], true),
+  page("internet-accounts", "com.apple.Internet-Accounts-Settings.extension", "互联网账户", "Internet Accounts", "hu lian wang zhang hu", ["邮件账户"]),
+  page("game-center", "com.apple.Game-Center-Settings.extension", "Game Center", "Game Center", ""),
+  page("wallet", "com.apple.WalletSettingsExtension", "钱包与 Apple Pay", "Wallet & Apple Pay", "qian bao", [], true),
+  page("keyboard", "com.apple.Keyboard-Settings.extension", "键盘", "Keyboard", "jian pan", [
+    "输入法",
+    "快捷键",
+    "听写"
+  ]),
+  page("mouse", "com.apple.Mouse-Settings.extension", "鼠标", "Mouse", "shu biao", ["指针速度", "滚动方向"]),
+  page("trackpad", "com.apple.Trackpad-Settings.extension", "触控板", "Trackpad", "chu kong ban", [
+    "轻点来点按",
+    "手势"
+  ]),
+  page("printers", "com.apple.Print-Scan-Settings.extension", "打印机与扫描仪", "Printers & Scanners", "da yin ji yu sao miao yi", ["打印机"]),
+  page("about", "com.apple.SystemProfiler.AboutExtension", "关于本机", "About", "guan yu ben ji", [
+    "电脑名称",
+    "系统版本",
+    "通用",
+    "General"
+  ]),
+  page("software-update", "com.apple.Software-Update-Settings.extension", "软件更新", "Software Update", "ruan jian geng xin", ["系统更新"]),
+  page("storage", "com.apple.settings.Storage", "储存空间", "Storage", "chu cun kong jian", ["磁盘空间", "存储"]),
+  page("airdrop", "com.apple.AirDrop-Handoff-Settings.extension", "隔空投送与接力", "AirDrop & Handoff", "ge kong tou song yu jie li", ["隔空投送", "AirDrop", "隔空播放"]),
+  page("login-items", "com.apple.LoginItems-Settings.extension", "登录项", "Login Items", "deng lu xiang", ["开机启动", "启动项"], true),
+  page("language", "com.apple.Localization-Settings.extension", "语言与地区", "Language & Region", "yu yan yu di qu", [
+    "系统语言"
+  ]),
+  page("date-time", "com.apple.Date-Time-Settings.extension", "日期与时间", "Date & Time", "ri qi yu shi jian", [
+    "时区"
+  ]),
+  page("sharing", "com.apple.Sharing-Settings.extension", "共享", "Sharing", "gong xiang", ["屏幕共享", "文件共享", "远程登录"], true),
+  page("time-machine", "com.apple.Time-Machine-Settings.extension", "时间机器", "Time Machine", "shi jian ji qi", [
+    "备份"
+  ]),
+  page("transfer-reset", "com.apple.Transfer-Reset-Settings.extension", "传输或还原", "Transfer or Reset", "chuan shu huo huan yuan", ["抹掉所有内容"], true),
+  page("startup-disk", "com.apple.Startup-Disk-Settings.extension", "启动磁盘", "Startup Disk", "qi dong ci pan", [], true),
+  page("apple-account", "com.apple.systempreferences.AppleIDSettings", "Apple 账户", "Apple Account", "", ["Apple ID", "iCloud"], true)
+];
+var OSASCRIPT = "/usr/bin/osascript";
+function hxMacCombined(read, write) {
+  const readScript = read.command === OSASCRIPT && read.args.length === 2 ? read.args[1] : undefined;
+  const writeScript = write.command === OSASCRIPT && write.args.length === 2 ? write.args[1] : undefined;
+  if (readScript === undefined || writeScript === undefined)
+    return null;
+  return {
+    command: OSASCRIPT,
+    args: [
+      "-e",
+      readScript,
+      "-e",
+      "set hxBefore to result as text",
+      "-e",
+      writeScript,
+      "-e",
+      readScript,
+      "-e",
+      `return hxBefore & linefeed & "${HX_COMBINED_SEPARATOR}" & linefeed & (result as text)`
+    ]
+  };
+}
+function script(text) {
+  return { command: OSASCRIPT, args: ["-e", text] };
+}
+function events(text) {
+  return script(`tell application "System Events" to ${text}`);
+}
+function volumeNumber(key, zh, en, pinyin, property) {
+  return {
+    key,
+    page: "sound",
+    zh,
+    en,
+    pinyin,
+    values: { type: "number", min: 0, max: 100 },
+    read: script(`${property} of (get volume settings)`),
+    parse: (stdout) => hxParseNumber(stdout, 0, 100),
+    write: (value) => script(`set volume ${property} ${Number(value)}`)
+  };
+}
+function dockSwitch(key, zh, en, pinyin, property, more = []) {
+  const seed = {
+    key,
+    page: "desktop-dock",
+    zh,
+    en,
+    pinyin,
+    more,
+    values: { type: "switch" },
+    read: events(`get ${property} of dock preferences`),
+    parse: hxParseSwitch,
+    write: (value) => events(`set ${property} of dock preferences to ${value === "on"}`)
+  };
+  return seed;
+}
+function dockChoice(key, zh, en, pinyin, property, options) {
+  const seed = {
+    key,
+    page: "desktop-dock",
+    zh,
+    en,
+    pinyin,
+    values: { type: "choice", options },
+    read: events(`get ${property} of dock preferences`),
+    parse: (stdout) => hxParseChoice(stdout, options),
+    write: (value) => events(`set ${property} of dock preferences to ${options.includes(value) ? value : options[0]}`)
+  };
+  return seed;
+}
+var HX_MAC_SETTINGS = [
+  {
+    key: "dark-mode",
+    page: "appearance",
+    zh: "深色模式",
+    en: "Dark mode",
+    pinyin: "shen se mo shi",
+    more: ["暗色模式", "夜间模式", "深色外观", "dark appearance"],
+    values: { type: "switch" },
+    read: events("tell appearance preferences to get dark mode"),
+    parse: hxParseSwitch,
+    write: (value) => events(`tell appearance preferences to set dark mode to ${value === "on"}`)
+  },
+  {
+    ...volumeNumber("volume", "音量", "Volume", "yin liang", "output volume"),
+    more: ["输出音量", "声音大小", "output volume"]
+  },
+  {
+    key: "mute",
+    page: "sound",
+    zh: "静音",
+    en: "Mute",
+    pinyin: "jing yin",
+    more: ["关闭声音", "muted"],
+    values: { type: "switch" },
+    read: script("output muted of (get volume settings)"),
+    parse: hxParseSwitch,
+    write: (value) => script(`set volume output muted ${value === "on"}`)
+  },
+  volumeNumber("alert-volume", "提示音音量", "Alert volume", "ti shi yin yin liang", "alert volume"),
+  {
+    ...volumeNumber("input-volume", "输入音量", "Input volume", "shu ru yin liang", "input volume"),
+    more: ["麦克风音量"]
+  },
+  dockSwitch("dock-autohide", "自动隐藏程序坞", "Hide the Dock automatically", "zi dong yin cang cheng xu wu", "autohide", ["自动隐藏 Dock", "Dock autohide"]),
+  dockSwitch("dock-magnification", "程序坞放大", "Dock magnification", "cheng xu wu fang da", "magnification", [
+    "Dock 放大"
+  ]),
+  dockSwitch("dock-recents", "在程序坞中显示最近使用的应用", "Show recent apps in the Dock", "", "show recents"),
+  dockSwitch("menu-bar-autohide", "自动隐藏菜单栏", "Hide the menu bar automatically", "zi dong yin cang cai dan lan", "autohide menu bar"),
+  dockChoice("dock-position", "程序坞位置", "Dock position", "cheng xu wu wei zhi", "screen edge", [
+    "left",
+    "bottom",
+    "right"
+  ]),
+  dockChoice("dock-minimize-effect", "最小化窗口的效果", "Minimize effect", "", "minimize effect", ["genie", "scale"]),
+  {
+    key: "dock-size",
+    page: "desktop-dock",
+    zh: "程序坞大小",
+    en: "Dock size",
+    pinyin: "cheng xu wu da xiao",
+    more: ["Dock 大小"],
+    values: { type: "number", min: 0, max: 100 },
+    read: events("get dock size of dock preferences"),
+    parse: (stdout) => hxParseNumber(stdout, 0, 100, 100),
+    write: (value) => events(`set dock size of dock preferences to (${Number(value)} / 100)`),
+    tolerance: 4
+  },
+  dockSwitch("dock-indicators", "显示已打开应用的指示灯", "Show indicators for open apps", "zhi shi deng", "show indicators", ["指示灯", "程序坞指示灯"]),
+  dockSwitch("dock-minimize-into-app", "将窗口最小化至应用程序图标", "Minimize windows into the app icon", "", "minimize into application", ["最小化到应用图标"]),
+  dockSwitch("dock-launch-animation", "打开应用时显示动画", "Animate opening apps", "", "animate", [
+    "启动动画",
+    "打开动画"
+  ]),
+  {
+    key: "dock-magnification-size",
+    page: "desktop-dock",
+    zh: "程序坞放大后的大小",
+    en: "Dock magnification size",
+    pinyin: "",
+    more: ["放大大小"],
+    values: { type: "number", min: 0, max: 100 },
+    read: events("get magnification size of dock preferences"),
+    parse: (stdout) => hxParseNumber(stdout, 0, 100, 100),
+    write: (value) => events(`set magnification size of dock preferences to (${Number(value)} / 100)`),
+    tolerance: 4
+  }
+];
+function hxMacAppRoots(home) {
+  return [
+    "/Applications",
+    "/Applications/Utilities",
+    "/System/Applications",
+    "/System/Applications/Utilities",
+    "/System/Library/CoreServices/Applications",
+    `${home}/Applications`
+  ];
+}
+var HX_MAC_EXTRA_APPS = ["/System/Library/CoreServices/Finder.app"];
+
+// src/backend/hx-computer/tables-win.ts
+function page2(key, uri, zh, en, pinyin, more = [], security = false) {
+  return { key, address: `ms-settings:${uri}`, zh, en, pinyin, more, security };
+}
+var HX_WIN_PAGES = [
+  page2("display", "display", "屏幕", "Display", "ping mu", ["显示", "分辨率", "缩放", "显示器"]),
+  page2("night-light", "nightlight", "夜间模式", "Night light", "ye jian mo shi", ["护眼"]),
+  page2("sound", "sound", "声音", "Sound", "sheng yin", ["音量", "扬声器", "麦克风", "输出设备"]),
+  page2("notifications", "notifications", "通知", "Notifications", "tong zhi", ["勿扰", "免打扰"]),
+  page2("focus", "quiethours", "专注", "Focus", "zhuan zhu", ["专注助手", "Focus assist"]),
+  page2("power", "powersleep", "电源", "Power & sleep", "dian yuan", ["睡眠", "电池", "休眠"]),
+  page2("storage", "storagesense", "存储", "Storage", "cun chu", ["磁盘空间"]),
+  page2("multitasking", "multitasking", "多任务处理", "Multitasking", "duo ren wu chu li", ["贴靠窗口", "虚拟桌面"]),
+  page2("clipboard", "clipboard", "剪贴板", "Clipboard", "jian tie ban"),
+  page2("about", "about", "系统信息", "About", "xi tong xin xi", ["关于", "电脑名称", "系统版本"]),
+  page2("bluetooth", "bluetooth", "蓝牙和其他设备", "Bluetooth & devices", "lan ya", ["蓝牙"]),
+  page2("printers", "printers", "打印机和扫描仪", "Printers & scanners", "da yin ji", ["打印机"]),
+  page2("mouse", "mousetouchpad", "鼠标", "Mouse", "shu biao", ["指针速度", "滚轮"]),
+  page2("touchpad", "devices-touchpad", "触摸板", "Touchpad", "chu mo ban"),
+  page2("typing", "typing", "输入", "Typing", "shu ru", ["键盘", "输入法"]),
+  page2("network", "network-status", "网络和 Internet", "Network & internet", "wang luo", ["网络"]),
+  page2("wifi", "network-wifi", "WLAN", "Wi-Fi", "", ["WiFi", "无线网络", "无线局域网"]),
+  page2("ethernet", "network-ethernet", "以太网", "Ethernet", "yi tai wang"),
+  page2("vpn", "network-vpn", "VPN", "VPN", ""),
+  page2("proxy", "network-proxy", "代理", "Proxy", "dai li", [], true),
+  page2("airplane", "network-airplanemode", "飞行模式", "Airplane mode", "fei xing mo shi"),
+  page2("hotspot", "network-mobilehotspot", "移动热点", "Mobile hotspot", "yi dong re dian"),
+  page2("personalization", "personalization", "个性化", "Personalization", "ge xing hua"),
+  page2("background", "personalization-background", "背景", "Background", "bei jing", ["壁纸", "桌面背景", "墙纸"]),
+  page2("colors", "colors", "颜色", "Colors", "yan se", ["浅色模式", "主题色", "强调色"]),
+  page2("lock-screen", "lockscreen", "锁屏界面", "Lock screen", "suo ping jie mian", ["锁屏"]),
+  page2("themes", "themes", "主题", "Themes", "zhu ti"),
+  page2("fonts", "fonts", "字体", "Fonts", "zi ti"),
+  page2("taskbar", "taskbar", "任务栏", "Taskbar", "ren wu lan"),
+  page2("start", "personalization-start", "开始菜单", "Start", "kai shi cai dan", ["开始"]),
+  page2("apps", "appsfeatures", "安装的应用", "Installed apps", "an zhuang de ying yong", ["应用和功能", "卸载程序"]),
+  page2("default-apps", "defaultapps", "默认应用", "Default apps", "mo ren ying yong", ["默认浏览器"]),
+  page2("startup-apps", "startupapps", "启动应用", "Startup apps", "qi dong ying yong", ["开机启动", "启动项"], true),
+  page2("your-info", "yourinfo", "账户信息", "Your info", "zhang hu xin xi"),
+  page2("email-accounts", "emailandaccounts", "电子邮件和账户", "Email & accounts", "dian zi you jian he zhang hu"),
+  page2("sign-in", "signinoptions", "登录选项", "Sign-in options", "deng lu xuan xiang", ["密码", "PIN", "指纹", "人脸"], true),
+  page2("other-users", "otherusers", "其他用户", "Other users", "qi ta yong hu", ["家庭和其他用户"], true),
+  page2("date-time", "dateandtime", "日期和时间", "Date & time", "ri qi he shi jian", ["时区"]),
+  page2("language", "regionlanguage", "语言和区域", "Language & region", "yu yan he qu yu", ["系统语言"]),
+  page2("speech", "speech", "语音", "Speech", "yu yin"),
+  page2("game-bar", "gaming-gamebar", "游戏栏", "Game Bar", "you xi lan"),
+  page2("accessibility", "easeofaccess", "辅助功能", "Accessibility", "fu zhu gong neng", ["轻松使用"]),
+  page2("text-size", "easeofaccess-display", "文本大小", "Text size", "wen ben da xiao", ["字体大小"]),
+  page2("mouse-pointer", "easeofaccess-mousepointer", "鼠标指针和触控", "Mouse pointer and touch", "shu biao zhi zhen"),
+  page2("narrator", "easeofaccess-narrator", "讲述人", "Narrator", "jiang shu ren"),
+  page2("magnifier", "easeofaccess-magnifier", "放大镜", "Magnifier", "fang da jing"),
+  page2("privacy", "privacy", "隐私和安全性", "Privacy & security", "yin si he an quan xing", ["隐私"], true),
+  page2("location", "privacy-location", "定位", "Location", "ding wei", [], true),
+  page2("camera", "privacy-webcam", "摄像头", "Camera", "she xiang tou", ["相机权限"], true),
+  page2("microphone", "privacy-microphone", "麦克风权限", "Microphone access", "mai ke feng quan xian", [], true),
+  page2("windows-security", "windowsdefender", "Windows 安全中心", "Windows Security", "an quan zhong xin", ["杀毒", "防火墙", "Defender"], true),
+  page2("windows-update", "windowsupdate", "Windows 更新", "Windows Update", "geng xin", ["系统更新"]),
+  page2("backup", "backup", "Windows 备份", "Windows Backup", "bei fen"),
+  page2("troubleshoot", "troubleshoot", "疑难解答", "Troubleshoot", "yi nan jie da"),
+  page2("recovery", "recovery", "恢复", "Recovery", "hui fu", ["重置此电脑"], true),
+  page2("activation", "activation", "激活", "Activation", "ji huo"),
+  page2("developers", "developers", "开发者选项", "For developers", "kai fa zhe xuan xiang", [], true)
+];
+function hxPowerShellPath(env = process.env) {
+  const root = env.SystemRoot || env.windir || "C:\\Windows";
+  return `${root.replace(/[\\/]+$/u, "")}\\System32\\WindowsPowerShell\\v1.0\\powershell.exe`;
+}
+var HX_POWERSHELL = hxPowerShellPath();
+var PREAMBLE = "$ProgressPreference = 'SilentlyContinue'; try { [Console]::OutputEncoding = [System.Text.Encoding]::UTF8 } catch { }; ";
+function hxPowerShell(scriptText, env) {
+  return {
+    command: HX_POWERSHELL,
+    args: [
+      "-NoLogo",
+      "-NoProfile",
+      "-NonInteractive",
+      "-ExecutionPolicy",
+      "Bypass",
+      "-Command",
+      `${PREAMBLE}${scriptText}`
+    ],
+    ...env ? { env } : {}
+  };
+}
+var PERSONALIZE = "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize";
+var CLIPBOARD = "HKCU:\\Software\\Microsoft\\Clipboard";
+var BROADCAST = [
+  "try {",
+  "$hxQuote = [string][char]34;",
+  "$hxMember = '[DllImport(' + $hxQuote + 'user32.dll' + $hxQuote + ', CharSet = CharSet.Unicode)] public static extern IntPtr SendMessageTimeout(IntPtr hWnd, uint Msg, UIntPtr wParam, string lParam, uint fuFlags, uint uTimeout, out UIntPtr lpdwResult);';",
+  "Add-Type -Namespace Hx -Name Native -MemberDefinition $hxMember -ErrorAction Stop;",
+  "$hxDone = [UIntPtr]::Zero;",
+  "[void][Hx.Native]::SendMessageTimeout([IntPtr]0xffff, 0x1A, [UIntPtr]::Zero, 'ImmersiveColorSet', 2, 2000, [ref]$hxDone)",
+  "} catch { }"
+].join(" ");
+function registryRead(path, name, missing) {
+  return hxPowerShell(`$v = (Get-ItemProperty -Path '${path}' -Name '${name}' -ErrorAction SilentlyContinue).'${name}'; if ($null -eq $v) { '${missing}' } else { [string]$v }`);
+}
+function registryWrite(path, name, value, broadcast) {
+  return hxPowerShell(`if (-not (Test-Path '${path}')) { New-Item -Path '${path}' -Force | Out-Null }; Set-ItemProperty -Path '${path}' -Name '${name}' -Value ${value} -Type DWord -ErrorAction Stop${broadcast ? `; ${BROADCAST}` : ""}`);
+}
+function registrySwitch(input) {
+  const offIs = input.offIs ?? (input.onIs === 1 ? 0 : 1);
+  return {
+    key: input.key,
+    page: input.page,
+    zh: input.zh,
+    en: input.en,
+    pinyin: input.pinyin,
+    more: input.more ?? [],
+    values: { type: "switch" },
+    read: registryRead(input.path, input.name, "missing"),
+    parse: (stdout) => {
+      const text = stdout.trim();
+      if (text === String(input.onIs))
+        return "on";
+      if (text === String(offIs))
+        return "off";
+      return text === "missing" ? input.missing : null;
+    },
+    write: (value) => registryWrite(input.path, input.name, value === "on" ? input.onIs : offIs, input.broadcast)
+  };
+}
+var THEME_READINGS = {
+  "0,0": "on",
+  "1,1": "off",
+  "0,1": "apps only",
+  "1,0": "system only"
+};
+var THEME_WRITES = {
+  on: [0, 0],
+  off: [1, 1],
+  "apps only": [0, 1],
+  "system only": [1, 0]
+};
+var DARK_MODE = {
+  key: "dark-mode",
+  page: "colors",
+  zh: "深色模式",
+  en: "Dark mode",
+  pinyin: "shen se mo shi",
+  more: ["暗色模式", "黑暗模式", "深色主题", "dark theme"],
+  values: { type: "switch" },
+  read: hxPowerShell(`$p = Get-ItemProperty -Path '${PERSONALIZE}' -ErrorAction SilentlyContinue; $a = $p.AppsUseLightTheme; $s = $p.SystemUsesLightTheme; if ($null -eq $a -or $null -eq $s) { 'missing' } else { [string]$a + ',' + [string]$s }`),
+  parse: (stdout) => THEME_READINGS[stdout.trim()] ?? null,
+  write: (value) => {
+    const [apps, system] = THEME_WRITES[value] ?? [1, 1];
+    return hxPowerShell(`if (-not (Test-Path '${PERSONALIZE}')) { New-Item -Path '${PERSONALIZE}' -Force | Out-Null }; Set-ItemProperty -Path '${PERSONALIZE}' -Name 'AppsUseLightTheme' -Value ${apps} -Type DWord -ErrorAction Stop; Set-ItemProperty -Path '${PERSONALIZE}' -Name 'SystemUsesLightTheme' -Value ${system} -Type DWord -ErrorAction Stop; ${BROADCAST}`);
+  }
+};
+var FIRST_SETTINGS = [
+  DARK_MODE,
+  registrySwitch({
+    key: "app-dark-mode",
+    page: "colors",
+    zh: "应用深色模式",
+    en: "Dark mode for apps",
+    pinyin: "",
+    more: ["应用模式", "app mode"],
+    path: PERSONALIZE,
+    name: "AppsUseLightTheme",
+    onIs: 0,
+    missing: null,
+    broadcast: true
+  }),
+  registrySwitch({
+    key: "system-dark-mode",
+    page: "colors",
+    zh: "任务栏和开始菜单深色模式",
+    en: "Dark mode for the taskbar and Start",
+    pinyin: "",
+    more: ["任务栏深色", "Windows 模式", "Windows mode"],
+    path: PERSONALIZE,
+    name: "SystemUsesLightTheme",
+    onIs: 0,
+    missing: null,
+    broadcast: true
+  }),
+  registrySwitch({
+    key: "transparency",
+    page: "colors",
+    zh: "透明效果",
+    en: "Transparency effects",
+    pinyin: "tou ming xiao guo",
+    path: PERSONALIZE,
+    name: "EnableTransparency",
+    onIs: 1,
+    missing: null,
+    broadcast: true
+  }),
+  registrySwitch({
+    key: "clipboard-history",
+    page: "clipboard",
+    zh: "剪贴板历史记录",
+    en: "Clipboard history",
+    pinyin: "jian tie ban li shi ji lu",
+    path: CLIPBOARD,
+    name: "EnableClipboardHistory",
+    onIs: 1,
+    missing: "off",
+    broadcast: false
+  }),
+  {
+    key: "brightness",
+    page: "display",
+    zh: "屏幕亮度",
+    en: "Screen brightness",
+    pinyin: "ping mu liang du",
+    more: ["亮度"],
+    values: { type: "number", min: 0, max: 100 },
+    read: hxPowerShell("try { [string](Get-CimInstance -Namespace root/WMI -ClassName WmiMonitorBrightness -ErrorAction Stop | Select-Object -First 1).CurrentBrightness } catch { 'none' }"),
+    parse: (stdout) => hxParseNumber(stdout, 0, 100),
+    write: (value) => hxPowerShell(`$m = Get-CimInstance -Namespace root/WMI -ClassName WmiMonitorBrightnessMethods -ErrorAction Stop | Select-Object -First 1; Invoke-CimMethod -InputObject $m -MethodName WmiSetBrightness -Arguments @{ Timeout = [uint32]1; Brightness = [byte]${Number(value)} } -ErrorAction Stop | Out-Null`)
+  }
+];
+function hxWinCombined(read, write) {
+  const readScript = hxPowerShellScript(read);
+  const writeScript = hxPowerShellScript(write);
+  if (readScript === null || writeScript === null)
+    return null;
+  return hxPowerShell([
+    `$hxBefore = & { ${readScript} };`,
+    `& { ${writeScript} } | Out-Null;`,
+    `$hxAfter = & { ${readScript} };`,
+    `[string]$hxBefore + [char]10 + '${HX_COMBINED_SEPARATOR}' + [char]10 + [string]$hxAfter`
+  ].join(" "), write.env);
+}
+function hxPowerShellScript(command) {
+  if (command.command !== HX_POWERSHELL)
+    return null;
+  const script = command.args[command.args.length - 1];
+  return script?.startsWith(PREAMBLE) ? script.slice(PREAMBLE.length) : null;
+}
+function registryChoice(input) {
+  const options = input.options.map(([option]) => option);
+  return {
+    key: input.key,
+    page: input.page,
+    zh: input.zh,
+    en: input.en,
+    pinyin: input.pinyin,
+    more: input.more ?? [],
+    values: { type: "choice", options },
+    read: registryRead(input.path, input.name, "missing"),
+    parse: (stdout) => {
+      const text = stdout.trim();
+      if (text === "missing")
+        return input.missing;
+      return input.options.find(([, number]) => String(number) === text)?.[0] ?? null;
+    },
+    write: (value) => {
+      const number = input.options.find(([option]) => option === value)?.[1] ?? input.options[0]?.[1] ?? 0;
+      return registryWrite(input.path, input.name, number, input.broadcast);
+    }
+  };
+}
+function powerMinutes(input) {
+  return {
+    key: input.key,
+    page: "power",
+    zh: input.zh,
+    en: input.en,
+    pinyin: input.pinyin,
+    more: input.more ?? [],
+    values: { type: "number", min: 0, max: 600 },
+    read: hxPowerShell(`$q = (powercfg /query SCHEME_CURRENT ${input.group} ${input.setting}) -join ' '; $n = [regex]::Matches($q, '0x[0-9a-fA-F]{8}'); if ($n.Count -lt 2) { 'none' } else { [string][math]::Round([Convert]::ToInt32($n[$n.Count - 2].Value, 16) / 60) }`),
+    parse: (stdout) => hxParseNumber(stdout, 0, 600),
+    write: (value) => hxPowerShell(`powercfg /change ${input.change} ${Number(value)}`)
+  };
+}
+var ADVANCED = "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced";
+var MORE_SETTINGS = [
+  registryChoice({
+    key: "taskbar-alignment",
+    page: "taskbar",
+    zh: "任务栏对齐方式",
+    en: "Taskbar alignment",
+    pinyin: "ren wu lan dui qi",
+    more: ["任务栏居中", "任务栏靠左", "开始按钮靠左"],
+    path: ADVANCED,
+    name: "TaskbarAl",
+    options: [
+      ["left", 0],
+      ["center", 1]
+    ],
+    missing: "center",
+    broadcast: true
+  }),
+  registrySwitch({
+    key: "task-view-button",
+    page: "taskbar",
+    zh: "任务栏上的任务视图按钮",
+    en: "Task view button on the taskbar",
+    pinyin: "ren wu shi tu",
+    more: ["任务视图", "task view"],
+    path: ADVANCED,
+    name: "ShowTaskViewButton",
+    onIs: 1,
+    missing: "on",
+    broadcast: true
+  }),
+  registrySwitch({
+    key: "clock-seconds",
+    page: "taskbar",
+    zh: "时钟显示秒",
+    en: "Show seconds in the clock",
+    pinyin: "shi zhong xian shi miao",
+    more: ["显示秒", "seconds"],
+    path: ADVANCED,
+    name: "ShowSecondsInSystemClock",
+    onIs: 1,
+    missing: "off",
+    broadcast: true
+  }),
+  registrySwitch({
+    key: "accent-title-bars",
+    page: "colors",
+    zh: "标题栏和窗口边框显示主题色",
+    en: "Accent color on title bars and window borders",
+    pinyin: "",
+    more: ["标题栏颜色", "窗口边框颜色"],
+    path: "HKCU:\\Software\\Microsoft\\Windows\\DWM",
+    name: "ColorPrevalence",
+    onIs: 1,
+    missing: "off",
+    broadcast: true
+  }),
+  registrySwitch({
+    key: "accent-start-taskbar",
+    page: "colors",
+    zh: "开始菜单和任务栏显示主题色",
+    en: "Accent color on Start and the taskbar",
+    pinyin: "",
+    more: ["任务栏颜色"],
+    path: PERSONALIZE,
+    name: "ColorPrevalence",
+    onIs: 1,
+    missing: "off",
+    broadcast: true
+  }),
+  registrySwitch({
+    key: "notifications",
+    page: "notifications",
+    zh: "接收通知",
+    en: "Get notifications",
+    pinyin: "jie shou tong zhi",
+    more: ["通知开关", "notifications on or off"],
+    path: "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\PushNotifications",
+    name: "ToastEnabled",
+    onIs: 1,
+    missing: "on",
+    broadcast: false
+  }),
+  registrySwitch({
+    key: "game-mode",
+    page: "game-bar",
+    zh: "游戏模式",
+    en: "Game Mode",
+    pinyin: "you xi mo shi",
+    path: "HKCU:\\Software\\Microsoft\\GameBar",
+    name: "AllowAutoGameMode",
+    onIs: 1,
+    missing: "on",
+    broadcast: false
+  }),
+  registrySwitch({
+    key: "storage-sense",
+    page: "storage",
+    zh: "存储感知",
+    en: "Storage Sense",
+    pinyin: "cun chu gan zhi",
+    more: ["自动清理"],
+    path: "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\StorageSense\\Parameters\\StoragePolicy",
+    name: "01",
+    onIs: 1,
+    missing: "off",
+    broadcast: false
+  }),
+  powerMinutes({
+    key: "screen-off-minutes",
+    zh: "多久后关闭屏幕（接通电源时，分钟）",
+    en: "Turn off the screen after (on power, minutes)",
+    pinyin: "",
+    more: ["关闭屏幕", "屏幕关闭时间", "熄屏时间"],
+    group: "SUB_VIDEO",
+    setting: "VIDEOIDLE",
+    change: "monitor-timeout-ac"
+  }),
+  powerMinutes({
+    key: "sleep-minutes",
+    zh: "多久后睡眠（接通电源时，分钟）",
+    en: "Sleep after (on power, minutes)",
+    pinyin: "",
+    more: ["睡眠时间", "自动睡眠"],
+    group: "SUB_SLEEP",
+    setting: "STANDBYIDLE",
+    change: "standby-timeout-ac"
+  })
+];
+var HX_WIN_SETTINGS = [...FIRST_SETTINGS, ...MORE_SETTINGS];
+var HX_WIN_LIST_APPS = hxPowerShell("Get-StartApps | Select-Object Name, AppID | ConvertTo-Json -Compress");
+function hxExplorerPath(env = process.env) {
+  const root = env.SystemRoot || env.windir || "C:\\Windows";
+  return `${root.replace(/[\\/]+$/u, "")}\\explorer.exe`;
+}
+function hxWinOpen(target) {
+  return { command: hxExplorerPath(), args: [target] };
+}
+function hxWinOpened(result) {
+  return !result.missing && !result.timedOut && (result.code === 0 || result.code === 1);
+}
+function hxWinStart(target) {
+  return hxPowerShell("$hxStep = 'start'; Start-Process -FilePath $env:HX_TARGET -ErrorAction Stop", {
+    HX_TARGET: target
+  });
+}
+
+// src/backend/hx-computer/combine.ts
+function hxCombinedChange(platform, seed, value) {
+  const write = seed.write(value);
+  return platform === "mac" ? hxMacCombined(seed.read, write) : hxWinCombined(seed.read, write);
+}
+function hxCombinedValues(seed, stdout) {
+  const parts = stdout.split(new RegExp(`^${HX_COMBINED_SEPARATOR}$`, "mu"));
+  if (parts.length !== 2)
+    return null;
+  const before = seed.parse(parts[0] ?? "");
+  const after = seed.parse(parts[1] ?? "");
+  return before === null || after === null ? null : { before, after };
+}
+
 // src/backend/hx-computer/runner.ts
 import { execFile } from "node:child_process";
 var DEFAULT_TIMEOUT_MS = 15000;
@@ -68,7 +783,7 @@ var CONTAINS = 60;
 var MENTIONED = 45;
 var WORDS = 40;
 var SURE_LEAD = 10;
-var MIN_MENTION_LATIN = 3;
+var MIN_MENTION_LATIN = 4;
 var MIN_MENTION_OTHER = 2;
 function hxNormalize(text) {
   return text.normalize("NFKC").toLowerCase().replace(/[^\p{L}\p{N}]+/gu, "");
@@ -218,262 +933,6 @@ function hxPinyinNames(spaced) {
   return initials.length >= 2 && initials !== full ? [full, initials] : [full];
 }
 
-// src/backend/hx-computer/tables.ts
-function hxSeedTolerance(seed) {
-  return seed.tolerance ?? 1;
-}
-function hxParseSwitch(stdout) {
-  const text = stdout.trim().toLowerCase();
-  if (text === "true")
-    return "on";
-  if (text === "false")
-    return "off";
-  return null;
-}
-function hxParseNumber(stdout, min, max, scale = 1) {
-  const text = stdout.trim().replace(",", ".");
-  if (!/^-?\d+(\.\d+)?$/u.test(text))
-    return null;
-  const value = Math.round(Number(text) * scale);
-  return value >= min && value <= max ? String(value) : null;
-}
-function hxParseChoice(stdout, options) {
-  const text = stdout.trim().toLowerCase();
-  return options.includes(text) ? text : null;
-}
-
-// src/backend/hx-computer/tables-win.ts
-function page(key, uri, zh, en, pinyin, more = [], security = false) {
-  return { key, address: `ms-settings:${uri}`, zh, en, pinyin, more, security };
-}
-var HX_WIN_PAGES = [
-  page("display", "display", "屏幕", "Display", "ping mu", ["显示", "分辨率", "缩放", "显示器"]),
-  page("night-light", "nightlight", "夜间模式", "Night light", "ye jian mo shi", ["护眼"]),
-  page("sound", "sound", "声音", "Sound", "sheng yin", ["音量", "扬声器", "麦克风", "输出设备"]),
-  page("notifications", "notifications", "通知", "Notifications", "tong zhi", ["勿扰", "免打扰"]),
-  page("focus", "quiethours", "专注", "Focus", "zhuan zhu", ["专注助手", "Focus assist"]),
-  page("power", "powersleep", "电源", "Power & sleep", "dian yuan", ["睡眠", "电池", "休眠"]),
-  page("storage", "storagesense", "存储", "Storage", "cun chu", ["磁盘空间", "存储感知"]),
-  page("multitasking", "multitasking", "多任务处理", "Multitasking", "duo ren wu chu li", ["贴靠窗口", "虚拟桌面"]),
-  page("clipboard", "clipboard", "剪贴板", "Clipboard", "jian tie ban"),
-  page("about", "about", "系统信息", "About", "xi tong xin xi", ["关于", "电脑名称", "系统版本"]),
-  page("bluetooth", "bluetooth", "蓝牙和其他设备", "Bluetooth & devices", "lan ya", ["蓝牙"]),
-  page("printers", "printers", "打印机和扫描仪", "Printers & scanners", "da yin ji", ["打印机"]),
-  page("mouse", "mousetouchpad", "鼠标", "Mouse", "shu biao", ["指针速度", "滚轮"]),
-  page("touchpad", "devices-touchpad", "触摸板", "Touchpad", "chu mo ban"),
-  page("typing", "typing", "输入", "Typing", "shu ru", ["键盘", "输入法"]),
-  page("network", "network-status", "网络和 Internet", "Network & internet", "wang luo", ["网络"]),
-  page("wifi", "network-wifi", "WLAN", "Wi-Fi", "", ["WiFi", "无线网络", "无线局域网"]),
-  page("ethernet", "network-ethernet", "以太网", "Ethernet", "yi tai wang"),
-  page("vpn", "network-vpn", "VPN", "VPN", ""),
-  page("proxy", "network-proxy", "代理", "Proxy", "dai li", [], true),
-  page("airplane", "network-airplanemode", "飞行模式", "Airplane mode", "fei xing mo shi"),
-  page("hotspot", "network-mobilehotspot", "移动热点", "Mobile hotspot", "yi dong re dian"),
-  page("personalization", "personalization", "个性化", "Personalization", "ge xing hua"),
-  page("background", "personalization-background", "背景", "Background", "bei jing", ["壁纸", "桌面背景", "墙纸"]),
-  page("colors", "colors", "颜色", "Colors", "yan se", ["浅色模式", "主题色", "强调色"]),
-  page("lock-screen", "lockscreen", "锁屏界面", "Lock screen", "suo ping jie mian", ["锁屏"]),
-  page("themes", "themes", "主题", "Themes", "zhu ti"),
-  page("fonts", "fonts", "字体", "Fonts", "zi ti"),
-  page("taskbar", "taskbar", "任务栏", "Taskbar", "ren wu lan"),
-  page("start", "personalization-start", "开始菜单", "Start", "kai shi cai dan", ["开始"]),
-  page("apps", "appsfeatures", "安装的应用", "Installed apps", "an zhuang de ying yong", ["应用和功能", "卸载程序"]),
-  page("default-apps", "defaultapps", "默认应用", "Default apps", "mo ren ying yong", ["默认浏览器"]),
-  page("startup-apps", "startupapps", "启动应用", "Startup apps", "qi dong ying yong", ["开机启动", "启动项"], true),
-  page("your-info", "yourinfo", "账户信息", "Your info", "zhang hu xin xi"),
-  page("email-accounts", "emailandaccounts", "电子邮件和账户", "Email & accounts", "dian zi you jian he zhang hu"),
-  page("sign-in", "signinoptions", "登录选项", "Sign-in options", "deng lu xuan xiang", ["密码", "PIN", "指纹", "人脸"], true),
-  page("other-users", "otherusers", "其他用户", "Other users", "qi ta yong hu", ["家庭和其他用户"], true),
-  page("date-time", "dateandtime", "日期和时间", "Date & time", "ri qi he shi jian", ["时区"]),
-  page("language", "regionlanguage", "语言和区域", "Language & region", "yu yan he qu yu", ["系统语言"]),
-  page("speech", "speech", "语音", "Speech", "yu yin"),
-  page("game-bar", "gaming-gamebar", "游戏栏", "Game Bar", "you xi lan"),
-  page("accessibility", "easeofaccess", "辅助功能", "Accessibility", "fu zhu gong neng", ["轻松使用"]),
-  page("text-size", "easeofaccess-display", "文本大小", "Text size", "wen ben da xiao", ["字体大小"]),
-  page("mouse-pointer", "easeofaccess-mousepointer", "鼠标指针和触控", "Mouse pointer and touch", "shu biao zhi zhen"),
-  page("narrator", "easeofaccess-narrator", "讲述人", "Narrator", "jiang shu ren"),
-  page("magnifier", "easeofaccess-magnifier", "放大镜", "Magnifier", "fang da jing"),
-  page("privacy", "privacy", "隐私和安全性", "Privacy & security", "yin si he an quan xing", ["隐私"], true),
-  page("location", "privacy-location", "定位", "Location", "ding wei", [], true),
-  page("camera", "privacy-webcam", "摄像头", "Camera", "she xiang tou", ["相机权限"], true),
-  page("microphone", "privacy-microphone", "麦克风权限", "Microphone access", "mai ke feng quan xian", [], true),
-  page("windows-security", "windowsdefender", "Windows 安全中心", "Windows Security", "an quan zhong xin", ["杀毒", "防火墙", "Defender"], true),
-  page("windows-update", "windowsupdate", "Windows 更新", "Windows Update", "geng xin", ["系统更新"]),
-  page("backup", "backup", "Windows 备份", "Windows Backup", "bei fen"),
-  page("troubleshoot", "troubleshoot", "疑难解答", "Troubleshoot", "yi nan jie da"),
-  page("recovery", "recovery", "恢复", "Recovery", "hui fu", ["重置此电脑"], true),
-  page("activation", "activation", "激活", "Activation", "ji huo"),
-  page("developers", "developers", "开发者选项", "For developers", "kai fa zhe xuan xiang", [], true)
-];
-function hxPowerShellPath(env = process.env) {
-  const root = env.SystemRoot || env.windir || "C:\\Windows";
-  return `${root.replace(/[\\/]+$/u, "")}\\System32\\WindowsPowerShell\\v1.0\\powershell.exe`;
-}
-var HX_POWERSHELL = hxPowerShellPath();
-var PREAMBLE = "$ProgressPreference = 'SilentlyContinue'; try { [Console]::OutputEncoding = [System.Text.Encoding]::UTF8 } catch { }; ";
-function hxPowerShell(scriptText, env) {
-  return {
-    command: HX_POWERSHELL,
-    args: [
-      "-NoLogo",
-      "-NoProfile",
-      "-NonInteractive",
-      "-ExecutionPolicy",
-      "Bypass",
-      "-Command",
-      `${PREAMBLE}${scriptText}`
-    ],
-    ...env ? { env } : {}
-  };
-}
-var PERSONALIZE = "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize";
-var CLIPBOARD = "HKCU:\\Software\\Microsoft\\Clipboard";
-var BROADCAST = [
-  "try {",
-  "$hxQuote = [string][char]34;",
-  "$hxMember = '[DllImport(' + $hxQuote + 'user32.dll' + $hxQuote + ', CharSet = CharSet.Unicode)] public static extern IntPtr SendMessageTimeout(IntPtr hWnd, uint Msg, UIntPtr wParam, string lParam, uint fuFlags, uint uTimeout, out UIntPtr lpdwResult);';",
-  "Add-Type -Namespace Hx -Name Native -MemberDefinition $hxMember -ErrorAction Stop;",
-  "$hxDone = [UIntPtr]::Zero;",
-  "[void][Hx.Native]::SendMessageTimeout([IntPtr]0xffff, 0x1A, [UIntPtr]::Zero, 'ImmersiveColorSet', 2, 2000, [ref]$hxDone)",
-  "} catch { }"
-].join(" ");
-function registryRead(path, name, missing) {
-  return hxPowerShell(`$v = (Get-ItemProperty -Path '${path}' -Name '${name}' -ErrorAction SilentlyContinue).'${name}'; if ($null -eq $v) { '${missing}' } else { [string]$v }`);
-}
-function registryWrite(path, name, value, broadcast) {
-  return hxPowerShell(`if (-not (Test-Path '${path}')) { New-Item -Path '${path}' -Force | Out-Null }; Set-ItemProperty -Path '${path}' -Name '${name}' -Value ${value} -Type DWord -ErrorAction Stop${broadcast ? `; ${BROADCAST}` : ""}`);
-}
-function registrySwitch(input) {
-  const offIs = input.onIs === 1 ? 0 : 1;
-  return {
-    key: input.key,
-    page: input.page,
-    zh: input.zh,
-    en: input.en,
-    pinyin: input.pinyin,
-    more: input.more ?? [],
-    values: { type: "switch" },
-    read: registryRead(input.path, input.name, "missing"),
-    parse: (stdout) => {
-      const text = stdout.trim();
-      if (text === String(input.onIs))
-        return "on";
-      if (text === String(offIs))
-        return "off";
-      return text === "missing" ? input.missing : null;
-    },
-    write: (value) => registryWrite(input.path, input.name, value === "on" ? input.onIs : offIs, input.broadcast)
-  };
-}
-var THEME_READINGS = {
-  "0,0": "on",
-  "1,1": "off",
-  "0,1": "apps only",
-  "1,0": "system only"
-};
-var THEME_WRITES = {
-  on: [0, 0],
-  off: [1, 1],
-  "apps only": [0, 1],
-  "system only": [1, 0]
-};
-var DARK_MODE = {
-  key: "dark-mode",
-  page: "colors",
-  zh: "深色模式",
-  en: "Dark mode",
-  pinyin: "shen se mo shi",
-  more: ["暗色模式", "黑暗模式", "深色主题", "dark theme"],
-  values: { type: "switch" },
-  read: hxPowerShell(`$p = Get-ItemProperty -Path '${PERSONALIZE}' -ErrorAction SilentlyContinue; $a = $p.AppsUseLightTheme; $s = $p.SystemUsesLightTheme; if ($null -eq $a -or $null -eq $s) { 'missing' } else { [string]$a + ',' + [string]$s }`),
-  parse: (stdout) => THEME_READINGS[stdout.trim()] ?? null,
-  write: (value) => {
-    const [apps, system] = THEME_WRITES[value] ?? [1, 1];
-    return hxPowerShell(`if (-not (Test-Path '${PERSONALIZE}')) { New-Item -Path '${PERSONALIZE}' -Force | Out-Null }; Set-ItemProperty -Path '${PERSONALIZE}' -Name 'AppsUseLightTheme' -Value ${apps} -Type DWord -ErrorAction Stop; Set-ItemProperty -Path '${PERSONALIZE}' -Name 'SystemUsesLightTheme' -Value ${system} -Type DWord -ErrorAction Stop; ${BROADCAST}`);
-  }
-};
-var HX_WIN_SETTINGS = [
-  DARK_MODE,
-  registrySwitch({
-    key: "app-dark-mode",
-    page: "colors",
-    zh: "应用深色模式",
-    en: "Dark mode for apps",
-    pinyin: "",
-    more: ["应用模式", "app mode"],
-    path: PERSONALIZE,
-    name: "AppsUseLightTheme",
-    onIs: 0,
-    missing: null,
-    broadcast: true
-  }),
-  registrySwitch({
-    key: "system-dark-mode",
-    page: "colors",
-    zh: "任务栏和开始菜单深色模式",
-    en: "Dark mode for the taskbar and Start",
-    pinyin: "",
-    more: ["任务栏深色", "Windows 模式", "Windows mode"],
-    path: PERSONALIZE,
-    name: "SystemUsesLightTheme",
-    onIs: 0,
-    missing: null,
-    broadcast: true
-  }),
-  registrySwitch({
-    key: "transparency",
-    page: "colors",
-    zh: "透明效果",
-    en: "Transparency effects",
-    pinyin: "tou ming xiao guo",
-    path: PERSONALIZE,
-    name: "EnableTransparency",
-    onIs: 1,
-    missing: null,
-    broadcast: true
-  }),
-  registrySwitch({
-    key: "clipboard-history",
-    page: "clipboard",
-    zh: "剪贴板历史记录",
-    en: "Clipboard history",
-    pinyin: "jian tie ban li shi ji lu",
-    path: CLIPBOARD,
-    name: "EnableClipboardHistory",
-    onIs: 1,
-    missing: "off",
-    broadcast: false
-  }),
-  {
-    key: "brightness",
-    page: "display",
-    zh: "屏幕亮度",
-    en: "Screen brightness",
-    pinyin: "ping mu liang du",
-    more: ["亮度"],
-    values: { type: "number", min: 0, max: 100 },
-    read: hxPowerShell("try { [string](Get-CimInstance -Namespace root/WMI -ClassName WmiMonitorBrightness -ErrorAction Stop | Select-Object -First 1).CurrentBrightness } catch { 'none' }"),
-    parse: (stdout) => hxParseNumber(stdout, 0, 100),
-    write: (value) => hxPowerShell(`$m = Get-CimInstance -Namespace root/WMI -ClassName WmiMonitorBrightnessMethods -ErrorAction Stop | Select-Object -First 1; Invoke-CimMethod -InputObject $m -MethodName WmiSetBrightness -Arguments @{ Timeout = [uint32]1; Brightness = [byte]${Number(value)} } -ErrorAction Stop | Out-Null`)
-  }
-];
-var HX_WIN_LIST_APPS = hxPowerShell("Get-StartApps | Select-Object Name, AppID | ConvertTo-Json -Compress");
-function hxExplorerPath(env = process.env) {
-  const root = env.SystemRoot || env.windir || "C:\\Windows";
-  return `${root.replace(/[\\/]+$/u, "")}\\explorer.exe`;
-}
-function hxWinOpen(target) {
-  return { command: hxExplorerPath(), args: [target] };
-}
-function hxWinOpened(result) {
-  return !result.missing && !result.timedOut && (result.code === 0 || result.code === 1);
-}
-function hxWinStart(target) {
-  return hxPowerShell("$hxStep = 'start'; Start-Process -FilePath $env:HX_TARGET -ErrorAction Stop", {
-    HX_TARGET: target
-  });
-}
-
 // src/backend/hx-computer/actions.ts
 var UNSUPPORTED = {
   status: "unsupported",
@@ -559,6 +1018,7 @@ var CHOICE_WORDS = {
   缩放: "scale"
 };
 var NOT_ALLOWED = /-1743|not authori[sz]ed to send apple events/iu;
+var NEEDS_AUTOMATION = "macOS has not allowed HXBot to control System Events. The user allows it in System Settings › Privacy & Security › Automation; then try again.";
 function hxBrief(entry) {
   return {
     id: entry.id,
@@ -730,15 +1190,41 @@ class HxComputerActions {
   async#read(seed) {
     const result = await this.#command(seed.read);
     if (NOT_ALLOWED.test(result.stderr)) {
-      return {
-        problem: "permission",
-        reason: "macOS has not allowed HXBot to control System Events. The user allows it in System Settings › Privacy & Security › Automation; then try again."
-      };
+      return { problem: "permission", reason: NEEDS_AUTOMATION };
     }
     if (!hxRunOk(result))
       return { problem: "unreadable", reason: hxRunFailure("Reading the setting", result) };
     const value = seed.parse(result.stdout);
     return value === null ? { problem: "unreadable", reason: "The system gave no value for this setting right now." } : { value };
+  }
+  async#combined(seed, entry, brief, wanted) {
+    const platform = this.#catalog.platform;
+    const command = platform === null || seed.values.type === "file" ? null : hxCombinedChange(platform, seed, wanted);
+    if (!command)
+      return null;
+    const result = await this.#command(command);
+    if (NOT_ALLOWED.test(result.stderr))
+      return { status: "needs-permission", reason: NEEDS_AUTOMATION };
+    if (!hxRunOk(result))
+      return null;
+    const values = hxCombinedValues(seed, result.stdout);
+    if (!values)
+      return null;
+    if (sameValue(seed, values.before, wanted))
+      return { status: "unchanged", setting: brief, value: values.before };
+    if (sameValue(seed, values.after, wanted)) {
+      return { status: "changed", setting: brief, previous: values.before, value: values.after };
+    }
+    for (const waitMs of READ_BACK_WAITS_MS) {
+      await this.#wait(waitMs);
+      const after = await this.#read(seed);
+      if ("value" in after && sameValue(seed, after.value, wanted)) {
+        return { status: "changed", setting: brief, previous: values.before, value: after.value };
+      }
+    }
+    await this.#command(seed.write(values.before));
+    await this.#catalog.disable(entry.id);
+    return this.#openPageOf(entry, "The change did not take effect, so the earlier value was put back. The settings page is open.");
   }
   async set(input) {
     if (this.#catalog.platform === null)
@@ -772,26 +1258,31 @@ class HxComputerActions {
     if (state === "disabled") {
       return this.#openPageOf(entry, "On this computer the direct change of this setting did not take effect before. Its page is open.");
     }
+    const wanted = input.value === undefined || input.value.trim() === "" ? null : hxNormalizeValue(entry.values, input.value);
+    if (input.value !== undefined && input.value.trim() !== "" && wanted === null) {
+      return { status: "invalid-value", setting: brief, expected: hxExpected(entry.values) };
+    }
+    if (wanted !== null && state === "direct") {
+      const combined = await this.#combined(seed, entry, brief, wanted);
+      if (combined)
+        return combined;
+    }
     const before = await this.#read(seed);
     if ("problem" in before) {
       if (before.problem === "permission")
         return { status: "needs-permission", reason: before.reason };
       return this.#openPageOf(entry, `${before.reason} Its page is open.`);
     }
-    if (input.value === undefined || input.value.trim() === "")
-      return { status: "value", setting: brief, value: before.value };
-    const wanted = hxNormalizeValue(entry.values, input.value);
     if (wanted === null)
-      return { status: "invalid-value", setting: brief, expected: hxExpected(entry.values) };
+      return { status: "value", setting: brief, value: before.value };
     if (before.value === wanted)
       return { status: "unchanged", setting: brief, value: before.value };
     if (state === "unchecked") {
       return this.#openPageOf(entry, "HXBot changes a setting directly only after its self-test passed for it on this computer, and it has not yet. The settings page is open: make the change there with the other Computer Use tools. Tell the user once that Settings › Computer Use › Run the self-test checks this computer (it changes no value); after it, such changes are immediate.");
     }
     const written = await this.#command(seed.write(wanted));
-    if (NOT_ALLOWED.test(written.stderr)) {
-      return { status: "needs-permission", reason: "macOS has not allowed HXBot to control System Events." };
-    }
+    if (NOT_ALLOWED.test(written.stderr))
+      return { status: "needs-permission", reason: NEEDS_AUTOMATION };
     if (!hxRunOk(written))
       return { status: "failed", reason: hxRunFailure("Changing the setting", written) };
     for (const waitMs of [0, ...READ_BACK_WAITS_MS]) {
@@ -817,223 +1308,159 @@ import { join as join2 } from "node:path";
 import { readdir, readFile, stat as stat2 } from "node:fs/promises";
 import { basename, join } from "node:path";
 
-// src/backend/hx-computer/tables-mac.ts
-function page2(key, pane, zh, en, pinyin, more = [], security = false) {
-  return { key, address: `x-apple.systempreferences:${pane}`, zh, en, pinyin, more, security };
-}
-var HX_MAC_PAGES = [
-  page2("wifi", "com.apple.wifi-settings-extension", "无线局域网", "Wi-Fi", "wu xian ju yu wang", [
-    "WiFi",
-    "WLAN",
-    "无线网络"
-  ]),
-  page2("bluetooth", "com.apple.BluetoothSettings", "蓝牙", "Bluetooth", "lan ya"),
-  page2("network", "com.apple.Network-Settings.extension", "网络", "Network", "wang luo", [
-    "以太网",
-    "DNS",
-    "代理",
-    "VPN"
-  ]),
-  page2("notifications", "com.apple.Notifications-Settings.extension", "通知", "Notifications", "tong zhi"),
-  page2("sound", "com.apple.Sound-Settings.extension", "声音", "Sound", "sheng yin", ["扬声器", "麦克风", "输出设备"]),
-  page2("focus", "com.apple.Focus-Settings.extension", "专注模式", "Focus", "zhuan zhu mo shi", [
-    "勿扰模式",
-    "Do Not Disturb"
-  ]),
-  page2("screen-time", "com.apple.Screen-Time-Settings.extension", "屏幕使用时间", "Screen Time", "ping mu shi yong shi jian"),
-  page2("general", "com.apple.systempreferences.GeneralSettings", "通用", "General", "tong yong"),
-  page2("appearance", "com.apple.Appearance-Settings.extension", "外观", "Appearance", "wai guan", [
-    "浅色模式",
-    "强调色"
-  ]),
-  page2("accessibility", "com.apple.Accessibility-Settings.extension", "辅助功能", "Accessibility", "fu zhu gong neng", [
-    "旁白",
-    "缩放"
-  ]),
-  page2("control-center", "com.apple.ControlCenter-Settings.extension", "控制中心", "Control Center", "kong zhi zhong xin", ["菜单栏"]),
-  page2("siri", "com.apple.Siri-Settings.extension", "Siri 与聚焦", "Siri & Spotlight", "", [
-    "Siri",
-    "聚焦",
-    "Spotlight"
-  ]),
-  page2("privacy", "com.apple.settings.PrivacySecurity.extension", "隐私与安全性", "Privacy & Security", "yin si yu an quan xing", ["防火墙", "文件保险箱", "定位服务", "屏幕录制", "自动化"], true),
-  page2("desktop-dock", "com.apple.Desktop-Settings.extension", "桌面与程序坞", "Desktop & Dock", "zhuo mian yu cheng xu wu", ["Dock", "程序坞", "台前调度", "默认浏览器"]),
-  page2("displays", "com.apple.Displays-Settings.extension", "显示器", "Displays", "xian shi qi", [
-    "分辨率",
-    "亮度",
-    "夜览",
-    "屏幕"
-  ]),
-  page2("wallpaper", "com.apple.Wallpaper-Settings.extension", "墙纸", "Wallpaper", "qiang zhi", ["壁纸", "桌面背景"]),
-  page2("screen-saver", "com.apple.ScreenSaver-Settings.extension", "屏幕保护程序", "Screen Saver", "ping mu bao hu cheng xu", ["屏保"]),
-  page2("battery", "com.apple.Battery-Settings.extension", "电池", "Battery", "dian chi", [
-    "节能",
-    "低电量模式",
-    "Energy Saver"
-  ]),
-  page2("lock-screen", "com.apple.Lock-Screen-Settings.extension", "锁定屏幕", "Lock Screen", "suo ding ping mu", [
-    "自动锁定",
-    "锁屏"
-  ]),
-  page2("touch-id", "com.apple.Touch-ID-Settings.extension", "触控 ID 与密码", "Touch ID & Password", "chu kong id yu mi ma", ["登录密码", "指纹"], true),
-  page2("users", "com.apple.Users-Groups-Settings.extension", "用户与群组", "Users & Groups", "yong hu yu qun zu", [], true),
-  page2("passwords", "com.apple.Passwords-Settings.extension", "密码", "Passwords", "mi ma", [], true),
-  page2("internet-accounts", "com.apple.Internet-Accounts-Settings.extension", "互联网账户", "Internet Accounts", "hu lian wang zhang hu", ["邮件账户"]),
-  page2("game-center", "com.apple.Game-Center-Settings.extension", "Game Center", "Game Center", ""),
-  page2("wallet", "com.apple.WalletSettingsExtension", "钱包与 Apple Pay", "Wallet & Apple Pay", "qian bao", [], true),
-  page2("keyboard", "com.apple.Keyboard-Settings.extension", "键盘", "Keyboard", "jian pan", [
-    "输入法",
-    "快捷键",
-    "听写"
-  ]),
-  page2("mouse", "com.apple.Mouse-Settings.extension", "鼠标", "Mouse", "shu biao", ["指针速度", "滚动方向"]),
-  page2("trackpad", "com.apple.Trackpad-Settings.extension", "触控板", "Trackpad", "chu kong ban", [
-    "轻点来点按",
-    "手势"
-  ]),
-  page2("printers", "com.apple.Print-Scan-Settings.extension", "打印机与扫描仪", "Printers & Scanners", "da yin ji yu sao miao yi", ["打印机"]),
-  page2("about", "com.apple.SystemProfiler.AboutExtension", "关于本机", "About", "guan yu ben ji", [
-    "电脑名称",
-    "系统版本"
-  ]),
-  page2("software-update", "com.apple.Software-Update-Settings.extension", "软件更新", "Software Update", "ruan jian geng xin", ["系统更新"]),
-  page2("storage", "com.apple.settings.Storage", "储存空间", "Storage", "chu cun kong jian", ["磁盘空间", "存储"]),
-  page2("airdrop", "com.apple.AirDrop-Handoff-Settings.extension", "隔空投送与接力", "AirDrop & Handoff", "ge kong tou song yu jie li", ["隔空投送", "AirDrop", "隔空播放"]),
-  page2("login-items", "com.apple.LoginItems-Settings.extension", "登录项", "Login Items", "deng lu xiang", ["开机启动", "启动项"], true),
-  page2("language", "com.apple.Localization-Settings.extension", "语言与地区", "Language & Region", "yu yan yu di qu", [
-    "系统语言"
-  ]),
-  page2("date-time", "com.apple.Date-Time-Settings.extension", "日期与时间", "Date & Time", "ri qi yu shi jian", [
-    "时区"
-  ]),
-  page2("sharing", "com.apple.Sharing-Settings.extension", "共享", "Sharing", "gong xiang", ["屏幕共享", "文件共享", "远程登录"], true),
-  page2("time-machine", "com.apple.Time-Machine-Settings.extension", "时间机器", "Time Machine", "shi jian ji qi", [
-    "备份"
-  ]),
-  page2("transfer-reset", "com.apple.Transfer-Reset-Settings.extension", "传输或还原", "Transfer or Reset", "chuan shu huo huan yuan", ["抹掉所有内容"], true),
-  page2("startup-disk", "com.apple.Startup-Disk-Settings.extension", "启动磁盘", "Startup Disk", "qi dong ci pan", [], true),
-  page2("apple-account", "com.apple.systempreferences.AppleIDSettings", "Apple 账户", "Apple Account", "", ["Apple ID", "iCloud"], true)
-];
-var OSASCRIPT = "/usr/bin/osascript";
-function script(text) {
-  return { command: OSASCRIPT, args: ["-e", text] };
-}
-function events(text) {
-  return script(`tell application "System Events" to ${text}`);
-}
-function volumeNumber(key, zh, en, pinyin, property) {
-  return {
-    key,
-    page: "sound",
-    zh,
-    en,
-    pinyin,
-    values: { type: "number", min: 0, max: 100 },
-    read: script(`${property} of (get volume settings)`),
-    parse: (stdout) => hxParseNumber(stdout, 0, 100),
-    write: (value) => script(`set volume ${property} ${Number(value)}`)
-  };
-}
-function dockSwitch(key, zh, en, pinyin, property, more = []) {
-  const seed = {
-    key,
-    page: "desktop-dock",
-    zh,
-    en,
-    pinyin,
-    more,
-    values: { type: "switch" },
-    read: events(`get ${property} of dock preferences`),
-    parse: hxParseSwitch,
-    write: (value) => events(`set ${property} of dock preferences to ${value === "on"}`)
-  };
-  return seed;
-}
-function dockChoice(key, zh, en, pinyin, property, options) {
-  const seed = {
-    key,
-    page: "desktop-dock",
-    zh,
-    en,
-    pinyin,
-    values: { type: "choice", options },
-    read: events(`get ${property} of dock preferences`),
-    parse: (stdout) => hxParseChoice(stdout, options),
-    write: (value) => events(`set ${property} of dock preferences to ${options.includes(value) ? value : options[0]}`)
-  };
-  return seed;
-}
-var HX_MAC_SETTINGS = [
-  {
-    key: "dark-mode",
-    page: "appearance",
-    zh: "深色模式",
-    en: "Dark mode",
-    pinyin: "shen se mo shi",
-    more: ["暗色模式", "夜间模式", "深色外观", "dark appearance"],
-    values: { type: "switch" },
-    read: events("tell appearance preferences to get dark mode"),
-    parse: hxParseSwitch,
-    write: (value) => events(`tell appearance preferences to set dark mode to ${value === "on"}`)
-  },
-  {
-    ...volumeNumber("volume", "音量", "Volume", "yin liang", "output volume"),
-    more: ["输出音量", "声音大小", "output volume"]
-  },
-  {
-    key: "mute",
-    page: "sound",
-    zh: "静音",
-    en: "Mute",
-    pinyin: "jing yin",
-    more: ["关闭声音", "muted"],
-    values: { type: "switch" },
-    read: script("output muted of (get volume settings)"),
-    parse: hxParseSwitch,
-    write: (value) => script(`set volume output muted ${value === "on"}`)
-  },
-  volumeNumber("alert-volume", "提示音音量", "Alert volume", "ti shi yin yin liang", "alert volume"),
-  {
-    ...volumeNumber("input-volume", "输入音量", "Input volume", "shu ru yin liang", "input volume"),
-    more: ["麦克风音量"]
-  },
-  dockSwitch("dock-autohide", "自动隐藏程序坞", "Hide the Dock automatically", "zi dong yin cang cheng xu wu", "autohide", ["自动隐藏 Dock", "Dock autohide"]),
-  dockSwitch("dock-magnification", "程序坞放大", "Dock magnification", "cheng xu wu fang da", "magnification", [
-    "Dock 放大"
-  ]),
-  dockSwitch("dock-recents", "在程序坞中显示最近使用的应用", "Show recent apps in the Dock", "", "show recents"),
-  dockSwitch("menu-bar-autohide", "自动隐藏菜单栏", "Hide the menu bar automatically", "zi dong yin cang cai dan lan", "autohide menu bar"),
-  dockChoice("dock-position", "程序坞位置", "Dock position", "cheng xu wu wei zhi", "screen edge", [
-    "left",
-    "bottom",
-    "right"
-  ]),
-  dockChoice("dock-minimize-effect", "最小化窗口的效果", "Minimize effect", "", "minimize effect", ["genie", "scale"]),
-  {
-    key: "dock-size",
-    page: "desktop-dock",
-    zh: "程序坞大小",
-    en: "Dock size",
-    pinyin: "cheng xu wu da xiao",
-    more: ["Dock 大小"],
-    values: { type: "number", min: 0, max: 100 },
-    read: events("get dock size of dock preferences"),
-    parse: (stdout) => hxParseNumber(stdout, 0, 100, 100),
-    write: (value) => events(`set dock size of dock preferences to (${Number(value)} / 100)`),
-    tolerance: 4
+// src/backend/hx-computer/pinyin-table.ts
+/*! The pinyin below is data of pinyin-pro 3.29.5 (https://github.com/zh-lx/pinyin-pro):
+
+MIT License
+
+Copyright (c) 2022-present zh-lx
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
+var HX_PINYIN_TABLE = "a啊阿吖嗄锕 ai埃挨哎唉哀皑癌蔼矮艾碍爱隘捱嗳嗌嫒瑷暧砹锿霭 an鞍氨安俺按暗岸胺案谙埯揞犴庵桉铵鹌黯 ang肮昂盎 ao凹敖熬翱袄傲奥懊澳嚣坳艹拗嗷岙廒遨媪骜獒聱螯鏊鳌鏖 ba芭捌扒叭吧笆八疤巴拔跋靶把坝霸罢爸茇菝岜灞钯粑鲅魃 bai白柏百摆佰败拜稗捭呗掰 ban斑班搬扳般颁板版扮拌伴瓣半办绊阪坂钣瘢癍舨 bang邦帮梆榜膀绑棒磅蚌镑傍谤蒡浜 bao苞胞包褒剥薄雹保堡饱宝抱报暴豹鲍爆勹葆孢煲鸨褓龅 bei杯碑悲卑北辈背贝钡倍狈备惫焙被孛陂邶蓓悖碚鹎褙鐾鞴 ben奔苯本笨畚坌贲锛 beng崩绷甭泵蹦迸嘣甏 bi逼鼻比鄙笔彼碧蓖蔽毕毙毖币庇痹闭敝弊必壁臂避陛匕俾荜荸萆薜吡哔狴庳愎滗濞弼妣婢嬖璧畀铋秕裨筚箅篦舭襞跸髀 bian鞭边编贬扁便变卞辨辩辫遍匾弁苄忭汴缏煸砭碥窆褊蝙笾鳊 biao标彪膘表婊飑飙飚镖镳瘭裱鳔髟 bie鳖憋别瘪蹩 bin彬斌濒滨宾摈傧豳缤玢槟殡膑镔髌鬓 bing兵冰柄丙秉饼炳病并禀冫邴摒 bo玻菠播拨钵波博勃搏铂箔伯帛舶脖膊渤泊驳簿亳啵饽檗擘礴钹鹁簸趵跛踣 bu捕卜哺补埠不布步部怖卟逋瓿晡钚钸醭 ca擦礤 cai猜裁材才财睬踩采彩菜蔡 can餐参蚕残惭惨灿骖璨粲黪 cang苍舱仓沧藏 cao操糙槽曹草嘈漕螬艚 ce厕策侧册测恻 cen岑涔 ceng层蹭曾噌 cha插叉茬茶查碴搽察岔差诧刹嚓猹馇汊姹杈槎檫锸镲衩 chai拆柴豺侪钗瘥虿 chan搀掺蝉馋谗缠铲产阐颤冁谄蒇廛忏潺澶孱羼婵骣觇禅蟾躔 chang昌猖场尝常长偿肠厂敞畅唱倡伥鬯苌菖徜怅惝阊娼嫦昶氅鲳 chao超抄钞朝嘲潮巢吵炒怊晁焯耖 che车扯撤掣彻澈坼屮砗 chen郴臣辰尘晨忱沉陈趁衬伧谌谶抻嗔宸琛榇碜龀 cheng撑称城橙成呈乘程惩澄诚承逞骋秤丞埕枨柽樘塍瞠铖裎蛏酲 chi吃痴持匙池迟弛驰耻齿侈尺赤翅斥炽傺郗墀茌叱哧啻嗤彳饬媸敕眵鸱瘛褫蚩螭笞篪豉踟魑 chong充冲虫崇宠茺忡憧铳舂艟 chou抽酬畴踌稠愁筹仇绸瞅丑臭俦帱惆瘳雠 chu初出橱厨躇锄雏滁除楚础储矗搐触处畜亍刍怵憷绌杵楮樗褚蜍蹰黜 chuai揣搋膪踹 chuan川穿椽传船喘串舛遄巛氚钏舡 chuang疮窗床闯创怆 chui吹炊捶锤垂陲棰槌 chun春椿醇唇淳纯蠢莼鹑蝽 chuo戳绰啜辶辍踔龊 ci疵茨磁雌辞慈瓷词此刺赐次呲祠鹚糍 cong聪葱囱匆从丛苁淙骢琮璁枞 cou凑楱辏腠 cu粗醋簇促蔟徂猝殂酢蹙蹴 cuan蹿篡窜汆撺爨镩 cui摧崔催脆瘁粹淬翠萃啐悴璀榱毳 cun村存寸忖皴 cuo磋撮搓措挫错厝嵯脞锉矬痤鹾蹉 da搭达答瘩打大耷哒嗒怛妲褡笪靼鞑 dai呆歹傣戴带殆代贷袋待逮怠埭甙呔岱迨骀绐玳黛 dan耽担丹单郸掸胆旦氮但惮淡诞蛋儋萏啖澹殚赕眈疸瘅聃箪 dang当挡党荡档谠凼菪宕砀铛裆 dao刀捣蹈倒岛祷导到稻悼道盗刂叨忉氘纛 de德得的锝 deng蹬灯登等瞪凳邓噔嶝戥磴镫簦 di堤低滴迪敌笛狄涤嫡抵底地蒂第帝弟递缔氐籴诋谛邸坻荻嘀娣柢棣觌砥碲睇镝羝骶 dia嗲 dian颠掂滇碘点典靛垫电佃甸店惦奠淀殿坫巅玷钿癜癫簟踮 diao碉叼雕凋刁掉吊钓铞貂鲷 die跌爹碟蝶迭谍叠垤堞揲喋牒瓞耋蹀鲽 ding丁盯叮钉顶鼎锭定订仃啶玎腚碇疔耵酊 diu丢铥 dong东冬董懂动栋侗恫冻洞垌咚岽峒氡胨胴硐鸫 dou兜抖斗陡豆逗痘都蔸窦蚪篼 du督毒犊独读堵睹赌杜镀肚度渡妒芏嘟渎椟牍蠹笃髑黩 duan端短锻段断缎椴煅簖 dui堆兑队对怼憝碓 dun墩吨蹲敦顿钝盾遁沌炖砘礅盹镦趸 duo掇哆多夺垛躲朵跺舵剁惰堕咄哚沲缍铎裰踱 e蛾峨鹅俄额讹娥恶厄扼遏鄂饿噩谔垩苊莪萼呃愕阏屙婀轭腭锇锷鹗颚鳄 ei诶 en恩蒽摁 er而儿耳尔饵洱二贰佴迩珥铒鸸鲕 fa发罚筏伐乏阀法珐垡砝 fan藩帆番翻樊矾钒繁凡烦反返范贩犯饭泛蕃蘩幡梵燔畈蹯 fang坊芳方肪房防妨仿访纺放匚邡枋钫舫鲂 fei菲非啡飞肥匪诽吠肺废沸费芾狒悱淝妃绯榧腓斐扉镄痱蜚篚翡霏鲱 fen芬酚吩氛分纷坟焚汾粉奋份忿愤粪偾瀵棼鲼鼢 feng丰封枫蜂峰锋风疯烽逢冯缝讽奉凤俸酆葑唪沣砜 fo佛 fou否缶 fu夫敷肤孵扶拂辐幅氟符伏俘服浮涪福袱弗甫抚辅俯釜斧腑府腐赴副覆赋复傅付阜父腹负富讣附妇缚咐匐凫阝郛芙苻茯菔拊呋呒幞怫滏艴孚驸绂绋桴赙祓砩黻黼罘稃馥蚨蜉蝠蝮麸趺跗鲋鳆 ga噶嘎尬尕尜旮钆 gai该改概钙盖溉丐陔垓戤赅胲 gan干甘杆柑竿肝赶感秆敢赣坩苷尴擀泔淦澉绀橄旰矸疳酐 gang冈刚钢缸肛纲岗港杠戆罡筻 gao篙皋高膏羔糕搞稿告睾诰郜藁缟槔槁杲锆 ge哥歌搁戈鸽胳疙割革葛格阁隔铬个各咯鬲哿圪塥嗝搿膈硌镉袼虼舸骼 gei给 gen根跟亘茛哏艮 geng耕更庚羹埂耿梗哽赓绠鲠 gong工攻功恭龚供躬公宫弓巩汞拱贡共廾珙肱蚣觥 gou钩勾沟苟狗垢构购够佝诟岣遘媾缑枸觏彀笱篝鞲 gu辜菇咕箍估沽孤姑鼓古蛊骨谷股故顾固雇嘏诂菰崮汩梏轱牯牿臌毂瞽罟钴锢鸪痼蛄酤觚鲴 gua刮瓜剐寡挂褂卦诖呱栝胍鸹 guai乖拐怪 guan棺关官冠观管馆罐惯灌贯倌掼涫盥鹳鳏 guang光广逛咣犷桄胱 gui瑰规圭硅归龟闺轨鬼诡癸桂柜跪贵刽匦刿庋宄妫桧晷皈簋鲑 gun辊滚棍丨衮绲磙鲧 guo锅郭国果裹过馘埚掴呙帼崞猓椁虢聒蜾蝈 ha蛤哈铪 hai骸孩海氦亥害骇还咳醢 han酣憨邯韩含涵寒函喊罕翰撼捍旱憾悍焊汗汉邗菡撖瀚晗焓顸颔蚶鼾 hang夯杭航沆绗颃 hao镐壕嚎豪毫郝好耗号浩蒿薅嗥嚆濠灏昊皓颢蚝 he呵喝荷菏核禾和何合盒阂河涸赫褐鹤贺诃劾壑嗬阖纥曷盍颌翮 hei嘿黑嗨 hen痕很狠恨 heng哼亨横衡恒蘅珩桁 hong轰哄烘虹鸿洪宏弘红黉訇讧荭蕻薨闳泓 hou喉侯猴吼厚候后堠後逅瘊篌糇鲎骺 hu呼乎忽瑚壶葫胡蝴狐糊湖弧虎唬护互沪户冱唿囫岵猢怙惚浒滹琥槲轷觳烀煳戽扈祜瓠鹄鹕鹱虍笏醐斛鹘 hua花哗华猾滑画划化话骅桦砉铧 huai槐徊怀淮坏踝 huan欢环桓缓换患唤痪豢焕涣宦幻郇奂萑擐圜獾洹浣漶寰逭缳锾鲩鬟 huang荒慌黄磺蝗簧皇凰惶煌晃幌恍谎隍徨湟潢遑璜肓癀蟥篁鳇 hui灰挥辉徽恢蛔回毁悔慧卉惠晦贿秽会烩汇讳诲绘诙茴荟蕙咴喙隳洄浍彗缋珲晖恚虺蟪麾 hun荤昏婚魂浑混诨馄阍溷 huo豁活伙火获或惑霍货祸劐藿攉嚯夥灬钬锪镬耠蠖 ji击圾基机畸稽积箕肌饥迹激讥鸡姬绩缉吉极棘辑籍集及急疾汲即嫉级挤几脊己蓟技冀季伎祭剂悸济寄寂计记既忌际妓继纪亟乩剞佶偈墼芨芰蒺蕺掎叽咭哜唧岌嵴洎彐屐骥畿玑楫殛戟戢赍觊犄齑矶羁嵇稷瘠虮笈笄暨跻跽霁鲚鲫髻麂 jia嘉枷夹佳家加荚颊贾甲钾假稼价架驾嫁伽郏葭岬浃迦珈戛胛恝铗镓痂瘕袷蛱笳袈跏 jian歼监坚尖笺间煎兼肩艰奸缄茧检柬碱硷拣捡简俭剪减荐鉴践贱见键箭件健舰剑饯渐溅涧建僭谏谫菅蒹搛囝湔蹇謇缣枧楗戋戬牮犍毽腱睑锏鹣裥笕翦趼踺鲣鞯 jiang僵姜将浆江疆蒋桨奖讲匠酱降茳洚绛缰犟礓耩糨豇 jiao蕉椒礁焦胶交郊浇骄娇嚼搅铰矫侥脚狡角饺缴绞剿教酵轿较叫窖佼僬艽茭挢噍徼姣敫皎鹪蛟醮跤鲛 jie揭接皆秸街阶截劫节杰捷睫竭洁结解姐戒藉芥界借介疥诫届讦诘卩拮喈嗟婕孑桀碣疖颉蚧羯鲒骱 jin巾筋斤金今津襟紧锦仅谨进靳晋禁近烬浸尽劲卺荩堇噤馑廑妗缙瑾槿赆觐钅衿矜 jing荆兢茎睛晶鲸京惊精粳经井警景颈静境敬镜径痉靖竟竞净刭儆阱菁獍憬泾迳弪婧肼胫腈旌箐 jiong炯窘冂迥炅扃 jiu揪究纠玖韭久灸九酒厩救旧臼舅咎就疚僦啾阄柩桕鸠鹫赳鬏 ju桔鞠拘狙疽居驹菊局矩举沮聚拒据巨具距踞锯俱句惧炬剧倨讵苣苴莒掬遽屦琚椐榘榉橘犋飓钜锔窭裾趄醵踽龃雎鞫 juan捐鹃娟倦眷卷绢鄄狷涓桊蠲锩镌 jue撅攫抉掘倔爵觉决诀绝厥劂谲矍蕨噘噱崛獗孓珏桷橛爝镢蹶觖鳜 jun均菌钧军君峻俊竣浚郡骏捃皲隽麇 ka喀咖卡佧咔胩 kai开揩楷凯慨剀垲蒈忾恺铠锎锴 kan槛刊堪勘坎砍看侃凵莰阚戡龛瞰 kang康慷糠扛抗亢炕伉闶钪 kao考拷烤靠尻栲犒铐 ke坷苛柯棵磕颗科壳可渴克刻客课嗑岢恪溘骒缂珂轲氪瞌钶锞稞疴窠颏蚵蝌髁 ken肯啃垦恳裉 keng坑吭铿 kong空恐孔控倥崆箜 kou抠口扣寇芤蔻叩眍筘 ku枯哭窟苦酷库裤刳堀喾绔骷 kua夸垮挎跨胯侉 kuai块筷侩快蒯郐哙狯脍 kuan宽款髋 kuang匡筐狂框矿眶旷况诓诳邝圹夼哐纩贶 kui亏盔岿窥葵奎魁傀馈愧溃馗匮夔蒉揆喹喟悝愦逵暌睽聩蝰篑跬 kun坤昆捆困悃阃琨锟醌鲲髡 kuo括扩廓阔蛞 la垃拉喇蜡腊辣啦剌邋旯砬瘌 lai莱来赖崃徕涞濑赉睐铼癞籁 lan蓝婪栏拦篮阑兰澜谰揽览懒缆烂滥岚漤榄斓罱镧褴 lang琅榔狼廊郎朗浪莨蒗啷阆锒稂螂 lao捞劳牢老佬姥酪烙涝唠崂栳铑铹痨耢醪 le勒乐仂叻嘞泐鳓 lei雷镭蕾磊累儡垒擂肋类泪羸诔嫘缧檑耒酹 leng棱楞冷塄愣 li厘梨犁黎篱狸离漓理李里鲤礼莉荔吏栗丽厉励砾历利傈例俐痢立粒沥隶力璃哩俪俚郦坜苈莅蓠藜呖唳喱猁溧澧逦娌嫠骊缡枥栎轹戾砺詈罹锂鹂疠疬蛎蜊蠡笠篥粝醴雳鲡鳢黧 lia俩 lian联莲连镰廉怜涟帘敛脸链恋炼练蔹奁潋濂琏楝殓臁裢裣蠊鲢 liang粮凉梁粱良两辆量晾亮谅墚椋踉靓魉 liao撩聊僚疗燎寥辽潦了撂镣廖料蓼尥嘹獠寮缭钌鹩 lie列裂烈劣猎冽埒捩咧洌趔躐鬣 lin琳林磷霖临邻鳞淋凛赁吝拎蔺啉嶙廪懔遴檩辚膦瞵粼躏麟 ling玲菱零龄铃伶羚凌灵陵岭领另令酃苓呤囹泠绫柃棂瓴聆蛉翎鲮 liu溜琉榴硫馏留刘瘤流柳六浏遛骝绺旒熘锍镏鹨鎏 long龙聋咙笼窿隆垄拢陇垅茏泷珑栊胧砻癃 lou楼娄搂篓漏陋蒌喽嵝镂瘘耧蝼髅 lu芦卢颅庐炉掳卤虏鲁麓碌露路赂鹿潞禄录陆戮垆撸噜泸渌漉逯璐栌橹轳辂辘氇胪镥鸬鹭簏舻鲈 luan峦挛孪滦卵乱脔娈栾鸾銮 lun抡轮伦仑沦纶论囵 luo萝螺罗逻锣箩骡裸落洛骆络倮蠃荦摞猡泺漯珞椤脶镙瘰跞雒 lv驴吕铝侣旅履屡缕虑氯律率滤绿偻捋闾榈膂稆褛 lve掠略锊 ma妈麻玛码蚂马骂嘛吗犸杩蟆 mai埋买麦卖迈脉劢荬唛霾 man瞒馒蛮满蔓曼慢漫谩墁幔缦熳镘颟螨鳗鞔 mang芒茫盲氓忙莽邙漭硭蟒 mao猫茅锚毛矛铆卯茂冒帽貌贸袤茆峁泖瑁昴牦耄旄懋瞀蝥蟊髦 me么 mei玫枚梅酶霉煤没眉媒镁每美昧寐妹媚莓嵋猸浼湄楣镅鹛袂魅 men门闷们扪焖懑钔 meng萌蒙檬盟锰猛梦孟勐甍瞢懵朦礞虻蜢蠓艋艨 mi眯醚靡糜迷谜弥米秘觅泌蜜密幂芈冖谧蘼咪嘧猕汨宓弭脒祢敉糸縻麋 mian棉眠绵冕免勉娩缅面沔渑湎宀腼眄黾 miao苗描瞄藐秒渺庙妙喵邈缈杪淼眇鹋 mie蔑灭咩蠛篾 min民抿皿敏悯闽苠岷闵泯缗玟珉愍鳘 ming明螟鸣铭名命冥茗溟暝瞑酩 miu谬缪 mo貉摸摹蘑模膜磨摩魔抹末莫墨默沫漠寞陌谟茉蓦馍嫫嬷殁镆秣瘼耱貊貘麽 mou谋某侔哞眸蛑鍪 mu牟拇牡亩姆母墓暮幕募慕木目睦牧穆仫坶苜沐毪钼 na拿哪呐钠那娜纳捺肭镎衲 nai氖乃奶耐奈鼐艿萘柰 nan南男难喃囡楠腩蝻赧 nang囊攮囔馕曩 nao挠脑恼闹淖孬垴呶猱瑙硇铙蛲 ne呢讷疒 nei馁内 nen嫩恁 neng能 ng嗯 ni妮霓倪泥尼拟你匿腻逆溺伲坭猊怩昵旎睨铌鲵 nian蔫拈年碾撵捻念粘辗廿埝辇黏鲇鲶 niang娘酿 niao鸟尿茑嬲脲袅 nie捏聂孽啮镊镍涅乜陧蘖嗫颞臬蹑 nin您 ning柠狞凝宁拧泞佞咛甯聍 niu牛扭钮纽狃忸妞 nong脓浓农弄侬哝 nou耨 nu奴努怒弩胬孥驽 nuan暖 nuo挪懦糯诺傩搦喏锘 nv女恧钕衄 nve虐疟 o哦噢 ou欧鸥殴藕呕偶沤讴怄瓯耦 pa耙啪趴爬帕怕琶葩杷筢 pai拍排牌徘湃派俳蒎哌 pan攀潘盘磐盼畔判叛丬爿泮袢襻蟠蹒 pang乓庞旁耪胖彷滂逄螃 pao抛咆刨炮袍跑泡匏狍庖脬疱 pei呸胚培裴赔陪配佩沛辔帔旆锫醅霈 pen喷盆湓 peng砰抨烹澎彭蓬棚硼篷膨朋鹏捧碰堋嘭怦蟛 pi辟坯砒霹批披劈琵毗啤脾疲皮匹痞僻屁譬丕仳陴邳郫圮埤鼙芘擗噼庀淠媲纰枇甓睥罴铍癖疋蚍蜱貔 pian篇偏片骗谝骈犏胼翩蹁 piao飘漂瓢票剽莩嘌嫖骠缥殍瞟螵 pie撇瞥丿苤氕 pin拼频贫品聘拚姘嫔榀牝颦 ping乒坪苹萍平凭瓶评屏俜娉枰鲆 po坡泼颇婆破魄迫粕叵鄱珀钋钷皤笸 pou剖裒掊 pu脯扑铺仆莆葡菩蒲埔朴圃普浦谱曝瀑匍噗溥濮璞攴氆攵镤镨蹼 qi期欺栖戚妻七凄漆柒沏其棋奇歧畦崎脐齐旗祈祁骑起岂乞企启契砌器气迄弃汽泣讫丌亓圻芑芪荠萁萋葺蕲嘁屺岐汔淇骐绮琪琦杞桤槭耆欹祺憩碛颀蛴蜞綦蹊鳍麒 qia掐恰洽葜髂 qian牵扦钎铅千迁签仟谦乾黔钱钳前潜遣浅谴堑嵌欠歉倩佥阡芊芡茜荨掮岍悭骞搴褰缱椠肷愆钤虔箝 qiang枪呛腔羌墙蔷强抢戕嫱樯戗炝锖锵镪襁蜣羟跄 qiao橇锹敲悄桥瞧乔侨巧鞘撬翘峭俏窍劁诮谯荞峤愀憔缲樵硗跷鞒 qie切茄且怯窃惬慊妾挈锲箧 qin钦侵亲秦琴勤芹擒禽寝沁芩揿吣嗪噙檎锓覃螓衾 qing青轻氢倾卿清擎晴氰情顷请庆苘圊檠磬蜻罄綮謦鲭黥 qiong琼穷邛茕穹蛩筇跫銎 qiu秋丘邱球求囚酋泅俅巯犰湫逑遒楸赇虬蚯裘糗鳅鼽 qu趋区蛆曲躯屈驱渠取娶龋趣去诎劬蕖蘧岖衢阒璩觑氍朐祛磲鸲癯蛐蠼麴瞿黢 quan圈颧权醛泉全痊拳犬券劝诠荃犭悛绻辁畎铨蜷筌鬈 que缺炔瘸却鹊榷确雀阕阙悫 qun裙群逡 ran然燃冉染苒蚺髯 rang瓤壤攘嚷让禳穰 rao饶扰绕荛娆桡 re惹热 ren壬仁人忍韧任认刃妊纫亻仞荏饪轫稔衽 reng扔仍 ri日 rong戎茸蓉荣融熔溶容绒冗嵘狨榕肜蝾 rou揉柔肉糅蹂鞣 ru茹蠕儒孺如辱乳汝入褥蓐薷嚅洳溽濡缛铷襦颥 ruan软阮朊 rui蕊瑞锐芮蕤枘睿蚋 run闰润 ruo若弱偌箬 sa撒洒萨卅仨挲脎飒 sai腮鳃塞赛噻 san三叁伞散馓毵 sang桑嗓丧搡磉颡 sao搔骚扫嫂埽缫臊瘙鳋 se瑟色涩啬铯穑 sen森 seng僧 sha莎砂杀沙纱傻啥煞厦唼歃铩痧裟霎鲨 shai筛晒酾 shan珊苫杉山删煽衫闪陕擅赡膳善汕扇缮栅讪鄯埏芟彡潸姗嬗骟膻钐疝蟮舢跚鳝 shang墒伤商赏晌上尚裳垧绱殇熵觞 shao梢捎稍烧芍勺韶少哨邵绍劭潲杓蛸筲艄 she奢赊蛇舌舍赦摄射慑涉社设厍佘猞滠畲麝 shen砷申呻伸身深娠绅神沈审婶甚肾慎渗什诜谂莘葚哂渖椹胂矧蜃糁 sheng声生甥牲升绳省盛剩胜圣嵊晟眚笙 shi师失狮施湿诗尸虱十石拾时食蚀实识史矢使屎驶始式示士世柿事拭誓逝势是嗜噬适仕侍释饰氏市恃室视试谥埘莳蓍弑饣轼贳炻礻铈螫舐筮豕鲥鲺 shou收手首守寿授售受瘦兽扌狩绶艏 shu蔬枢梳殊抒输叔舒淑疏书赎孰熟薯暑曙署蜀黍鼠属术述树束戍竖墅庶数漱恕倏塾菽摅沭澍姝纾毹腧殳秫 shua刷耍唰 shuai摔衰甩帅蟀 shuan栓拴闩涮 shuang霜双爽孀 shui谁水睡税氵 shun吮瞬顺舜 shuo说硕朔烁蒴搠妁槊铄 si斯撕嘶思私司丝死肆寺嗣四伺似饲巳厮俟兕厶咝汜泗澌姒驷纟缌祀锶鸶耜蛳笥 song松耸怂颂送宋讼诵凇菘崧嵩忪悚淞竦 sou搜艘擞嗽叟薮嗖嗾馊溲飕瞍锼螋 su苏酥俗素速粟僳塑溯宿诉肃夙谡蔌嗉愫涑簌觫稣 suan酸蒜算狻 sui虽隋随绥髓碎岁穗遂隧祟谇荽濉邃燧眭睢 sun孙损笋荪狲飧榫隼 suo蓑梭唆缩琐索锁所唢嗦嗍娑桫睃羧 ta塌他它她塔獭挞蹋踏闼溻遢榻沓铊趿鳎 tai胎苔抬台泰酞太态汰邰薹肽炱钛跆鲐 tan弹坍摊贪瘫滩坛檀痰潭谭谈坦毯袒碳探叹炭郯昙忐钽锬镡 tang汤塘搪堂棠膛唐糖倘躺淌趟烫傥帑饧溏瑭铴镗耥螗螳羰醣 tao掏涛滔绦萄桃逃淘陶讨套鼗啕洮韬焘饕 te特忒忑慝铽 teng藤腾疼誊滕 ti梯剔踢锑提题蹄啼体替嚏惕涕剃屉倜悌逖绨缇鹈裼醍 tian天添填田甜恬舔腆掭忝阗殄畋 tiao调挑条迢眺跳佻苕祧窕蜩笤粜龆鲦髫 tie贴铁帖萜餮 ting厅听烃汀廷停亭庭挺艇莛葶婷梃町铤蜓霆 tong通桐酮瞳同铜彤童桶捅筒统痛佟僮仝茼嗵恸潼砼 tou偷投头透亠钭骰 tu凸秃突图徒途涂屠土吐兔堍荼菟钍酴 tuan湍团抟彖疃 tui推颓腿蜕褪退煺 tun囤吞屯臀氽饨暾豚 tuo拖托脱鸵陀驮驼椭妥拓唾乇佗坨庹沱柝柁橐砣箨酡跎鼍 wa挖哇蛙洼娃瓦袜佤娲腽 wai歪外崴 wan豌弯湾玩顽丸烷完碗挽晚皖惋宛婉万腕剜芄莞菀纨绾琬脘畹蜿 wang汪王亡枉网往旺望忘妄罔尢惘辋魍 wei威巍微危韦违桅围唯惟为潍维苇萎委伟伪尾纬未蔚味畏胃喂魏位渭谓尉慰卫偎诿隈隗葳薇囗帏帷嵬猥猬闱沩洧涠逶娓玮韪軎炜煨痿艉鲔 wen瘟温蚊文闻纹吻稳紊问刎阌汶璺雯 weng嗡翁瓮蓊蕹 wo挝蜗涡窝我斡卧握沃倭莴喔幄渥肟硪龌 wu巫呜钨乌污诬屋无芜梧吾吴毋武五捂午舞伍侮坞戊雾晤物勿务悟误兀仵阢邬圬芴唔庑怃忤浯寤迕妩婺骛杌牾於焐鹉鹜痦蜈鋈鼯 xi昔熙析西硒矽晰嘻吸锡牺稀息希悉膝夕惜熄烯溪汐犀檄袭席习媳喜洗系隙戏细僖兮隰郄菥葸蓰奚唏徙饩阋浠淅屣嬉玺樨曦觋欷歙熹禊禧皙穸蜥螅蟋舄舾羲粞翕醯鼷 xia瞎虾匣霞辖暇峡侠狭下夏吓呷狎遐瑕柙硖罅黠 xian铣掀锨先仙鲜纤咸贤衔舷闲涎弦嫌显险现献县腺馅羡宪陷限线冼苋莶藓岘猃暹娴氙燹祆鹇痫蚬筅籼酰跣跹霰 xiang相厢镶香箱襄湘乡翔祥详想响享项巷橡像向象芗葙饷庠骧缃蟓鲞飨 xiao萧硝霄削哮销消宵淆晓小孝校肖啸笑效哓崤潇逍骁绡枭枵筱箫魈 xie楔些歇蝎鞋协挟携邪斜胁谐写械卸蟹懈泄泻谢屑偕亵勰燮薤撷獬廨渫瀣邂绁缬榭榍躞 xin薪芯锌欣辛新忻心信衅囟馨忄昕歆鑫 xing星腥猩惺兴刑型形邢行醒幸杏性姓陉荇擤悻硎 xiong兄凶胸匈汹雄熊芎 xiu休修羞朽嗅锈秀袖绣咻岫馐庥溴鸺貅髹 xu墟戌需虚嘘须徐许蓄酗叙旭序恤絮婿绪续吁诩勖圩蓿洫溆顼栩煦盱胥糈醑 xuan轩喧宣悬旋玄选癣眩绚儇谖萱揎泫渲漩璇楦暄炫煊碹铉镟痃 xue靴薛学穴雪血谑泶踅鳕 xun勋熏循旬询寻驯巡殉汛训讯逊迅巽埙荀蕈薰峋徇獯恂洵浔曛窨醺鲟 ya压押鸦鸭呀丫芽牙蚜崖衙涯雅哑亚讶轧伢垭揠岈迓娅琊桠氩砑睚痖 yan焉咽阉烟淹盐严研蜒岩延言颜阎炎沿奄掩眼衍演艳堰燕厌砚雁唁彦焰宴谚验厣赝剡俨偃兖讠谳阽郾鄢菸崦恹闫湮滟妍嫣琰檐晏胭腌焱罨筵酽魇餍鼹 yang殃央鸯秧杨扬佯疡羊洋阳氧仰痒养样漾徉怏泱炀烊恙蛘鞅 yao邀腰妖瑶摇尧遥窑谣姚咬舀药要耀钥夭爻吆崾徭幺珧杳轺曜肴铫鹞窈繇鳐 ye椰噎耶爷野冶也页掖业叶曳腋夜液靥谒邺揶晔烨铘 yi一壹医揖铱依伊衣颐夷遗移仪胰疑沂宜姨彝椅蚁倚已乙矣以艺抑易邑屹亿役臆逸肄疫亦裔意毅忆义益溢诣议谊译异翼翌绎刈劓仡佚佾诒圯埸懿苡荑薏弈奕挹弋呓咦咿噫峄嶷猗饴怿怡悒漪迤驿缢殪轶贻旖熠眙钇镒镱痍瘗癔翊衤蜴舣羿翳酏黟 yin茵荫因殷音阴姻吟银淫寅饮尹引隐印胤鄞廴垠堙茚吲喑狺夤洇氤铟瘾蚓霪龈 ying英樱婴鹰应缨莹萤营荧蝇迎赢盈影颖硬映嬴郢茔荥莺萦蓥撄嘤膺滢潆瀛瑛璎楹媵鹦瘿颍罂 yo哟唷 yong拥佣臃痈庸雍踊蛹咏泳涌永恿勇用俑壅墉喁慵邕镛甬鳙饔 you幽优悠忧尤由邮铀犹油游酉有友右佑釉诱又幼卣攸侑莠莜莸呦囿宥柚猷牖铕疣蚰蚴蝣蝤鱿黝鼬 yu迂淤于盂榆虞愚舆余俞逾鱼愉渝渔隅予娱雨与屿禹宇语羽玉域芋郁遇喻峪御愈欲狱育誉浴寓裕预豫驭禺毓伛俣谀谕萸蓣揄圄圉嵛狳饫馀庾阈鬻妪妤纡瑜昱觎腴欤煜燠肀聿钰鹆鹬瘐瘀窬窳蜮蝓竽臾舁雩龉 yuan鸳渊冤元垣袁原援辕园员圆猿源缘远苑愿怨院垸塬芫掾沅媛瑗橼爰眢鸢螈箢鼋 yue曰约越跃岳粤月悦阅龠哕瀹樾刖钺 yun耘云郧匀陨允运蕴酝晕韵孕郓芸狁恽愠纭韫殒昀氲熨筠 za匝砸杂咋拶咂 zai栽哉灾宰载再在仔崽甾 zan咱攒暂赞瓒昝簪糌趱錾 zang赃脏葬奘驵臧 zao遭糟凿藻枣早澡蚤躁噪造皂灶燥唣 ze责择则泽仄赜啧帻迮昃笮箦舴 zei贼 zen怎谮 zeng增憎赠缯甑罾锃 zha扎喳渣札铡闸眨榨乍炸诈柞揸吒咤哳楂砟痄蚱齄 zhai翟摘斋宅窄债寨砦瘵 zhan瞻毡詹沾盏斩崭展蘸栈占战站湛绽谵搌旃 zhang樟章彰漳张掌涨杖丈帐账仗胀瘴障仉鄣幛嶂獐嫜璋蟑 zhao招昭找沼赵照罩兆肇召诏棹钊笊 zhe遮折哲蛰辙者锗蔗这浙着谪摺柘辄磔鹧褶蜇赭 zhen珍斟真甄砧臻贞针侦枕疹诊震振镇阵帧圳蓁浈溱缜桢榛轸赈胗朕祯畛稹鸩箴 zheng蒸挣睁征狰争怔整拯正政症郑证诤峥钲铮筝 zhi芝枝支吱蜘知肢脂汁之织职直植殖执值侄址指止趾只旨纸志挚掷至致置帜峙制智秩稚质炙痔滞治窒卮陟郅埴芷摭帙徵夂忮彘咫骘栉枳栀桎轵轾贽胝膣祉祗黹雉鸷痣蛭絷酯跖踬踯豸觯 zhong中盅忠钟衷终种肿重仲众冢锺螽舯踵 zhou舟周州洲诌粥轴肘帚咒皱宙昼骤荮啁妯纣绉胄碡籀酎 zhu珠株蛛朱猪诸诛逐竹烛煮拄瞩嘱主著柱助蛀贮铸筑住注祝驻丶伫侏邾苎茱洙渚潴杼槠橥炷铢疰瘃竺箸舳翥躅麈 zhua抓爪 zhuai拽 zhuan专砖转撰赚篆啭馔颛 zhuang幢桩庄装妆撞壮状 zhui椎锥追赘坠缀惴骓缒隹 zhun谆准肫窀 zhuo捉拙卓桌琢茁酌啄灼浊倬诼擢浞涿濯禚斫镯 zi兹咨资姿滋淄孜紫籽滓子自渍字谘茈嵫姊孳缁梓辎赀恣眦锱秭耔笫粢趑觜訾龇鲻髭 zong鬃棕踪宗综总纵偬腙粽 zou邹走奏揍诹陬鄹驺鲰 zu租足卒族祖诅阻组俎菹镞 zuan钻纂攥缵躜 zui咀嘴醉最罪蕞 zun尊遵撙樽鳟 zuo昨左佐做作坐座阼唑嘬怍胙祚";
+var HX_PINYIN_WORDS = {
+  宝藏: "bao zang",
+  便宜: "pian yi",
+  成都: "cheng du",
+  成长: "cheng zhang",
+  重庆: "chong qing",
+  传记: "zhuan ji",
+  传输或还原: "chuan shu huo huan yuan",
+  的确: "di que",
+  调查: "diao cha",
+  调度: "diao du",
+  调度中心: "diao du zhong xin",
+  调用: "diao yong",
+  都市: "du shi",
+  饿了么: "e le me",
+  反省: "fan xing",
+  给予: "ji yu",
+  供给: "gong ji",
+  归还: "gui huan",
+  还原: "huan yuan",
+  会计: "kuai ji",
+  家长: "jia zhang",
+  角色: "jue se",
+  库乐队: "ku yue dui",
+  乐队: "yue dui",
+  乐谱: "yue pu",
+  乐器: "yue qi",
+  率领: "shuai ling",
+  目的: "mu di",
+  暖和: "nuan huo",
+  色调: "se diao",
+  生长: "sheng zhang",
+  声乐: "sheng yue",
+  首都: "shou du",
+  睡觉: "shui jiao",
+  似的: "shi de",
+  投降: "tou xiang",
+  为了: "wei le",
+  西藏: "xi zang",
+  校长: "xiao zhang",
+  行情: "hang qing",
+  行业: "hang ye",
+  淹没: "yan mo",
+  钥匙串访问: "yao shi chuan fang wen",
+  音乐: "yin yue",
+  银行: "yin hang",
+  银行卡: "yin hang ka",
+  游说: "you shui",
+  云音乐: "yun yin yue",
+  重复: "chong fu",
+  重启: "chong qi",
+  重新: "chong xin",
+  子弹: "zi dan"
+};
+
+// src/backend/hx-computer/pinyin.ts
+var HAN = /\p{Script=Han}/u;
+var characters = null;
+var longestWord = 0;
+function table() {
+  if (characters)
+    return characters;
+  const read = new Map;
+  for (const group of HX_PINYIN_TABLE.split(" ")) {
+    const syllable = /^[a-z]+/u.exec(group)?.[0] ?? "";
+    for (const character of group.slice(syllable.length))
+      read.set(character, syllable);
   }
-];
-function hxMacAppRoots(home) {
-  return [
-    "/Applications",
-    "/Applications/Utilities",
-    "/System/Applications",
-    "/System/Applications/Utilities",
-    "/System/Library/CoreServices/Applications",
-    `${home}/Applications`
-  ];
+  for (const word of Object.keys(HX_PINYIN_WORDS))
+    longestWord = Math.max(longestWord, [...word].length);
+  characters = read;
+  return read;
 }
-var HX_MAC_EXTRA_APPS = ["/System/Library/CoreServices/Finder.app"];
+function parts(name) {
+  if (!HAN.test(name))
+    return null;
+  const read = table();
+  const letters = [...name.normalize("NFKC")];
+  const found = [];
+  let latin = "";
+  const endLatin = () => {
+    if (latin)
+      found.push({ text: latin.toLowerCase(), latin: true });
+    latin = "";
+  };
+  for (let at = 0;at < letters.length; ) {
+    const letter = letters[at] ?? "";
+    if (!HAN.test(letter)) {
+      if (/[\p{L}\p{N}]/u.test(letter))
+        latin += letter;
+      else
+        endLatin();
+      at += 1;
+      continue;
+    }
+    endLatin();
+    let taken = 0;
+    for (let length = Math.min(longestWord, letters.length - at);length >= 2; length -= 1) {
+      const said = HX_PINYIN_WORDS[letters.slice(at, at + length).join("")];
+      if (said) {
+        for (const syllable of said.split(" "))
+          found.push({ text: syllable, latin: false });
+        taken = length;
+        break;
+      }
+    }
+    if (taken > 0) {
+      at += taken;
+      continue;
+    }
+    const syllable = read.get(letter);
+    if (!syllable)
+      return null;
+    found.push({ text: syllable, latin: false });
+    at += 1;
+  }
+  endLatin();
+  return found.length > 0 ? found : null;
+}
+function hxPinyinTyped(name) {
+  const found = parts(name);
+  if (!found)
+    return [];
+  const full = found.map((part) => part.text).join("");
+  const initials = found.map((part) => part.latin ? part.text : part.text.slice(0, 1)).join("");
+  return initials.length >= 2 && initials !== full ? [full, initials] : [full];
+}
 
 // src/backend/hx-computer/apps.ts
 var CHINESE_FOLDERS = ["zh-Hans.lproj", "zh_CN.lproj", "zh-CN.lproj", "zh_Hans.lproj", "zh.lproj"];
@@ -1110,7 +1537,8 @@ function hxAppNames(names) {
       continue;
     more.push(...known.names, ...known.pinyin ? hxPinyinNames(known.pinyin) : []);
   }
-  return unique([...names, ...more]);
+  const all = unique([...names, ...more]);
+  return unique([...all, ...all.flatMap(hxPinyinTyped)]);
 }
 function xmlText(value) {
   return value.replace(/&lt;/gu, "<").replace(/&gt;/gu, ">").replace(/&quot;/gu, '"').replace(/&apos;/gu, "'").replace(/&amp;/gu, "&");
@@ -1784,6 +2212,7 @@ function regRead(key, name, onIs) {
   };
 }
 var PERSONALIZE2 = "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize";
+var ADVANCED2 = "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced";
 var EFFECTS = {
   mac: {
     "dark-mode": defaultsRead(["-g", "AppleInterfaceStyle"], (stdout, code, value) => value === "on" ? stdout.trim() === "Dark" : code !== 0 || stdout.trim() !== "Dark"),
@@ -1796,13 +2225,27 @@ var EFFECTS = {
     "dock-size": defaultsRead(["com.apple.dock", "tilesize"], (stdout, _code, value) => {
       const tile = Number(stdout.trim());
       return Number.isFinite(tile) && Math.abs((tile - 16) / 112 * 100 - Number(value)) <= 3;
-    })
+    }),
+    "dock-indicators": defaultsRead(["com.apple.dock", "show-process-indicators"], asSwitch),
+    "dock-minimize-into-app": defaultsRead(["com.apple.dock", "minimize-to-application"], asSwitch),
+    "dock-launch-animation": defaultsRead(["com.apple.dock", "launchanim"], asSwitch)
   },
   windows: {
     "app-dark-mode": regRead(PERSONALIZE2, "AppsUseLightTheme", 0),
     "system-dark-mode": regRead(PERSONALIZE2, "SystemUsesLightTheme", 0),
     transparency: regRead(PERSONALIZE2, "EnableTransparency", 1),
     "clipboard-history": regRead("HKCU\\Software\\Microsoft\\Clipboard", "EnableClipboardHistory", 1),
+    "taskbar-alignment": {
+      command: { command: regPath(), args: ["query", ADVANCED2, "/v", "TaskbarAl"] },
+      shows: (stdout, _code, value) => hxRegValue(stdout, "TaskbarAl") === (value === "left" ? 0 : 1)
+    },
+    "task-view-button": regRead(ADVANCED2, "ShowTaskViewButton", 1),
+    "clock-seconds": regRead(ADVANCED2, "ShowSecondsInSystemClock", 1),
+    "accent-title-bars": regRead("HKCU\\Software\\Microsoft\\Windows\\DWM", "ColorPrevalence", 1),
+    "accent-start-taskbar": regRead(PERSONALIZE2, "ColorPrevalence", 1),
+    notifications: regRead("HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\PushNotifications", "ToastEnabled", 1),
+    "game-mode": regRead("HKCU\\Software\\Microsoft\\GameBar", "AllowAutoGameMode", 1),
+    "storage-sense": regRead("HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\StorageSense\\Parameters\\StoragePolicy", "01", 1),
     "dark-mode": {
       command: { command: regPath(), args: ["query", PERSONALIZE2] },
       shows: (stdout, _code, value) => {
@@ -7983,11 +8426,12 @@ var PAGE_WAIT_MS = 8000;
 var FIRST_PAGE_WAIT_MS = 30000;
 var PAGE_STEP_MS = 600;
 var PAGE_SETTLE_MS = 700;
+var SLOW_READ_MS = 3000;
 var READ_BACK_WAITS_MS2 = [0, 400, 1200];
 var EFFECT_WAIT_MS = 3000;
 var BASELINE_MIN_PAGES = 5;
 var NOT_ALLOWED3 = /-1743|not authori[sz]ed to send apple events/iu;
-var HAN = /\p{Script=Han}/u;
+var HAN2 = /\p{Script=Han}/u;
 function clip(text, limit) {
   const flat = text.replace(/\s+/gu, " ").trim();
   return flat.length > limit ? `${flat.slice(0, limit)}…` : flat;
@@ -8138,6 +8582,7 @@ async function hxRealCheck(host) {
   const actions = new HxComputerActions(catalog, run, host.wait);
   const pages = [];
   const chineseNames = [];
+  const chineseApps = [];
   const selfTest = { report: null };
   const about = { system: platform === "mac" ? "macOS" : "Windows", desktop: false, detail: "" };
   const environment = { automation: true, accessibility: true };
@@ -8207,8 +8652,9 @@ async function hxRealCheck(host) {
       });
       await chinese.rebuild();
       const list = (await chinese.entries()).filter((entry) => entry.kind === "app");
+      chineseApps.push(...list);
       for (const entry of list)
-        if (HAN.test(entry.title))
+        if (HAN2.test(entry.title))
           chineseNames.push(entry.title);
       const right = [];
       const other = [];
@@ -8219,7 +8665,7 @@ async function hxRealCheck(host) {
           continue;
         if (entry.title === name)
           right.push(name);
-        else if (HAN.test(entry.title))
+        else if (HAN2.test(entry.title))
           other.push(`${name} 实际是 ${entry.title}`);
         else
           notRead.push(`${name}（得到的是 ${entry.title}）`);
@@ -8286,7 +8732,38 @@ async function hxRealCheck(host) {
       }
       if (wanted.length === 0)
         return unavailable(`“${phrase.phrase}”要找的应用不在这台机器上。`);
-      return sure && wanted.includes(sure.id) ? passed(`“${phrase.phrase}” → ${sure.id}`) : failed(`“${phrase.phrase}”应得 ${wanted.join(" 或 ")}。${got}`);
+      if (sure) {
+        return wanted.includes(sure.id) ? passed(`“${phrase.phrase}” → ${sure.id}`) : failed(`“${phrase.phrase}”应得 ${wanted.join(" 或 ")}。${got}`);
+      }
+      const best = hits[0]?.score ?? 0;
+      const tied = hits.filter((hit) => hit.score === best).map((hit) => hit.entry.id);
+      return wanted.length > 1 && tied.length > 1 && tied.every((id) => wanted.includes(id)) ? passed(`“${phrase.phrase}”交回了同分的 ${tied.join("、")}，都通向同一处。`) : failed(`“${phrase.phrase}”应得 ${wanted.join(" 或 ")}。${got}`);
+    });
+  }
+  if (platform === "mac") {
+    const named = chineseApps.filter((entry) => HAN2.test(entry.title));
+    const typed = named.map((entry) => ({ entry, ways: hxPinyinTyped(entry.title) }));
+    const unknown = typed.filter((one) => one.ways.length === 0).map((one) => one.entry.title);
+    const rank = (query, limit) => hxSearch(chineseApps, query, { kinds: ["app"], limit }).map((hit) => hit.entry.id);
+    await check("search.pinyin-full", async () => {
+      if (named.length === 0)
+        return unavailable("这台 Mac 上没有读到应用的中文名。");
+      const missed = typed.filter(({ entry, ways }) => ways[0] !== undefined && rank(ways[0], 1)[0] !== entry.id);
+      const said = `${named.length} 个中文名里 ${named.length - unknown.length - missed.length} 个用全拼排第一`;
+      const detail = `${said}；表里没有的字使它没有拼音的 ${unknown.length} 个：${unknown.join("、") || "无"}；没排第一的：${missed.map(({ entry, ways }) => `${entry.title}（${ways[0]}）`).join("、") || "无"}`;
+      if (missed.length === 0)
+        return passed(detail);
+      return missed.length * 10 <= named.length ? review(detail) : failed(detail);
+    });
+    await check("search.pinyin-initials", async () => {
+      const short = typed.filter(({ ways }) => ways[1] !== undefined);
+      if (short.length === 0)
+        return unavailable("这台 Mac 上没有可以用首字母找的中文名。");
+      const missed = short.filter(({ entry, ways }) => !rank(ways[1] ?? "", 5).includes(entry.id));
+      const detail = `${short.length} 个中文名里 ${short.length - missed.length} 个用首字母能在前五个里找到；找不到的：${missed.map(({ entry, ways }) => `${entry.title}（${ways[1]}）`).join("、") || "无"}`;
+      if (missed.length === 0)
+        return passed(detail);
+      return missed.length * 5 <= short.length ? review(detail) : failed(detail);
     });
   }
   const running = async (names) => {
@@ -8525,7 +9002,36 @@ ${result.stderr}`;
       const after = await readBack(seed, before);
       return after.ok ? passed(`改回了 ${before}`) : failed(`改回 ${before}，读到的却是 ${after.value ?? "没有值"}`);
     });
-    if (changeOutcome === "passed" && restoreOutcome === "passed" && (effectOutcome ?? "passed") === "passed") {
+    let fastOutcome = "passed";
+    const fast = hxCombinedChange(platform, seed, other);
+    if (fast && changeOutcome === "passed" && restoreOutcome === "passed") {
+      fastOutcome = await check(`${id}.fast`, async () => {
+        const began = host.now();
+        const result = await exec(fast);
+        const ms = host.now() - began;
+        try {
+          if (!hxRunOk(result))
+            return failed(`一次启动做完读、写、读，命令出错。${output(result)}`);
+          const values = hxCombinedValues(seed, result.stdout);
+          if (!values)
+            return failed(`一次启动做完读、写、读，回答不是两次读数。${output(result, 400)}`);
+          if (!sameValue2(seed, values.before, before)) {
+            return failed(`一次启动的第一次读数是 ${values.before}，三步做法读到的是 ${before}。`);
+          }
+          const settled = sameValue2(seed, values.after, other) ? { ok: true } : await readBack(seed, other);
+          if (!settled.ok)
+            return failed(`一次启动写入 ${other}，第二次读数是 ${values.after}，再等也没有变。`);
+          time("setting.change.fast", ms);
+          return passed(`${values.before} → ${values.after}（一次启动 ${ms} 毫秒）`);
+        } finally {
+          await exec(seed.write(before));
+          await readBack(seed, before);
+        }
+      });
+    } else if (fast) {
+      skip(`${id}.fast`, "三步做法没有通过，没有再比一次启动的做法。");
+    }
+    if (changeOutcome === "passed" && restoreOutcome === "passed" && fastOutcome === "passed" && (effectOutcome ?? "passed") === "passed") {
       verified.push(seed.key);
     }
   }
@@ -8538,7 +9044,7 @@ ${result.stderr}`;
       const own = wanted.filter((id) => id.startsWith(HX_MAC_OWN_PANES));
       const missing = wanted.filter((id) => !id.startsWith(HX_MAC_OWN_PANES) && !here.has(id));
       const detail = `${wanted.length} 个地址里 ${wanted.length - own.length - missing.length} 个是这台 Mac 的设置面板；属于系统设置自身、无法这样核对的 ${own.length} 个；这台 Mac 共有 ${here.size} 个面板`;
-      return missing.length === 0 ? passed(detail) : review(`这些地址不是这台 Mac 的设置面板：${missing.join(" ")}；它们是否还能打开，看各自那一项。${detail}。这台 Mac 的面板：${clip([...here].sort().join(" "), 3500)}`);
+      return passed(missing.length === 0 ? detail : `这些地址不是这台 Mac 的设置面板：${missing.join(" ")}；它们是否还能打开，看各自那一项。${detail}。这台 Mac 的面板：${clip([...here].sort().join(" "), 3500)}`);
     });
   }
   const server = platform === "windows" && /server/iu.test(about.system);
@@ -8583,7 +9089,7 @@ ${result.stderr}`;
           const moved = window.open && window.texts.length > 0 && !sameTexts(window.texts, previousTexts);
           if (shown || moved) {
             seenMs ??= elapsed;
-            if (shown && platform === "mac" || settled)
+            if (shown && platform === "mac" || settled || host.now() - asked >= SLOW_READ_MS)
               break;
             settled = true;
             await host.wait(PAGE_SETTLE_MS);
@@ -8894,6 +9400,7 @@ function options(argv) {
     out: "hxbot-check",
     machine: `${process.platform}-${process.arch}`,
     screenshots: true,
+    budgetMinutes: 0,
     merge: "",
     expected: []
   };
@@ -8906,6 +9413,8 @@ function options(argv) {
       read.out = value;
     else if (name === "--machine")
       read.machine = value;
+    else if (name === "--budget-minutes")
+      read.budgetMinutes = Math.max(0, Number(value) || 0);
     else if (name === "--merge")
       read.merge = value;
     else if (name === "--expected") {
@@ -8962,6 +9471,7 @@ async function check(read) {
     home: homedir(),
     out,
     screenshots: read.screenshots,
+    ...read.budgetMinutes > 0 ? { budgetMs: read.budgetMinutes * 60000 } : {},
     now: () => Date.now(),
     wait: (ms) => new Promise((done) => {
       setTimeout(done, ms);
