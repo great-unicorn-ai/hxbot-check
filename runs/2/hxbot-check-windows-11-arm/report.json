@@ -1,0 +1,1215 @@
+{
+ "format": 1,
+ "machine": "windows-11-arm",
+ "platform": "windows",
+ "system": "Microsoft Windows 11 Enterprise 10.0.26200 (Windows_NT 10.0.26200 arm64)",
+ "startedAt": 1794616183097,
+ "finishedAt": 1794618509990,
+ "items": [
+  {
+   "id": "env.system",
+   "group": "env",
+   "outcome": "passed",
+   "detail": "Microsoft Windows 11 Enterprise 10.0.26200 (Windows_NT 10.0.26200 arm64)；Node v24.22.2；语言 en-US；Microsoft Windows 11 Enterprise 10.0.26200 | interactive=True | session=2 | culture=en-US | ui=en-US",
+   "ms": 35886
+  },
+  {
+   "id": "env.desktop",
+   "group": "env",
+   "outcome": "passed",
+   "detail": "有桌面会话。Microsoft Windows 11 Enterprise 10.0.26200 | interactive=True | session=2 | culture=en-US | ui=en-US",
+   "ms": 0
+  },
+  {
+   "id": "catalog.scan",
+   "group": "catalog",
+   "outcome": "passed",
+   "detail": "172 个应用，57 个设置页，6 项设置；用时 25693 毫秒",
+   "ms": 25696
+  },
+  {
+   "id": "catalog.known",
+   "group": "catalog",
+   "outcome": "passed",
+   "detail": "找到：Notepad（Notepad）、Paint（Paint）、Calculator（Calculator）、Command Prompt（Command Prompt）、Settings（Settings）、File Explorer（File Explorer）",
+   "ms": 1
+  },
+  {
+   "id": "catalog.saved",
+   "group": "catalog",
+   "outcome": "passed",
+   "detail": "从存盘读入 235 个条目，用时 2 毫秒，没有再扫描。",
+   "ms": 3
+  },
+  {
+   "id": "catalog.rescan",
+   "group": "catalog",
+   "outcome": "passed",
+   "detail": "再扫描一次，235 个条目和第一次相同；用时 23558 毫秒。",
+   "ms": 23558
+  },
+  {
+   "id": "catalog.ids",
+   "group": "catalog",
+   "outcome": "passed",
+   "detail": "235 个编号，没有重复。",
+   "ms": 0
+  },
+  {
+   "id": "search.01",
+   "group": "search",
+   "outcome": "passed",
+   "detail": "“蓝牙” → page:bluetooth",
+   "ms": 4
+  },
+  {
+   "id": "search.02",
+   "group": "search",
+   "outcome": "passed",
+   "detail": "“蓝牙设置” → page:bluetooth",
+   "ms": 1
+  },
+  {
+   "id": "search.03",
+   "group": "search",
+   "outcome": "passed",
+   "detail": "“打开蓝牙设置” → page:bluetooth",
+   "ms": 2
+  },
+  {
+   "id": "search.04",
+   "group": "search",
+   "outcome": "passed",
+   "detail": "“bluetooth settings” → page:bluetooth",
+   "ms": 2
+  },
+  {
+   "id": "search.05",
+   "group": "search",
+   "outcome": "passed",
+   "detail": "“wifi” → page:wifi",
+   "ms": 1
+  },
+  {
+   "id": "search.06",
+   "group": "search",
+   "outcome": "passed",
+   "detail": "“声音设置” → page:sound",
+   "ms": 1
+  },
+  {
+   "id": "search.07",
+   "group": "search",
+   "outcome": "passed",
+   "detail": "“屏幕” → page:display",
+   "ms": 1
+  },
+  {
+   "id": "search.08",
+   "group": "search",
+   "outcome": "passed",
+   "detail": "“夜间模式” → page:night-light",
+   "ms": 1
+  },
+  {
+   "id": "search.09",
+   "group": "search",
+   "outcome": "passed",
+   "detail": "“壁纸” → page:background",
+   "ms": 0
+  },
+  {
+   "id": "search.10",
+   "group": "search",
+   "outcome": "passed",
+   "detail": "“任务栏” → page:taskbar",
+   "ms": 1
+  },
+  {
+   "id": "search.11",
+   "group": "search",
+   "outcome": "passed",
+   "detail": "“打印机” → page:printers",
+   "ms": 0
+  },
+  {
+   "id": "search.12",
+   "group": "search",
+   "outcome": "passed",
+   "detail": "“系统更新” → page:windows-update",
+   "ms": 1
+  },
+  {
+   "id": "search.13",
+   "group": "search",
+   "outcome": "passed",
+   "detail": "“默认应用” → page:default-apps",
+   "ms": 0
+  },
+  {
+   "id": "search.14",
+   "group": "search",
+   "outcome": "passed",
+   "detail": "“剪贴板” → page:clipboard",
+   "ms": 1
+  },
+  {
+   "id": "search.15",
+   "group": "search",
+   "outcome": "passed",
+   "detail": "“隐私” → page:privacy",
+   "ms": 0
+  },
+  {
+   "id": "search.16",
+   "group": "search",
+   "outcome": "passed",
+   "detail": "“深色模式” → setting:dark-mode",
+   "ms": 1
+  },
+  {
+   "id": "search.17",
+   "group": "search",
+   "outcome": "passed",
+   "detail": "“打开深色模式” → setting:dark-mode",
+   "ms": 0
+  },
+  {
+   "id": "search.18",
+   "group": "search",
+   "outcome": "passed",
+   "detail": "“dark mode” → setting:dark-mode",
+   "ms": 1
+  },
+  {
+   "id": "search.19",
+   "group": "search",
+   "outcome": "passed",
+   "detail": "“透明效果” → setting:transparency",
+   "ms": 0
+  },
+  {
+   "id": "search.20",
+   "group": "search",
+   "outcome": "passed",
+   "detail": "“亮度” → setting:brightness",
+   "ms": 1
+  },
+  {
+   "id": "search.21",
+   "group": "search",
+   "outcome": "passed",
+   "detail": "“剪贴板历史记录” → setting:clipboard-history",
+   "ms": 0
+  },
+  {
+   "id": "search.22",
+   "group": "search",
+   "outcome": "passed",
+   "detail": "“记事本” → app:Microsoft.WindowsNotepad_8wekyb3d8bbwe!App",
+   "ms": 1
+  },
+  {
+   "id": "search.23",
+   "group": "search",
+   "outcome": "passed",
+   "detail": "“notepad” → app:Microsoft.WindowsNotepad_8wekyb3d8bbwe!App",
+   "ms": 1
+  },
+  {
+   "id": "search.24",
+   "group": "search",
+   "outcome": "passed",
+   "detail": "“设置” → app:windows.immersivecontrolpanel_cw5n1h2txyewy!microsoft.windows.immersivecontrolpanel",
+   "ms": 0
+  },
+  {
+   "id": "search.25",
+   "group": "search",
+   "outcome": "passed",
+   "detail": "“打开设置” → app:windows.immersivecontrolpanel_cw5n1h2txyewy!microsoft.windows.immersivecontrolpanel",
+   "ms": 1
+  },
+  {
+   "id": "search.26",
+   "group": "search",
+   "outcome": "passed",
+   "detail": "“系统设置” → app:windows.immersivecontrolpanel_cw5n1h2txyewy!microsoft.windows.immersivecontrolpanel",
+   "ms": 13
+  },
+  {
+   "id": "search.27",
+   "group": "search",
+   "outcome": "passed",
+   "detail": "“资源管理器” → app:Microsoft.Windows.Explorer",
+   "ms": 0
+  },
+  {
+   "id": "search.28",
+   "group": "search",
+   "outcome": "passed",
+   "detail": "“cmd” → app:{1AC14E77-02E7-4E5D-B744-2EB1AE5198B7}\\cmd.exe",
+   "ms": 1
+  },
+  {
+   "id": "open.cost",
+   "group": "open",
+   "outcome": "passed",
+   "detail": "打开一个设置页的命令用了 3643 毫秒（回答 opened）",
+   "ms": 25850
+  },
+  {
+   "id": "open.app.notepad",
+   "group": "open",
+   "outcome": "passed",
+   "detail": "进程 notepad 在 24282 毫秒后出现；已关掉。",
+   "ms": 68662
+  },
+  {
+   "id": "open.app.paint",
+   "group": "open",
+   "outcome": "passed",
+   "detail": "进程 mspaint 在 22826 毫秒后出现；已关掉。",
+   "ms": 66731
+  },
+  {
+   "id": "open.app.calculator",
+   "group": "open",
+   "outcome": "passed",
+   "detail": "进程 CalculatorApp 在 22791 毫秒后出现；已关掉。",
+   "ms": 110604
+  },
+  {
+   "id": "open.folder",
+   "group": "open",
+   "outcome": "passed",
+   "detail": "文件夹窗口从 0 个变成 1 个，用时 22241 毫秒。",
+   "ms": 89541,
+   "shot": "open-folder.jpg"
+  },
+  {
+   "id": "open.document",
+   "group": "open",
+   "outcome": "passed",
+   "detail": "notepad 在 22074 毫秒后出现；已关掉。",
+   "ms": 89240,
+   "shot": "open-document.jpg"
+  },
+  {
+   "id": "open.url",
+   "group": "open",
+   "outcome": "passed",
+   "detail": "浏览器 msedge 在 22994 毫秒后出现；已关掉。",
+   "ms": 200517,
+   "shot": "open-url.jpg"
+  },
+  {
+   "id": "open.refuse.script-sh",
+   "group": "open",
+   "outcome": "passed",
+   "detail": "script.sh 被拒绝，没有启动任何系统命令。",
+   "ms": 1
+  },
+  {
+   "id": "open.refuse.double-click-command",
+   "group": "open",
+   "outcome": "passed",
+   "detail": "double-click.command 被拒绝，没有启动任何系统命令。",
+   "ms": 3
+  },
+  {
+   "id": "open.refuse.program-exe",
+   "group": "open",
+   "outcome": "passed",
+   "detail": "program.exe 被拒绝，没有启动任何系统命令。",
+   "ms": 0
+  },
+  {
+   "id": "open.refuse.batch-bat",
+   "group": "open",
+   "outcome": "passed",
+   "detail": "batch.bat 被拒绝，没有启动任何系统命令。",
+   "ms": 1
+  },
+  {
+   "id": "open.refuse.shortcut-lnk",
+   "group": "open",
+   "outcome": "passed",
+   "detail": "shortcut.lnk 被拒绝，没有启动任何系统命令。",
+   "ms": 1
+  },
+  {
+   "id": "open.refuse.address-url",
+   "group": "open",
+   "outcome": "passed",
+   "detail": "address.url 被拒绝，没有启动任何系统命令。",
+   "ms": 1
+  },
+  {
+   "id": "open.refuse.macro-py",
+   "group": "open",
+   "outcome": "passed",
+   "detail": "macro.py 被拒绝，没有启动任何系统命令。",
+   "ms": 0
+  },
+  {
+   "id": "open.refuse.installer-msi",
+   "group": "open",
+   "outcome": "passed",
+   "detail": "installer.msi 被拒绝，没有启动任何系统命令。",
+   "ms": 1
+  },
+  {
+   "id": "open.refuse.scheme",
+   "group": "open",
+   "outcome": "passed",
+   "detail": "4 个不是网页的地址都被拒绝，没有启动任何系统命令。",
+   "ms": 0
+  },
+  {
+   "id": "open.missing",
+   "group": "open",
+   "outcome": "passed",
+   "detail": "不存在的路径和不存在的名称都回答“没有找到”。",
+   "ms": 23494
+  },
+  {
+   "id": "setting.dark-mode.read",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "off（22137 毫秒）",
+   "ms": 22138
+  },
+  {
+   "id": "setting.dark-mode.same",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "写回 off，读到 off",
+   "ms": 44776
+  },
+  {
+   "id": "setting.dark-mode.change",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "off → on（44745 毫秒）",
+   "ms": 68138,
+   "shot": "setting-dark-mode-after.jpg"
+  },
+  {
+   "id": "setting.dark-mode.effect",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "换一条路读，也是 on。退出码 0：HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize ColorPrevalence REG_DWORD 0x0 EnableTransparency REG_DWORD 0x1 AppsUseLightTheme REG_DWORD 0x0 SystemUsesLightTheme REG_D…",
+   "ms": 56
+  },
+  {
+   "id": "setting.dark-mode.restore",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "改回了 off",
+   "ms": 44546
+  },
+  {
+   "id": "setting.app-dark-mode.read",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "off（21888 毫秒）",
+   "ms": 21888
+  },
+  {
+   "id": "setting.app-dark-mode.same",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "写回 off，读到 off",
+   "ms": 44114
+  },
+  {
+   "id": "setting.app-dark-mode.change",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "off → on（44080 毫秒）",
+   "ms": 66934,
+   "shot": "setting-app-dark-mode-after.jpg"
+  },
+  {
+   "id": "setting.app-dark-mode.effect",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "换一条路读，也是 on。退出码 0：HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize AppsUseLightTheme REG_DWORD 0x0",
+   "ms": 30
+  },
+  {
+   "id": "setting.app-dark-mode.restore",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "改回了 off",
+   "ms": 43989
+  },
+  {
+   "id": "setting.system-dark-mode.read",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "off（21949 毫秒）",
+   "ms": 21949
+  },
+  {
+   "id": "setting.system-dark-mode.same",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "写回 off，读到 off",
+   "ms": 44078
+  },
+  {
+   "id": "setting.system-dark-mode.change",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "off → on（44409 毫秒）",
+   "ms": 67262,
+   "shot": "setting-system-dark-mode-after.jpg"
+  },
+  {
+   "id": "setting.system-dark-mode.effect",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "换一条路读，也是 on。退出码 0：HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize SystemUsesLightTheme REG_DWORD 0x0",
+   "ms": 33
+  },
+  {
+   "id": "setting.system-dark-mode.restore",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "改回了 off",
+   "ms": 44202
+  },
+  {
+   "id": "setting.transparency.read",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "on（22147 毫秒）",
+   "ms": 22147
+  },
+  {
+   "id": "setting.transparency.same",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "写回 on，读到 on",
+   "ms": 44306
+  },
+  {
+   "id": "setting.transparency.change",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "on → off（44941 毫秒）",
+   "ms": 67664,
+   "shot": "setting-transparency-after.jpg"
+  },
+  {
+   "id": "setting.transparency.effect",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "换一条路读，也是 off。退出码 0：HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize EnableTransparency REG_DWORD 0x0",
+   "ms": 31
+  },
+  {
+   "id": "setting.transparency.restore",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "改回了 on",
+   "ms": 44903
+  },
+  {
+   "id": "setting.clipboard-history.read",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "off（21952 毫秒）",
+   "ms": 21952
+  },
+  {
+   "id": "setting.clipboard-history.same",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "写回 off，读到 off",
+   "ms": 43902
+  },
+  {
+   "id": "setting.clipboard-history.change",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "off → on（44125 毫秒）",
+   "ms": 67695,
+   "shot": "setting-clipboard-history-after.jpg"
+  },
+  {
+   "id": "setting.clipboard-history.effect",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "换一条路读，也是 on。退出码 0：HKEY_CURRENT_USER\\Software\\Microsoft\\Clipboard EnableClipboardHistory REG_DWORD 0x1",
+   "ms": 30
+  },
+  {
+   "id": "setting.clipboard-history.restore",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "改回了 off",
+   "ms": 43826
+  },
+  {
+   "id": "setting.brightness.read",
+   "group": "setting",
+   "outcome": "unavailable",
+   "detail": "命令成功，但这台机器上没有值。退出码 0：none",
+   "ms": 29664
+  },
+  {
+   "id": "page.display",
+   "group": "page",
+   "outcome": "passed",
+   "detail": "窗口显示：Display / Brightness & color / Night light / Use warmer colors to help block blue light / Color profile / Determine how colors appear on your screen / HDR / More about HDR / Scale & layout / Scale / Change the size of text, apps, and other items / 100% (Recommended) / Display resolution / Adjust the resolution to fit your connected display（24268 毫秒）",
+   "ms": 24268,
+   "shot": "page-display.jpg"
+  },
+  {
+   "id": "page.night-light",
+   "group": "page",
+   "outcome": "passed",
+   "detail": "窗口显示：Display / Night light / Show warmer colors on your display to help you sleep / Turn on now / Strength / Schedule night light / Related support / Help from the web / Adjusting display brightness automatically / Scheduling night light for better sleep（23216 毫秒）",
+   "ms": 23216,
+   "shot": "page-night-light.jpg"
+  },
+  {
+   "id": "page.sound",
+   "group": "page",
+   "outcome": "passed",
+   "detail": "窗口显示：Sound / Output / Choose where to play sound. Apps might have their own settings. / Choose where to play sound / Apps might have their own settings / No output devices found / Show more settings / Pair a new output device / Add device / Volume / Mute volume / 0 / Adjust the output volume / Mono audio（22843 毫秒）",
+   "ms": 22843,
+   "shot": "page-sound.jpg"
+  },
+  {
+   "id": "page.notifications",
+   "group": "page",
+   "outcome": "passed",
+   "detail": "窗口显示：Notifications / Get notifications from apps and other senders / Show more settings / Do not disturb / Notifications will be sent directly to notification center / Turn on do not disturb automatically / Set priority notifications / Focus / Session duration, hide badges on apps / Notifications from apps and other senders / Sort by: / Most recent / Startup App Notification / Off（22509 毫秒）",
+   "ms": 22509,
+   "shot": "page-notifications.jpg"
+  },
+  {
+   "id": "page.focus",
+   "group": "page",
+   "outcome": "passed",
+   "detail": "窗口显示：Focus / Focus sessions help you get more done by reducing distractions. When you start a session, these settings will apply for a set amount of time. / Start focus session / Session duration / Decrease duration / 30 mins / Increase duration / Show the timer in the Clock app / Hide badges on taskbar apps / Hide flashing on taskbar apps / Turn on do not disturb / More about focus / Related settings / Notifications（22712 毫秒）",
+   "ms": 22712,
+   "shot": "page-focus.jpg"
+  },
+  {
+   "id": "page.power",
+   "group": "page",
+   "outcome": "skipped",
+   "detail": "这次检查的时间用完了，这一页没有开。",
+   "ms": 0
+  },
+  {
+   "id": "page.storage",
+   "group": "page",
+   "outcome": "skipped",
+   "detail": "这次检查的时间用完了，这一页没有开。",
+   "ms": 0
+  },
+  {
+   "id": "page.multitasking",
+   "group": "page",
+   "outcome": "skipped",
+   "detail": "这次检查的时间用完了，这一页没有开。",
+   "ms": 0
+  },
+  {
+   "id": "page.clipboard",
+   "group": "page",
+   "outcome": "skipped",
+   "detail": "这次检查的时间用完了，这一页没有开。",
+   "ms": 0
+  },
+  {
+   "id": "page.about",
+   "group": "page",
+   "outcome": "skipped",
+   "detail": "这次检查的时间用完了，这一页没有开。",
+   "ms": 0
+  },
+  {
+   "id": "page.bluetooth",
+   "group": "page",
+   "outcome": "skipped",
+   "detail": "这次检查的时间用完了，这一页没有开。",
+   "ms": 0
+  },
+  {
+   "id": "page.printers",
+   "group": "page",
+   "outcome": "skipped",
+   "detail": "这次检查的时间用完了，这一页没有开。",
+   "ms": 0
+  },
+  {
+   "id": "page.mouse",
+   "group": "page",
+   "outcome": "skipped",
+   "detail": "这次检查的时间用完了，这一页没有开。",
+   "ms": 0
+  },
+  {
+   "id": "page.touchpad",
+   "group": "page",
+   "outcome": "skipped",
+   "detail": "这次检查的时间用完了，这一页没有开。",
+   "ms": 0
+  },
+  {
+   "id": "page.typing",
+   "group": "page",
+   "outcome": "skipped",
+   "detail": "这次检查的时间用完了，这一页没有开。",
+   "ms": 0
+  },
+  {
+   "id": "page.network",
+   "group": "page",
+   "outcome": "skipped",
+   "detail": "这次检查的时间用完了，这一页没有开。",
+   "ms": 0
+  },
+  {
+   "id": "page.wifi",
+   "group": "page",
+   "outcome": "skipped",
+   "detail": "这次检查的时间用完了，这一页没有开。",
+   "ms": 0
+  },
+  {
+   "id": "page.ethernet",
+   "group": "page",
+   "outcome": "skipped",
+   "detail": "这次检查的时间用完了，这一页没有开。",
+   "ms": 0
+  },
+  {
+   "id": "page.vpn",
+   "group": "page",
+   "outcome": "skipped",
+   "detail": "这次检查的时间用完了，这一页没有开。",
+   "ms": 0
+  },
+  {
+   "id": "page.proxy",
+   "group": "page",
+   "outcome": "skipped",
+   "detail": "这次检查的时间用完了，这一页没有开。",
+   "ms": 0
+  },
+  {
+   "id": "page.airplane",
+   "group": "page",
+   "outcome": "skipped",
+   "detail": "这次检查的时间用完了，这一页没有开。",
+   "ms": 0
+  },
+  {
+   "id": "page.hotspot",
+   "group": "page",
+   "outcome": "skipped",
+   "detail": "这次检查的时间用完了，这一页没有开。",
+   "ms": 0
+  },
+  {
+   "id": "page.personalization",
+   "group": "page",
+   "outcome": "skipped",
+   "detail": "这次检查的时间用完了，这一页没有开。",
+   "ms": 0
+  },
+  {
+   "id": "page.background",
+   "group": "page",
+   "outcome": "skipped",
+   "detail": "这次检查的时间用完了，这一页没有开。",
+   "ms": 0
+  },
+  {
+   "id": "page.colors",
+   "group": "page",
+   "outcome": "skipped",
+   "detail": "这次检查的时间用完了，这一页没有开。",
+   "ms": 0
+  },
+  {
+   "id": "page.lock-screen",
+   "group": "page",
+   "outcome": "skipped",
+   "detail": "这次检查的时间用完了，这一页没有开。",
+   "ms": 0
+  },
+  {
+   "id": "page.themes",
+   "group": "page",
+   "outcome": "skipped",
+   "detail": "这次检查的时间用完了，这一页没有开。",
+   "ms": 0
+  },
+  {
+   "id": "page.fonts",
+   "group": "page",
+   "outcome": "skipped",
+   "detail": "这次检查的时间用完了，这一页没有开。",
+   "ms": 0
+  },
+  {
+   "id": "page.taskbar",
+   "group": "page",
+   "outcome": "skipped",
+   "detail": "这次检查的时间用完了，这一页没有开。",
+   "ms": 0
+  },
+  {
+   "id": "page.start",
+   "group": "page",
+   "outcome": "skipped",
+   "detail": "这次检查的时间用完了，这一页没有开。",
+   "ms": 0
+  },
+  {
+   "id": "page.apps",
+   "group": "page",
+   "outcome": "skipped",
+   "detail": "这次检查的时间用完了，这一页没有开。",
+   "ms": 0
+  },
+  {
+   "id": "page.default-apps",
+   "group": "page",
+   "outcome": "skipped",
+   "detail": "这次检查的时间用完了，这一页没有开。",
+   "ms": 0
+  },
+  {
+   "id": "page.startup-apps",
+   "group": "page",
+   "outcome": "skipped",
+   "detail": "这次检查的时间用完了，这一页没有开。",
+   "ms": 0
+  },
+  {
+   "id": "page.your-info",
+   "group": "page",
+   "outcome": "skipped",
+   "detail": "这次检查的时间用完了，这一页没有开。",
+   "ms": 0
+  },
+  {
+   "id": "page.email-accounts",
+   "group": "page",
+   "outcome": "skipped",
+   "detail": "这次检查的时间用完了，这一页没有开。",
+   "ms": 0
+  },
+  {
+   "id": "page.sign-in",
+   "group": "page",
+   "outcome": "skipped",
+   "detail": "这次检查的时间用完了，这一页没有开。",
+   "ms": 0
+  },
+  {
+   "id": "page.other-users",
+   "group": "page",
+   "outcome": "skipped",
+   "detail": "这次检查的时间用完了，这一页没有开。",
+   "ms": 0
+  },
+  {
+   "id": "page.date-time",
+   "group": "page",
+   "outcome": "skipped",
+   "detail": "这次检查的时间用完了，这一页没有开。",
+   "ms": 0
+  },
+  {
+   "id": "page.language",
+   "group": "page",
+   "outcome": "skipped",
+   "detail": "这次检查的时间用完了，这一页没有开。",
+   "ms": 0
+  },
+  {
+   "id": "page.speech",
+   "group": "page",
+   "outcome": "skipped",
+   "detail": "这次检查的时间用完了，这一页没有开。",
+   "ms": 0
+  },
+  {
+   "id": "page.game-bar",
+   "group": "page",
+   "outcome": "skipped",
+   "detail": "这次检查的时间用完了，这一页没有开。",
+   "ms": 0
+  },
+  {
+   "id": "page.accessibility",
+   "group": "page",
+   "outcome": "skipped",
+   "detail": "这次检查的时间用完了，这一页没有开。",
+   "ms": 0
+  },
+  {
+   "id": "page.text-size",
+   "group": "page",
+   "outcome": "skipped",
+   "detail": "这次检查的时间用完了，这一页没有开。",
+   "ms": 0
+  },
+  {
+   "id": "page.mouse-pointer",
+   "group": "page",
+   "outcome": "skipped",
+   "detail": "这次检查的时间用完了，这一页没有开。",
+   "ms": 0
+  },
+  {
+   "id": "page.narrator",
+   "group": "page",
+   "outcome": "skipped",
+   "detail": "这次检查的时间用完了，这一页没有开。",
+   "ms": 0
+  },
+  {
+   "id": "page.magnifier",
+   "group": "page",
+   "outcome": "skipped",
+   "detail": "这次检查的时间用完了，这一页没有开。",
+   "ms": 0
+  },
+  {
+   "id": "page.privacy",
+   "group": "page",
+   "outcome": "skipped",
+   "detail": "这次检查的时间用完了，这一页没有开。",
+   "ms": 0
+  },
+  {
+   "id": "page.location",
+   "group": "page",
+   "outcome": "skipped",
+   "detail": "这次检查的时间用完了，这一页没有开。",
+   "ms": 0
+  },
+  {
+   "id": "page.camera",
+   "group": "page",
+   "outcome": "skipped",
+   "detail": "这次检查的时间用完了，这一页没有开。",
+   "ms": 0
+  },
+  {
+   "id": "page.microphone",
+   "group": "page",
+   "outcome": "skipped",
+   "detail": "这次检查的时间用完了，这一页没有开。",
+   "ms": 0
+  },
+  {
+   "id": "page.windows-security",
+   "group": "page",
+   "outcome": "skipped",
+   "detail": "这次检查的时间用完了，这一页没有开。",
+   "ms": 0
+  },
+  {
+   "id": "page.windows-update",
+   "group": "page",
+   "outcome": "skipped",
+   "detail": "这次检查的时间用完了，这一页没有开。",
+   "ms": 0
+  },
+  {
+   "id": "page.backup",
+   "group": "page",
+   "outcome": "skipped",
+   "detail": "这次检查的时间用完了，这一页没有开。",
+   "ms": 0
+  },
+  {
+   "id": "page.troubleshoot",
+   "group": "page",
+   "outcome": "skipped",
+   "detail": "这次检查的时间用完了，这一页没有开。",
+   "ms": 0
+  },
+  {
+   "id": "page.recovery",
+   "group": "page",
+   "outcome": "skipped",
+   "detail": "这次检查的时间用完了，这一页没有开。",
+   "ms": 0
+  },
+  {
+   "id": "page.activation",
+   "group": "page",
+   "outcome": "skipped",
+   "detail": "这次检查的时间用完了，这一页没有开。",
+   "ms": 0
+  },
+  {
+   "id": "page.developers",
+   "group": "page",
+   "outcome": "skipped",
+   "detail": "这次检查的时间用完了，这一页没有开。",
+   "ms": 0
+  },
+  {
+   "id": "gate.before",
+   "group": "gate",
+   "outcome": "skipped",
+   "detail": "这次检查的时间用完了，这一项没有做。",
+   "ms": 0
+  },
+  {
+   "id": "gate.selftest",
+   "group": "gate",
+   "outcome": "skipped",
+   "detail": "这次检查的时间用完了，这一项没有做。",
+   "ms": 0
+  },
+  {
+   "id": "gate.selftest-items",
+   "group": "gate",
+   "outcome": "skipped",
+   "detail": "这次检查的时间用完了，这一项没有做。",
+   "ms": 0
+  },
+  {
+   "id": "gate.after",
+   "group": "gate",
+   "outcome": "skipped",
+   "detail": "闸门前两步没有通过，这一项没有做。",
+   "ms": 0
+  },
+  {
+   "id": "tool.set.query",
+   "group": "tool",
+   "outcome": "skipped",
+   "detail": "闸门前两步没有通过，这一项没有做。",
+   "ms": 0
+  },
+  {
+   "id": "tool.set.invalid",
+   "group": "tool",
+   "outcome": "skipped",
+   "detail": "闸门前两步没有通过，这一项没有做。",
+   "ms": 0
+  },
+  {
+   "id": "tool.find",
+   "group": "tool",
+   "outcome": "skipped",
+   "detail": "闸门前两步没有通过，这一项没有做。",
+   "ms": 0
+  },
+  {
+   "id": "tool.set.security",
+   "group": "tool",
+   "outcome": "skipped",
+   "detail": "这次检查的时间用完了，这一项没有做。",
+   "ms": 0
+  },
+  {
+   "id": "tool.refuse",
+   "group": "tool",
+   "outcome": "skipped",
+   "detail": "这次检查的时间用完了，这一项没有做。",
+   "ms": 0
+  },
+  {
+   "id": "probe.explorer-advanced",
+   "group": "probe",
+   "outcome": "skipped",
+   "detail": "这次检查的时间用完了，这一项没有做。",
+   "ms": 0
+  },
+  {
+   "id": "probe.explorer",
+   "group": "probe",
+   "outcome": "skipped",
+   "detail": "这次检查的时间用完了，这一项没有做。",
+   "ms": 0
+  },
+  {
+   "id": "probe.search",
+   "group": "probe",
+   "outcome": "skipped",
+   "detail": "这次检查的时间用完了，这一项没有做。",
+   "ms": 0
+  },
+  {
+   "id": "probe.personalize",
+   "group": "probe",
+   "outcome": "skipped",
+   "detail": "这次检查的时间用完了，这一项没有做。",
+   "ms": 0
+  },
+  {
+   "id": "probe.dwm",
+   "group": "probe",
+   "outcome": "skipped",
+   "detail": "这次检查的时间用完了，这一项没有做。",
+   "ms": 0
+  },
+  {
+   "id": "probe.mouse",
+   "group": "probe",
+   "outcome": "skipped",
+   "detail": "这次检查的时间用完了，这一项没有做。",
+   "ms": 0
+  },
+  {
+   "id": "probe.desktop",
+   "group": "probe",
+   "outcome": "skipped",
+   "detail": "这次检查的时间用完了，这一项没有做。",
+   "ms": 0
+  },
+  {
+   "id": "probe.accessibility",
+   "group": "probe",
+   "outcome": "skipped",
+   "detail": "这次检查的时间用完了，这一项没有做。",
+   "ms": 0
+  },
+  {
+   "id": "probe.notifications",
+   "group": "probe",
+   "outcome": "skipped",
+   "detail": "这次检查的时间用完了，这一项没有做。",
+   "ms": 0
+  },
+  {
+   "id": "probe.game-bar",
+   "group": "probe",
+   "outcome": "skipped",
+   "detail": "这次检查的时间用完了，这一项没有做。",
+   "ms": 0
+  },
+  {
+   "id": "probe.storage-sense",
+   "group": "probe",
+   "outcome": "skipped",
+   "detail": "这次检查的时间用完了，这一项没有做。",
+   "ms": 0
+  },
+  {
+   "id": "probe.clipboard",
+   "group": "probe",
+   "outcome": "skipped",
+   "detail": "这次检查的时间用完了，这一项没有做。",
+   "ms": 0
+  },
+  {
+   "id": "probe.power-scheme",
+   "group": "probe",
+   "outcome": "skipped",
+   "detail": "这次检查的时间用完了，这一项没有做。",
+   "ms": 0
+  },
+  {
+   "id": "probe.power-display",
+   "group": "probe",
+   "outcome": "skipped",
+   "detail": "这次检查的时间用完了，这一项没有做。",
+   "ms": 0
+  },
+  {
+   "id": "probe.power-sleep",
+   "group": "probe",
+   "outcome": "skipped",
+   "detail": "这次检查的时间用完了，这一项没有做。",
+   "ms": 0
+  },
+  {
+   "id": "probe.sound-devices",
+   "group": "probe",
+   "outcome": "skipped",
+   "detail": "这次检查的时间用完了，这一项没有做。",
+   "ms": 0
+  },
+  {
+   "id": "probe.network-adapters",
+   "group": "probe",
+   "outcome": "skipped",
+   "detail": "这次检查的时间用完了，这一项没有做。",
+   "ms": 0
+  },
+  {
+   "id": "probe.start-apps",
+   "group": "probe",
+   "outcome": "skipped",
+   "detail": "这次检查的时间用完了，这一项没有做。",
+   "ms": 0
+  },
+  {
+   "id": "probe.brightness",
+   "group": "probe",
+   "outcome": "skipped",
+   "detail": "这次检查的时间用完了，这一项没有做。",
+   "ms": 0
+  },
+  {
+   "id": "probe.culture",
+   "group": "probe",
+   "outcome": "skipped",
+   "detail": "这次检查的时间用完了，这一项没有做。",
+   "ms": 0
+  },
+  {
+   "id": "probe.powershell-start",
+   "group": "probe",
+   "outcome": "skipped",
+   "detail": "这次检查的时间用完了，这一项没有做。",
+   "ms": 0
+  },
+  {
+   "id": "final.restored",
+   "group": "final",
+   "outcome": "passed",
+   "detail": "5 项读到过值的设置，结束时都是开始时的值。",
+   "ms": 0
+  },
+  {
+   "id": "final.cleanup",
+   "group": "final",
+   "outcome": "passed",
+   "detail": "关掉了设置窗口和文件夹窗口，删掉了临时文件。",
+   "ms": 0
+  }
+ ],
+ "times": {
+  "catalog.scan": 25693,
+  "catalog.load": 2,
+  "catalog.rescan": 23558,
+  "open.cost": 3643,
+  "open.app": 22826,
+  "open.folder": 67331,
+  "setting.read": 21952,
+  "setting.change": 44409,
+  "open.page.command": 425,
+  "page.read": 22287,
+  "open.page": 22843
+ },
+ "verified": [
+  "dark-mode",
+  "app-dark-mode",
+  "system-dark-mode",
+  "transparency",
+  "clipboard-history"
+ ],
+ "untestable": [
+  "brightness"
+ ]
+}

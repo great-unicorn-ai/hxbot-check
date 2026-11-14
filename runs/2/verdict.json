@@ -1,0 +1,36 @@
+{
+ "green": false,
+ "clean": false,
+ "failed": 6,
+ "review": 2,
+ "missing": [],
+ "verified": {
+  "mac": [
+   "alert-volume",
+   "dark-mode",
+   "dock-autohide",
+   "dock-magnification",
+   "dock-minimize-effect",
+   "dock-position",
+   "dock-recents",
+   "dock-size",
+   "input-volume",
+   "menu-bar-autohide",
+   "mute",
+   "volume"
+  ],
+  "windows": [
+   "app-dark-mode",
+   "clipboard-history",
+   "dark-mode",
+   "system-dark-mode",
+   "transparency"
+  ]
+ },
+ "untestable": {
+  "mac": [],
+  "windows": [
+   "brightness"
+  ]
+ }
+}
