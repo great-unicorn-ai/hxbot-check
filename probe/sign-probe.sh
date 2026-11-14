@@ -5,6 +5,7 @@
 set -u
 OUT="$1"; mkdir -p "$OUT"; R="$OUT/sign.txt"; : > "$R"
 W="$(mktemp -d)"; O=/usr/bin/openssl; NAME="HXBot Code Signing"
+limit() { perl -e 'alarm shift; exec @ARGV' "$@"; }   # macOS has no timeout command
 r() { printf '%s=%s\n' "$1" "$2" >> "$R"; }
 r macos "$(sw_vers -productVersion)"
 cat > "$W/cert.cnf" <<'CNF'
@@ -31,10 +32,12 @@ r sha1 "$SHA1"
 KC="$W/probe.keychain-db"; KP="$("$O" rand -hex 16)"
 security create-keychain -p "$KP" "$KC"; security set-keychain-settings -lut 21600 "$KC"; security unlock-keychain -p "$KP" "$KC"
 security import "$W/cert.p12" -k "$KC" -P "$PASS" -T /usr/bin/codesign -T /usr/bin/security >/dev/null 2>&1; r import $?
-security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KP" "$KC" >/dev/null 2>&1; r partition_list $?
+limit 60 security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KP" "$KC" >/dev/null 2>&1; r partition_list $?
 security list-keychains -d user -s "$KC" $(security list-keychains -d user | tr -d '"')
 r valid_identities_before_trust "$(security find-identity -v -p codesigning "$KC" | grep -c "$NAME")"
-sudo security add-trusted-cert -d -r trustRoot -p codeSign -k /Library/Keychains/System.keychain "$W/cert.pem"; r trust $?
+# without this, add-trusted-cert waits for a password window that nobody can answer on a runner
+sudo security authorizationdb write com.apple.trust-settings.admin allow >/dev/null 2>&1; r authorizationdb $?
+limit 60 sudo security add-trusted-cert -d -r trustRoot -p codeSign -k /Library/Keychains/System.keychain "$W/cert.pem"; r trust $?
 r valid_identities_after_trust "$(security find-identity -v -p codesigning "$KC" | grep -c "$NAME")"
 r find_identity_line "$(security find-identity -v -p codesigning "$KC" | grep "$NAME" | head -1 | sed 's/^ *//')"
 
@@ -70,8 +73,8 @@ int main(void) {
 }
 C
   clang -dynamiclib -o "$app/Contents/Frameworks/libprobe.dylib" "$1/lib.c" && clang -o "$app/Contents/MacOS/probe" "$1/main.c" || return 1
-  codesign --force --options runtime --timestamp=none --keychain "$KC" -s "$NAME" "$app/Contents/Frameworks/libprobe.dylib" 2>>"$OUT/codesign.log" &&
-    codesign --force --options runtime --timestamp=none --keychain "$KC" --entitlements "$3" -s "$NAME" "$app" 2>>"$OUT/codesign.log"
+  limit 120 codesign --force --options runtime --timestamp=none --keychain "$KC" -s "$NAME" "$app/Contents/Frameworks/libprobe.dylib" 2>>"$OUT/codesign.log" &&
+    limit 120 codesign --force --options runtime --timestamp=none --keychain "$KC" --entitlements "$3" -s "$NAME" "$app" 2>>"$OUT/codesign.log"
 }
 build "$W/v1" 1 "$W/ent-ldv.plist"; r sign_v1 $?
 build "$W/v2" 2 "$W/ent-ldv.plist"; r sign_v2 $?
