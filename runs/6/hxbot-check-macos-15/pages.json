@@ -1,0 +1,322 @@
+[
+ {
+  "key": "wifi",
+  "wanted": "Wi-Fi",
+  "opened": true,
+  "seen": [
+   "Wi‑Fi"
+  ]
+ },
+ {
+  "key": "bluetooth",
+  "wanted": "Bluetooth",
+  "opened": true,
+  "seen": [
+   "Bluetooth"
+  ]
+ },
+ {
+  "key": "network",
+  "wanted": "Network",
+  "opened": true,
+  "seen": [
+   "Network"
+  ]
+ },
+ {
+  "key": "notifications",
+  "wanted": "Notifications",
+  "opened": true,
+  "seen": [
+   "Notifications"
+  ]
+ },
+ {
+  "key": "sound",
+  "wanted": "Sound",
+  "opened": true,
+  "seen": [
+   "Sound"
+  ]
+ },
+ {
+  "key": "focus",
+  "wanted": "Focus",
+  "opened": true,
+  "seen": [
+   "Focus"
+  ]
+ },
+ {
+  "key": "screen-time",
+  "wanted": "Screen Time",
+  "opened": true,
+  "seen": [
+   "Screen Time"
+  ]
+ },
+ {
+  "key": "appearance",
+  "wanted": "Appearance",
+  "opened": true,
+  "seen": [
+   "Appearance"
+  ]
+ },
+ {
+  "key": "accessibility",
+  "wanted": "Accessibility",
+  "opened": true,
+  "seen": [
+   "Accessibility"
+  ]
+ },
+ {
+  "key": "control-center",
+  "wanted": "Control Center",
+  "opened": true,
+  "seen": [
+   "Control Center"
+  ]
+ },
+ {
+  "key": "siri",
+  "wanted": "Siri & Spotlight",
+  "opened": true,
+  "seen": [
+   "Siri"
+  ]
+ },
+ {
+  "key": "privacy",
+  "wanted": "Privacy & Security",
+  "opened": true,
+  "seen": [
+   "Privacy & Security"
+  ]
+ },
+ {
+  "key": "desktop-dock",
+  "wanted": "Desktop & Dock",
+  "opened": true,
+  "seen": [
+   "Desktop & Dock"
+  ]
+ },
+ {
+  "key": "displays",
+  "wanted": "Displays",
+  "opened": true,
+  "seen": [
+   "Displays"
+  ]
+ },
+ {
+  "key": "wallpaper",
+  "wanted": "Wallpaper",
+  "opened": true,
+  "seen": [
+   "Wallpaper"
+  ]
+ },
+ {
+  "key": "screen-saver",
+  "wanted": "Screen Saver",
+  "opened": true,
+  "seen": [
+   "Screen Saver"
+  ]
+ },
+ {
+  "key": "battery",
+  "wanted": "Battery",
+  "opened": true,
+  "seen": [
+   "Energy"
+  ]
+ },
+ {
+  "key": "lock-screen",
+  "wanted": "Lock Screen",
+  "opened": true,
+  "seen": [
+   "Lock Screen"
+  ]
+ },
+ {
+  "key": "touch-id",
+  "wanted": "Touch ID & Password",
+  "opened": true,
+  "seen": [
+   "Login Password"
+  ]
+ },
+ {
+  "key": "users",
+  "wanted": "Users & Groups",
+  "opened": true,
+  "seen": [
+   "Users & Groups"
+  ]
+ },
+ {
+  "key": "passwords",
+  "wanted": "Passwords",
+  "opened": true,
+  "seen": [
+   "AutoFill & Passwords"
+  ]
+ },
+ {
+  "key": "internet-accounts",
+  "wanted": "Internet Accounts",
+  "opened": true,
+  "seen": [
+   "Internet Accounts"
+  ]
+ },
+ {
+  "key": "game-center",
+  "wanted": "Game Center",
+  "opened": true,
+  "seen": [
+   "Game Center"
+  ]
+ },
+ {
+  "key": "wallet",
+  "wanted": "Wallet & Apple Pay",
+  "opened": true,
+  "seen": [
+   "Game Center"
+  ]
+ },
+ {
+  "key": "keyboard",
+  "wanted": "Keyboard",
+  "opened": true,
+  "seen": [
+   "Keyboard"
+  ]
+ },
+ {
+  "key": "mouse",
+  "wanted": "Mouse",
+  "opened": true,
+  "seen": [
+   "Mouse"
+  ]
+ },
+ {
+  "key": "trackpad",
+  "wanted": "Trackpad",
+  "opened": true,
+  "seen": [
+   "Mouse"
+  ]
+ },
+ {
+  "key": "printers",
+  "wanted": "Printers & Scanners",
+  "opened": true,
+  "seen": [
+   "Printers & Scanners"
+  ]
+ },
+ {
+  "key": "about",
+  "wanted": "About",
+  "opened": true,
+  "seen": [
+   "About"
+  ]
+ },
+ {
+  "key": "software-update",
+  "wanted": "Software Update",
+  "opened": true,
+  "seen": [
+   "Software Update"
+  ]
+ },
+ {
+  "key": "storage",
+  "wanted": "Storage",
+  "opened": true,
+  "seen": [
+   "Storage"
+  ]
+ },
+ {
+  "key": "airdrop",
+  "wanted": "AirDrop & Handoff",
+  "opened": true,
+  "seen": [
+   "AirDrop & Handoff"
+  ]
+ },
+ {
+  "key": "login-items",
+  "wanted": "Login Items",
+  "opened": true,
+  "seen": [
+   "Login Items & Extensions"
+  ]
+ },
+ {
+  "key": "language",
+  "wanted": "Language & Region",
+  "opened": true,
+  "seen": [
+   "Language & Region"
+  ]
+ },
+ {
+  "key": "date-time",
+  "wanted": "Date & Time",
+  "opened": true,
+  "seen": [
+   "Date & Time"
+  ]
+ },
+ {
+  "key": "sharing",
+  "wanted": "Sharing",
+  "opened": true,
+  "seen": [
+   "Sharing"
+  ]
+ },
+ {
+  "key": "time-machine",
+  "wanted": "Time Machine",
+  "opened": true,
+  "seen": [
+   "Time Machine"
+  ]
+ },
+ {
+  "key": "transfer-reset",
+  "wanted": "Transfer or Reset",
+  "opened": true,
+  "seen": [
+   "Transfer or Reset"
+  ]
+ },
+ {
+  "key": "startup-disk",
+  "wanted": "Startup Disk",
+  "opened": true,
+  "seen": [
+   "Startup Disk"
+  ]
+ },
+ {
+  "key": "apple-account",
+  "wanted": "Apple Account",
+  "opened": true,
+  "seen": [
+   "Sign in"
+  ]
+ }
+]
