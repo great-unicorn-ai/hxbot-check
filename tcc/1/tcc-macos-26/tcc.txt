@@ -1,0 +1,22 @@
+macOS: 26.7.2 (25G332); user runner; SIP: System Integrity Protection status: disabled.
+== columns
+service|TEXT|1| client|TEXT|1| client_type|INTEGER|1| auth_value|INTEGER|1| auth_reason|INTEGER|1| auth_version|INTEGER|1| csreq|BLOB|0| policy_id|INTEGER|0| indirect_object_identifier_type|INTEGER|0| indirect_object_identifier|TEXT|1|'UNUSED' indirect_object_code_identity|BLOB|0| flags|INTEGER|0| last_modified|INTEGER|1|CAST(strftime('%s','now') AS INTEGER) pid|INTEGER|0| pid_version|INTEGER|0| boot_uuid|TEXT|1|'UNUSED' last_reminded|INTEGER|1|CAST(strftime('%s','now') AS INTEGER) 
+insert kTCCServiceScreenCapture: 0
+insert kTCCServiceAccessibility: 0
+== before
+kTCCServiceScreenCapture|org.example.hxprobe|2
+kTCCServiceAccessibility|org.example.hxprobe|2
+== tccutil reset ScreenCapture org.example.hxprobe (no sudo)
+Successfully reset ScreenCapture approval status for org.example.hxprobe
+exit: 0
+== tccutil reset Accessibility org.example.hxprobe (no sudo)
+Successfully reset Accessibility approval status for org.example.hxprobe
+exit: 0
+== after
+== other apps' entries still there (bash)
+kTCCServiceAccessibility|/bin/bash
+kTCCServiceAppleEvents|/bin/bash
+kTCCServiceAppleEvents|/bin/bash
+kTCCServiceScreenCapture|/bin/bash
+kTCCServiceSystemPolicyAllFiles|/bin/bash
+kTCCServiceSystemPolicyNetworkVolumes|/bin/bash
