@@ -1,0 +1,84 @@
+# HXBot: two probes on GitHub's Mac machines, for the plan to fix Mac privacy grants (v1.6.8).
+#   probe/sign-probe.sh         a code signing certificate made with the Mac's own openssl: does it
+#                               sign a hardened app, and do two builds get the same designated
+#                               requirement (macOS keeps privacy grants per requirement)?
+#   probe/privacy-probe.swift   does System Settings accept a program's press on a toggle in
+#                               Privacy & Security (and then ask for a password or Touch ID)?
+# Results: the Artifacts of the run, and the branch main-results, folder probe/<run number>/.
+name: Mac privacy probe
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - probe/**
+      - .github/workflows/mac-privacy-probe.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: mac-privacy-probe
+  cancel-in-progress: true
+
+jobs:
+  probe:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-15, macos-26]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v6
+      - name: Signing probe
+        continue-on-error: true
+        run: bash probe/sign-probe.sh "out/${{ matrix.os }}"
+      - name: Build the privacy probe
+        continue-on-error: true
+        run: swiftc -O probe/privacy-probe.swift -o "$RUNNER_TEMP/privacy-probe"
+      - name: Privacy probe
+        continue-on-error: true
+        timeout-minutes: 8
+        run: |
+          mkdir -p "out/${{ matrix.os }}"
+          "$RUNNER_TEMP/privacy-probe" "out/${{ matrix.os }}" > "out/${{ matrix.os }}/privacy-log.txt" 2>&1 || true
+          tail -c 4000 "out/${{ matrix.os }}/privacy-log.txt"
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: probe-${{ matrix.os }}
+          path: out/${{ matrix.os }}
+          if-no-files-found: warn
+
+  results:
+    needs: [probe]
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v8
+        continue-on-error: true
+        with:
+          path: all
+          pattern: probe-*
+      - name: Keep the results on a branch
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p all
+          work="$RUNNER_TEMP/results"
+          git init -q "$work"
+          cp -R all "$RUNNER_TEMP/all"
+          cd "$work"
+          git remote add origin "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          if git fetch -q --depth=1 origin main-results 2>/dev/null; then git checkout -q -B main-results FETCH_HEAD; else git checkout -q --orphan main-results; fi
+          mkdir -p "probe/$GITHUB_RUN_NUMBER"
+          cp -R "$RUNNER_TEMP/all/." "probe/$GITHUB_RUN_NUMBER/"
+          printf '%s %s\n' "$GITHUB_RUN_NUMBER" "$GITHUB_SHA" > latest-probe.txt
+          git add -A
+          git -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" commit -q -m "Mac privacy probe results of run $GITHUB_RUN_NUMBER"
+          git push -q origin main-results
