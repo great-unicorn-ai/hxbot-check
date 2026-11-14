@@ -1,0 +1,124 @@
+# HXBot: can an app's own grants be reset without administrator rights (tccutil reset <service> <id>)?
+# An app that changed its signature keeps old, useless entries in Privacy & Security; resetting its
+# own entries before it asks again gives the user a clean list. On macos-15 and macos-26: plant
+# Screen Recording and Accessibility entries for a tiny app, then reset them as the normal user.
+# Results go to the branch main-results, folder tcc/<run>/.
+name: Mac TCC reset
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/mac-tcc-reset.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: hxbot-tcc-reset
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: ${{ matrix.machine }}
+    runs-on: ${{ matrix.machine }}
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        machine: [macos-15, macos-26]
+    steps:
+      - name: Reset an app's own entries as the normal user
+        shell: bash
+        run: |
+          set +e
+          mkdir -p out
+          id=org.example.hxprobe
+          app="$HOME/Applications/Hxprobe.app"
+          mkdir -p "$app/Contents/MacOS"
+          cp /usr/bin/true "$app/Contents/MacOS/hxprobe"
+          cat > "$app/Contents/Info.plist" <<PLIST
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0"><dict>
+          <key>CFBundleIdentifier</key><string>$id</string>
+          <key>CFBundleExecutable</key><string>hxprobe</string>
+          <key>CFBundleName</key><string>Hxprobe</string>
+          <key>CFBundlePackageType</key><string>APPL</string>
+          </dict></plist>
+          PLIST
+          codesign -s - --force "$app" 2>&1
+          /System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -f "$app"
+          db="/Library/Application Support/com.apple.TCC/TCC.db"
+          rows() { sudo sqlite3 "$db" "select service, client, auth_value from access where client='$id'" 2>&1; }
+          {
+            echo "macOS: $(sw_vers -productVersion) ($(sw_vers -buildVersion)); user $(id -un); SIP: $(csrutil status 2>&1)"
+            echo "== columns"; sudo sqlite3 "$db" "pragma table_info(access)" 2>&1 | cut -d'|' -f2,3,4,5 | tr '\n' ' '; echo
+            for service in kTCCServiceScreenCapture kTCCServiceAccessibility; do
+              sudo sqlite3 "$db" "insert or replace into access (service, client, client_type, auth_value, auth_reason, auth_version, flags, last_modified) values ('$service', '$id', 0, 2, 4, 1, 0, strftime('%s','now'))" 2>&1
+              echo "insert $service: $?"
+            done
+            echo "== before"; rows
+            for service in ScreenCapture Accessibility; do
+              echo "== tccutil reset $service $id (no sudo)"
+              perl -e 'alarm shift; exec @ARGV' 30 tccutil reset "$service" "$id" 2>&1
+              echo "exit: $?"
+            done
+            sleep 2
+            echo "== after"; rows
+            echo "== other apps' entries still there (bash)"
+            sudo sqlite3 "$db" "select service, client from access where client='/bin/bash'" 2>&1
+          } 2>&1 | tee out/tcc.txt
+          exit 0
+      - name: Show the result
+        if: always()
+        shell: bash
+        run: |
+          { echo '```'; cat out/tcc.txt; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+      - name: Upload the result
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: tcc-${{ matrix.machine }}
+          path: out
+          if-no-files-found: warn
+          retention-days: 14
+
+  keep:
+    name: keep the results
+    needs: [check]
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - name: Download the results
+        continue-on-error: true
+        uses: actions/download-artifact@v8
+        with:
+          path: all
+          pattern: tcc-*
+      - name: Keep the results on a branch
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p all
+          cp -R all "$RUNNER_TEMP/all"
+          work="$RUNNER_TEMP/results"
+          git init -q "$work"
+          cd "$work"
+          git remote add origin "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          if git fetch -q --depth=1 origin main-results 2>/dev/null; then git checkout -q -B main-results FETCH_HEAD; else git checkout -q --orphan main-results; fi
+          mkdir -p "tcc/$GITHUB_RUN_NUMBER"
+          cp -R "$RUNNER_TEMP/all/." "tcc/$GITHUB_RUN_NUMBER/"
+          printf '%s %s\n' "$GITHUB_RUN_NUMBER" "$GITHUB_SHA" > latest-tcc.txt
+          git add -A
+          git -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" commit -q -m "TCC reset results of run $GITHUB_RUN_NUMBER"
+          for attempt in 1 2 3; do
+            git push -q origin main-results && break
+            sleep 5
+            git pull -q --rebase origin main-results
+          done
