@@ -1,0 +1,27 @@
+macos=15.8.2
+make_cert=0
+make_p12=0
+sha1=3F82A5BA08A5EA86C8E75DC8CAAD2C53A20F8A1F
+import=0
+partition_list=0
+valid_identities_before_trust=0
+authorizationdb=255
+trust=0
+valid_identities_after_trust=1
+find_identity_line=1) 3F82A5BA08A5EA86C8E75DC8CAAD2C53A20F8A1F "HXBot Code Signing"
+sign_v1=0
+sign_v2=0
+sign_v3_without_ldv=0
+verify_deep_strict=0
+dr_v1=identifier "org.example.hxprobe" and certificate root = H"3f82a5ba08a5ea86c8e75dc8caad2c53a20f8a1f"
+dr_v2=identifier "org.example.hxprobe" and certificate root = H"3f82a5ba08a5ea86c8e75dc8caad2c53a20f8a1f"
+same_dr_for_two_builds=yes
+dr_has_sha1=1
+dr_has_identifier=1
+runtime_flag=1
+team_identifier=not set
+run_with_ldv=loaded 1
+run_v2=loaded 2
+run_without_ldv=loaded 3
+spctl=/var/folders/2s/vty41l455yv698g4xkgfv7z00000gn/T/tmp.ZVsl9v7NG5/v1/Probe.app: rejected
+v2_satisfies_v1_requirement=0
