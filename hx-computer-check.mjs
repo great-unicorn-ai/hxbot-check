@@ -393,6 +393,7 @@ function hxPowerShell(scriptText, env) {
 }
 var PERSONALIZE = "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize";
 var CLIPBOARD = "HKCU:\\Software\\Microsoft\\Clipboard";
+var WMI_LIMIT_SECONDS = 10;
 var BROADCAST = [
   "try {",
   "$hxQuote = [string][char]34;",
@@ -517,9 +518,9 @@ var FIRST_SETTINGS = [
     pinyin: "ping mu liang du",
     more: ["亮度"],
     values: { type: "number", min: 0, max: 100 },
-    read: hxPowerShell("try { [string](Get-CimInstance -Namespace root/WMI -ClassName WmiMonitorBrightness -ErrorAction Stop | Select-Object -First 1).CurrentBrightness } catch { 'none' }"),
+    read: hxPowerShell(`try { [string](Get-CimInstance -Namespace root/WMI -ClassName WmiMonitorBrightness -OperationTimeoutSec ${WMI_LIMIT_SECONDS} -ErrorAction Stop | Select-Object -First 1).CurrentBrightness } catch { 'none' }`),
     parse: (stdout) => hxParseNumber(stdout, 0, 100),
-    write: (value) => hxPowerShell(`$m = Get-CimInstance -Namespace root/WMI -ClassName WmiMonitorBrightnessMethods -ErrorAction Stop | Select-Object -First 1; Invoke-CimMethod -InputObject $m -MethodName WmiSetBrightness -Arguments @{ Timeout = [uint32]1; Brightness = [byte]${Number(value)} } -ErrorAction Stop | Out-Null`)
+    write: (value) => hxPowerShell(`$m = Get-CimInstance -Namespace root/WMI -ClassName WmiMonitorBrightnessMethods -OperationTimeoutSec ${WMI_LIMIT_SECONDS} -ErrorAction Stop | Select-Object -First 1; Invoke-CimMethod -InputObject $m -MethodName WmiSetBrightness -Arguments @{ Timeout = [uint32]1; Brightness = [byte]${Number(value)} } -OperationTimeoutSec ${WMI_LIMIT_SECONDS} -ErrorAction Stop | Out-Null`)
   }
 ];
 function hxWinCombined(read, write) {
@@ -1893,20 +1894,24 @@ class HxCatalog {
   async directState(id) {
     if (await this.isDisabled(id))
       return "disabled";
-    if (this.#host.verified || (await this.#checkedNow()).has(id))
+    if (this.#isVerified(id) || (await this.#checkedNow()).has(id))
       return "direct";
     return "unchecked";
+  }
+  #isVerified(id) {
+    const verified = this.#host.verified;
+    if (typeof verified === "boolean")
+      return verified;
+    return verified.some((key) => `setting:${key}` === id);
   }
   async#notDirect() {
     const disabled = await this.#disabledNow();
     const unchecked = new Set;
-    if (!this.#host.verified) {
-      const checked = await this.#checkedNow();
-      for (const seed of this.settingSeeds()) {
-        const id = `setting:${seed.key}`;
-        if (!checked.has(id) && !disabled.has(id))
-          unchecked.add(id);
-      }
+    const checked = await this.#checkedNow();
+    for (const seed of this.settingSeeds()) {
+      const id = `setting:${seed.key}`;
+      if (!this.#isVerified(id) && !checked.has(id) && !disabled.has(id))
+        unchecked.add(id);
     }
     return { disabled, unchecked };
   }
@@ -2347,7 +2352,7 @@ end timeout`),
     shell("sound-devices", "Get-CimInstance Win32_SoundDevice | Select-Object Name, Status | ConvertTo-Json -Compress"),
     shell("network-adapters", "Get-NetAdapter | Select-Object Name, InterfaceDescription, Status | ConvertTo-Json -Compress"),
     shell("start-apps", "(Get-StartApps | Select-Object -First 150 | ForEach-Object { $_.Name }) -join ' ; '"),
-    shell("brightness", "Get-CimInstance -Namespace root/WMI -ClassName WmiMonitorBrightness -ErrorAction Stop | Select-Object CurrentBrightness, Levels | ConvertTo-Json -Compress"),
+    shell("brightness", "Get-CimInstance -Namespace root/WMI -ClassName WmiMonitorBrightness -OperationTimeoutSec 10 -ErrorAction Stop | Select-Object CurrentBrightness, Levels | ConvertTo-Json -Compress"),
     shell("culture", "(Get-Culture).Name + ' ; ' + (Get-UICulture).Name + ' ; ' + (Get-WinSystemLocale).Name"),
     shell("powershell-start", "$hxOwn = [Diagnostics.Process]::GetCurrentProcess(); $hxUp = [int]((Get-Date) - $hxOwn.StartTime).TotalMilliseconds; $hxEach = @(); foreach ($hxRound in 1..3) { $hxAt = Get-Date; & $hxOwn.Path -NoLogo -NoProfile -NonInteractive -Command exit | Out-Null; $hxEach += [int]((Get-Date) - $hxAt).TotalMilliseconds }; 'this one was already up for ' + $hxUp + ' ms; another one takes ' + ($hxEach -join ', ') + ' ms'", 180000)
   ]
