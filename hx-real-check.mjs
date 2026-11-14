@@ -21118,7 +21118,8 @@ async function main() {
     brain = found.brain;
     tried = found.tried;
   }
-  items.add("M1", "有可用的真实模型", brain ? "pass" : "fail", brain?.name ?? tried.map((item) => `${item.name}：${item.answer}`).join("；"));
+  const given = Boolean(process.env.HX_CHECK_MODEL_KEY) || Boolean(option(args, "--opencode"));
+  items.add("M1", "有可用的真实模型", brain ? "pass" : given ? "fail" : "skip", brain?.name ?? `没有配模型（仓库 Secret HX_CHECK_MODEL_URL、HX_CHECK_MODEL_KEY、HX_CHECK_MODEL）；${tried.map((item) => `${item.name}：${item.answer}`).join("；")}`);
   if (parts.has("steps")) {
     const driver = option(args, "--driver");
     if (driver)
