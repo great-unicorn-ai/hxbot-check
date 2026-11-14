@@ -1,0 +1,13 @@
+== /Users/runner/work/_temp/driver/cua-driver check_permissions
+Cua Driver sends content-free product telemetry by default. Run `cua-driver telemetry disable` to stop it; `cua-driver telemetry status` shows the current setting.
+Cua Driver daemon is not running on /Users/runner/Library/Caches/cua-driver/cua-driver.sock.
+Start it first with: cua-driver serve --socket /Users/runner/Library/Caches/cua-driver/cua-driver.sock
+== /Users/runner/work/_temp/driver/cua-driver check-permissions
+Cua Driver sends content-free product telemetry by default. Run `cua-driver telemetry disable` to stop it; `cua-driver telemetry status` shows the current setting.
+Cua Driver daemon is not running on /Users/runner/Library/Caches/cua-driver/cua-driver.sock.
+Start it first with: cua-driver serve --socket /Users/runner/Library/Caches/cua-driver/cua-driver.sock
+== /Users/runner/work/_temp/driver/cua-driver permissions
+Cua Driver sends content-free product telemetry by default. Run `cua-driver telemetry disable` to stop it; `cua-driver telemetry status` shows the current setting.
+Accessibility:    ❓ unknown
+Screen Recording: ❓ unknown
+No CuaDriver daemon is running under the driver's own identity (com.trycua.driver), so its real TCC status can't be read from this process. Run `cua-driver permissions grant` to grant + verify, or start the daemon (`open -n -g -a CuaDriver --args serve`) and re-run this command.

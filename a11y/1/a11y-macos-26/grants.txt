@@ -1,0 +1,33 @@
+macOS: 26.7.2 (25G332)
+SIP: System Integrity Protection status: disabled.
+== before (system)
+/bin/bash|2
+/opt/hca/hosted-compute-agent|2
+/usr/local/opt/runner/provisioner/provisioner|2
+== before (user)
+/bin/bash|2
+/opt/hca/hosted-compute-agent|2
+/usr/bin/osascript|2
+/usr/local/opt/runner/provisioner/provisioner|2
+com.apple.Terminal|2
+== before (probe)
+screen_recording=1 accessibility=1 windows=10 titled=9
+== remove
+system delete: 0
+user delete: 0
+Successfully reset ScreenCapture
+tccutil reset: 0
+== after (system)
+== after (user)
+== after (probe)
+screen_recording=0 accessibility=1 windows=10 titled=3
+== accessibility (system)
+/bin/bash|2
+/opt/hca/hosted-compute-agent|2
+/opt/hca/start_hca.sh|2
+/usr/bin/osascript|2
+/usr/libexec/sshd-keygen-wrapper|2
+/usr/local/opt/runner/provisioner/provisioner|2
+/usr/local/opt/runner/runprovisioner.sh|2
+com.apple.Terminal|2
+com.apple.dt.Xcode-Helper|2

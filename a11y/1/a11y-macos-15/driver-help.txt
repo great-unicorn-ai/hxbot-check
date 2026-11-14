@@ -1,0 +1,40 @@
+cua-driver 0.34.0 — cross-platform computer-use automation driver
+Usage: cua-driver [SUBCOMMAND] [OPTIONS]
+Subcommands: mcp, list-tools, describe, call, serve, stop, revoke, status, config, telemetry, recording, update, check-update, doctor, diagnose, permissions, autostart, skills, manifest, extension, perception, channel, cursor-theme, cursor, sessions, history, mcp-config
+
+permissions options (macOS):
+  cua-driver permissions status   Report Accessibility + Screen Recording status. Read-only (no prompt).
+                                  Answers via a running daemon, so the result carries the CuaDriver
+                                  identity (com.trycua.driver). If no daemon is running it reports
+                                  `unknown` rather than your terminal's grants. Add --json for the payload.
+  cua-driver permissions grant    Launch CuaDriver via LaunchServices so dialogs attribute to the app,
+                                  explain and request Accessibility, Screen Recording, and Tahoe's
+                                  direct-capture consent, then verify live capture. This is the correct
+                                  way to grant; the read-only status command never triggers that probe.
+
+Updating cua-driver:
+  cua-driver check-update         Ask GitHub whether a newer release is available. Read-only.
+                                  Default output is human-friendly text.
+    --json                        Emit a machine-readable JSON payload (same shape as the
+                                  check_for_update MCP tool). Hermes branches on update_available.
+    --no-cache                    Skip the 20h on-disk cache and force a fresh GitHub round-trip.
+  cua-driver update               Same check as above, then suggest --apply if outdated.
+    --apply                       Download + install the latest release via the canonical installer.
+    --json                        Emit the structured check payload (does not change --apply behaviour).
+  cua-driver channel status      Show the saved stable/nightly update channel.
+  cua-driver channel set <name>  Save stable or nightly; run update --apply to switch binaries.
+    --json                        Emit machine-readable channel state.
+
+autostart options (Windows-only today):
+  cua-driver autostart enable     Register a logon Scheduled Task so serve starts at every interactive logon.
+  cua-driver autostart disable    Remove the autostart entry. No-op if not registered.
+  cua-driver autostart status     Print whether the entry is registered + whether the daemon is running.
+  cua-driver autostart kick       Start the entry now without re-logging.
+
+skills options (agent skill-pack management, opt-in):
+  cua-driver skills install       Fetch the versioned skill pack from GitHub Releases and symlink it
+                                  into each detected agent's skills/ dir (Claude Code, Codex, Prime Agent,
+                                  OpenClaw, OpenCode). Idempotent. Never overwrites existing user links.
+  cua-driver skills update        Re-fetch the skill pack from GitHub, refreshing the local copy + links.
+  cua-driver skills uninstall     Remove the agent symlinks. Add --all to also delete the local copy.
+  cua-driver skills status        Report local install state + per-agent link state. Read-only.

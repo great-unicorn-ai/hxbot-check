@@ -1,0 +1,63 @@
+{
+  "machine": "macos-15",
+  "model": "",
+  "startedAt": "2026-11-14T20:06:09.237Z",
+  "seconds": 8.706,
+  "items": [
+    {
+      "id": "M1",
+      "title": "有可用的真实模型",
+      "status": "skip",
+      "detail": "没有配模型（仓库 Secret HX_CHECK_MODEL_URL、HX_CHECK_MODEL_KEY、HX_CHECK_MODEL）；"
+    },
+    {
+      "id": "S1",
+      "title": "电脑操控驱动启动并答复（serve --socket）",
+      "status": "pass",
+      "detail": "Cua Driver daemon listening on /var/folders/2s/vty41l455yv698g4xkgfv7z00000gn/T/hxc-2875.sock\n"
+    },
+    {
+      "id": "S2",
+      "title": "Mac 的授权（辅助功能、屏幕录制）",
+      "status": "warn",
+      "detail": "{\"accessibility\":true,\"direct_capture_error\":null,\"direct_capture_status\":\"not_checked\",\"screen_recording\":false,\"screen_recording_capturable\":null,\"source\":{\"attribution\":\"host\",\"direct_runtime\":false,\"disclaim_env\":false,\"embedded\":true,\"executable\":\"/Users/runner/work/_temp/driver/cua-driver\",\"host_bundle_id\":\"\",\"note\":\"Embedded mode: these booleans reflect the HOST app's TCC grant (the driver "
+    },
+    {
+      "id": "S3",
+      "title": "打开 TextEdit，找到它的窗口",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "S4",
+      "title": "读出窗口提纲，有可输入的文字框",
+      "status": "pass",
+      "detail": "TextEdit — (no title) (pid 2896, window 29)\n[0] window \"hxbot-check.txt\"\n [1] field \"HXBot check\"\n [2] button\n [3] button\n [4] button\n[5] menu \"_NS:813\"\n [6] menu \"Apple\"\n  [7] menu\n   [8] menu \"About This Mac\"\n   [9] menu \"System Information\"\n   [10] menu \"System Settings…\"\n   [11] menu \"App Store\"\n   [12] menu \"Recent Items\"\n    [13] menu\n     [14] menu \"Installer\"\n     [15] menu \"Show “Installer” in Finder\"\n     [16] menu \"System Settings\"\n     [17] menu \"Show “System Settings” in Finder\"\n     [18] menu \"TextEdit\"\n     [19] menu \"Show “TextEdit” in Finder\"\n     [20] menu \"AnkaGuestAddons.pk"
+    },
+    {
+      "id": "S5",
+      "title": "固定步骤：在文字框里输入并保存，文件里有这段文字",
+      "status": "pass",
+      "detail": "done；HXBot check: 15 characters [foreground, checked]；cmd+s [keyboard]；文件： HXBot-6370bd79HXBot check\n"
+    },
+    {
+      "id": "S6",
+      "title": "“删除”这类步骤先停下来问（status confirm），不执行",
+      "status": "pass",
+      "detail": "\"Delete\" sends, pays, buys, deletes or publishes. Ask the user in the chat first; after a yes, repeat the step with confirmed true."
+    },
+    {
+      "id": "S7",
+      "title": "按停止键后，下一步不再执行",
+      "status": "pass",
+      "detail": "stopped"
+    },
+    {
+      "id": "S8",
+      "title": "真实模型：列计划、一步步输入并保存",
+      "status": "skip",
+      "detail": "没有可用的模型"
+    }
+  ],
+  "models": []
+}

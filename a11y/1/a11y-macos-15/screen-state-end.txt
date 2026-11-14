@@ -1,0 +1,1 @@
+screen_recording=0 accessibility=1 windows=9 titled=2
