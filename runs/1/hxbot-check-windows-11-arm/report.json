@@ -1,0 +1,1063 @@
+{
+ "format": 1,
+ "machine": "windows-11-arm",
+ "platform": "windows",
+ "system": "Microsoft Windows 11 Enterprise 10.0.26200 (Windows_NT 10.0.26200 arm64)",
+ "startedAt": 1794613553254,
+ "finishedAt": 1794615491670,
+ "items": [
+  {
+   "id": "env.system",
+   "group": "env",
+   "outcome": "passed",
+   "detail": "Microsoft Windows 11 Enterprise 10.0.26200 (Windows_NT 10.0.26200 arm64)；Node v24.22.3；语言 en-US；Microsoft Windows 11 Enterprise 10.0.26200 | interactive=True | session=2 | culture=en-US | ui=en-US",
+   "ms": 55260
+  },
+  {
+   "id": "env.desktop",
+   "group": "env",
+   "outcome": "passed",
+   "detail": "有桌面会话。Microsoft Windows 11 Enterprise 10.0.26200 | interactive=True | session=2 | culture=en-US | ui=en-US",
+   "ms": 0
+  },
+  {
+   "id": "catalog.scan",
+   "group": "catalog",
+   "outcome": "passed",
+   "detail": "172 个应用，57 个设置页，6 项设置；用时 28830 毫秒",
+   "ms": 28833
+  },
+  {
+   "id": "catalog.known",
+   "group": "catalog",
+   "outcome": "passed",
+   "detail": "找到：Notepad（Notepad）、Paint（Paint）、Calculator（Calculator）、Command Prompt（Command Prompt）、Settings（Settings）、File Explorer（File Explorer）",
+   "ms": 2
+  },
+  {
+   "id": "catalog.saved",
+   "group": "catalog",
+   "outcome": "passed",
+   "detail": "从存盘读入 235 个条目，用时 2 毫秒，没有再扫描。",
+   "ms": 2
+  },
+  {
+   "id": "catalog.rescan",
+   "group": "catalog",
+   "outcome": "passed",
+   "detail": "再扫描一次，235 个条目和第一次相同；用时 24430 毫秒。",
+   "ms": 24430
+  },
+  {
+   "id": "catalog.ids",
+   "group": "catalog",
+   "outcome": "passed",
+   "detail": "235 个编号，没有重复。",
+   "ms": 1
+  },
+  {
+   "id": "search.01",
+   "group": "search",
+   "outcome": "passed",
+   "detail": "“蓝牙” → page:bluetooth",
+   "ms": 3
+  },
+  {
+   "id": "search.02",
+   "group": "search",
+   "outcome": "passed",
+   "detail": "“蓝牙设置” → page:bluetooth",
+   "ms": 1
+  },
+  {
+   "id": "search.03",
+   "group": "search",
+   "outcome": "passed",
+   "detail": "“打开蓝牙设置” → page:bluetooth",
+   "ms": 2
+  },
+  {
+   "id": "search.04",
+   "group": "search",
+   "outcome": "passed",
+   "detail": "“bluetooth settings” → page:bluetooth",
+   "ms": 2
+  },
+  {
+   "id": "search.05",
+   "group": "search",
+   "outcome": "passed",
+   "detail": "“wifi” → page:wifi",
+   "ms": 1
+  },
+  {
+   "id": "search.06",
+   "group": "search",
+   "outcome": "passed",
+   "detail": "“声音设置” → page:sound",
+   "ms": 1
+  },
+  {
+   "id": "search.07",
+   "group": "search",
+   "outcome": "passed",
+   "detail": "“屏幕” → page:display",
+   "ms": 1
+  },
+  {
+   "id": "search.08",
+   "group": "search",
+   "outcome": "passed",
+   "detail": "“夜间模式” → page:night-light",
+   "ms": 1
+  },
+  {
+   "id": "search.09",
+   "group": "search",
+   "outcome": "passed",
+   "detail": "“壁纸” → page:background",
+   "ms": 1
+  },
+  {
+   "id": "search.10",
+   "group": "search",
+   "outcome": "passed",
+   "detail": "“任务栏” → page:taskbar",
+   "ms": 0
+  },
+  {
+   "id": "search.11",
+   "group": "search",
+   "outcome": "passed",
+   "detail": "“打印机” → page:printers",
+   "ms": 1
+  },
+  {
+   "id": "search.12",
+   "group": "search",
+   "outcome": "passed",
+   "detail": "“系统更新” → page:windows-update",
+   "ms": 0
+  },
+  {
+   "id": "search.13",
+   "group": "search",
+   "outcome": "passed",
+   "detail": "“默认应用” → page:default-apps",
+   "ms": 1
+  },
+  {
+   "id": "search.14",
+   "group": "search",
+   "outcome": "passed",
+   "detail": "“剪贴板” → page:clipboard",
+   "ms": 1
+  },
+  {
+   "id": "search.15",
+   "group": "search",
+   "outcome": "passed",
+   "detail": "“隐私” → page:privacy",
+   "ms": 0
+  },
+  {
+   "id": "search.16",
+   "group": "search",
+   "outcome": "passed",
+   "detail": "“深色模式” → setting:dark-mode",
+   "ms": 0
+  },
+  {
+   "id": "search.17",
+   "group": "search",
+   "outcome": "passed",
+   "detail": "“打开深色模式” → setting:dark-mode",
+   "ms": 0
+  },
+  {
+   "id": "search.18",
+   "group": "search",
+   "outcome": "passed",
+   "detail": "“dark mode” → setting:dark-mode",
+   "ms": 0
+  },
+  {
+   "id": "search.19",
+   "group": "search",
+   "outcome": "passed",
+   "detail": "“透明效果” → setting:transparency",
+   "ms": 0
+  },
+  {
+   "id": "search.20",
+   "group": "search",
+   "outcome": "passed",
+   "detail": "“亮度” → setting:brightness",
+   "ms": 0
+  },
+  {
+   "id": "search.21",
+   "group": "search",
+   "outcome": "passed",
+   "detail": "“剪贴板历史记录” → setting:clipboard-history",
+   "ms": 0
+  },
+  {
+   "id": "search.22",
+   "group": "search",
+   "outcome": "passed",
+   "detail": "“记事本” → Notepad",
+   "ms": 1
+  },
+  {
+   "id": "search.23",
+   "group": "search",
+   "outcome": "passed",
+   "detail": "“notepad” → Notepad",
+   "ms": 1
+  },
+  {
+   "id": "search.24",
+   "group": "search",
+   "outcome": "passed",
+   "detail": "“设置” → Settings",
+   "ms": 0
+  },
+  {
+   "id": "search.25",
+   "group": "search",
+   "outcome": "passed",
+   "detail": "“打开设置” → Settings",
+   "ms": 2
+  },
+  {
+   "id": "search.26",
+   "group": "search",
+   "outcome": "passed",
+   "detail": "“系统设置” → Settings",
+   "ms": 0
+  },
+  {
+   "id": "search.27",
+   "group": "search",
+   "outcome": "passed",
+   "detail": "“资源管理器” → File Explorer",
+   "ms": 1
+  },
+  {
+   "id": "search.28",
+   "group": "search",
+   "outcome": "passed",
+   "detail": "“cmd” → Command Prompt",
+   "ms": 0
+  },
+  {
+   "id": "open.app.notepad",
+   "group": "open",
+   "outcome": "failed",
+   "detail": "按名称打开 Notepad，回答是 failed：Opening it did not answer in time",
+   "ms": 42622
+  },
+  {
+   "id": "open.app.paint",
+   "group": "open",
+   "outcome": "failed",
+   "detail": "按名称打开 Paint，回答是 failed：Opening it did not answer in time",
+   "ms": 42907
+  },
+  {
+   "id": "open.app.calculator",
+   "group": "open",
+   "outcome": "failed",
+   "detail": "按名称打开 Calculator，回答是 failed：Opening it did not answer in time",
+   "ms": 87517
+  },
+  {
+   "id": "open.folder",
+   "group": "open",
+   "outcome": "failed",
+   "detail": "打开文件夹，回答是 failed：Opening it did not answer in time",
+   "ms": 42792
+  },
+  {
+   "id": "open.document",
+   "group": "open",
+   "outcome": "failed",
+   "detail": "打开 .txt 文件，回答是 failed：Opening it did not answer in time",
+   "ms": 42228
+  },
+  {
+   "id": "open.url",
+   "group": "open",
+   "outcome": "failed",
+   "detail": "打开网址，回答是 failed：Opening it did not answer in time",
+   "ms": 87158
+  },
+  {
+   "id": "open.refuse.script-sh",
+   "group": "open",
+   "outcome": "passed",
+   "detail": "script.sh 被拒绝，没有启动任何系统命令。",
+   "ms": 2
+  },
+  {
+   "id": "open.refuse.double-click-command",
+   "group": "open",
+   "outcome": "passed",
+   "detail": "double-click.command 被拒绝，没有启动任何系统命令。",
+   "ms": 2
+  },
+  {
+   "id": "open.refuse.program-exe",
+   "group": "open",
+   "outcome": "passed",
+   "detail": "program.exe 被拒绝，没有启动任何系统命令。",
+   "ms": 1
+  },
+  {
+   "id": "open.refuse.batch-bat",
+   "group": "open",
+   "outcome": "passed",
+   "detail": "batch.bat 被拒绝，没有启动任何系统命令。",
+   "ms": 1
+  },
+  {
+   "id": "open.refuse.shortcut-lnk",
+   "group": "open",
+   "outcome": "passed",
+   "detail": "shortcut.lnk 被拒绝，没有启动任何系统命令。",
+   "ms": 1
+  },
+  {
+   "id": "open.refuse.address-url",
+   "group": "open",
+   "outcome": "passed",
+   "detail": "address.url 被拒绝，没有启动任何系统命令。",
+   "ms": 0
+  },
+  {
+   "id": "open.refuse.macro-py",
+   "group": "open",
+   "outcome": "passed",
+   "detail": "macro.py 被拒绝，没有启动任何系统命令。",
+   "ms": 0
+  },
+  {
+   "id": "open.refuse.installer-msi",
+   "group": "open",
+   "outcome": "passed",
+   "detail": "installer.msi 被拒绝，没有启动任何系统命令。",
+   "ms": 1
+  },
+  {
+   "id": "open.refuse.scheme",
+   "group": "open",
+   "outcome": "passed",
+   "detail": "4 个不是网页的地址都被拒绝，没有启动任何系统命令。",
+   "ms": 1
+  },
+  {
+   "id": "open.missing",
+   "group": "open",
+   "outcome": "passed",
+   "detail": "不存在的路径和不存在的名称都回答“没有找到”。",
+   "ms": 23857
+  },
+  {
+   "id": "page.display",
+   "group": "page",
+   "outcome": "failed",
+   "detail": "打开“Display”，回答是 failed：Opening it did not answer in time",
+   "ms": 0
+  },
+  {
+   "id": "page.night-light",
+   "group": "page",
+   "outcome": "failed",
+   "detail": "打开“Night light”，回答是 failed：Opening it did not answer in time",
+   "ms": 0
+  },
+  {
+   "id": "page.sound",
+   "group": "page",
+   "outcome": "failed",
+   "detail": "打开“Sound”，回答是 failed：Opening it did not answer in time",
+   "ms": 0
+  },
+  {
+   "id": "page.notifications",
+   "group": "page",
+   "outcome": "failed",
+   "detail": "打开“Notifications”，回答是 failed：Opening it did not answer in time",
+   "ms": 0
+  },
+  {
+   "id": "page.focus",
+   "group": "page",
+   "outcome": "failed",
+   "detail": "打开“Focus”，回答是 failed：Opening it did not answer in time",
+   "ms": 0
+  },
+  {
+   "id": "page.power",
+   "group": "page",
+   "outcome": "failed",
+   "detail": "打开“Power & sleep”，回答是 failed：Opening it did not answer in time",
+   "ms": 0
+  },
+  {
+   "id": "page.storage",
+   "group": "page",
+   "outcome": "failed",
+   "detail": "打开“Storage”，回答是 failed：Opening it did not answer in time",
+   "ms": 0
+  },
+  {
+   "id": "page.multitasking",
+   "group": "page",
+   "outcome": "failed",
+   "detail": "打开“Multitasking”，回答是 failed：Opening it did not answer in time",
+   "ms": 0
+  },
+  {
+   "id": "page.clipboard",
+   "group": "page",
+   "outcome": "failed",
+   "detail": "打开“Clipboard”，回答是 failed：Opening it did not answer in time",
+   "ms": 0
+  },
+  {
+   "id": "page.about",
+   "group": "page",
+   "outcome": "failed",
+   "detail": "打开“About”，回答是 failed：Opening it did not answer in time",
+   "ms": 0
+  },
+  {
+   "id": "page.bluetooth",
+   "group": "page",
+   "outcome": "failed",
+   "detail": "打开“Bluetooth & devices”，回答是 failed：Opening it did not answer in time",
+   "ms": 0
+  },
+  {
+   "id": "page.printers",
+   "group": "page",
+   "outcome": "failed",
+   "detail": "打开“Printers & scanners”，回答是 failed：Opening it did not answer in time",
+   "ms": 0
+  },
+  {
+   "id": "page.mouse",
+   "group": "page",
+   "outcome": "failed",
+   "detail": "打开“Mouse”，回答是 failed：Opening it did not answer in time",
+   "ms": 0
+  },
+  {
+   "id": "page.touchpad",
+   "group": "page",
+   "outcome": "failed",
+   "detail": "打开“Touchpad”，回答是 failed：Opening it did not answer in time",
+   "ms": 0
+  },
+  {
+   "id": "page.typing",
+   "group": "page",
+   "outcome": "failed",
+   "detail": "打开“Typing”，回答是 failed：Opening it did not answer in time",
+   "ms": 0
+  },
+  {
+   "id": "page.network",
+   "group": "page",
+   "outcome": "failed",
+   "detail": "打开“Network & internet”，回答是 failed：Opening it did not answer in time",
+   "ms": 0
+  },
+  {
+   "id": "page.wifi",
+   "group": "page",
+   "outcome": "failed",
+   "detail": "打开“Wi-Fi”，回答是 failed：Opening it did not answer in time",
+   "ms": 0
+  },
+  {
+   "id": "page.ethernet",
+   "group": "page",
+   "outcome": "failed",
+   "detail": "打开“Ethernet”，回答是 failed：Opening it did not answer in time",
+   "ms": 0
+  },
+  {
+   "id": "page.vpn",
+   "group": "page",
+   "outcome": "failed",
+   "detail": "打开“VPN”，回答是 failed：Opening it did not answer in time",
+   "ms": 0
+  },
+  {
+   "id": "page.proxy",
+   "group": "page",
+   "outcome": "failed",
+   "detail": "打开“Proxy”，回答是 failed：Opening it did not answer in time",
+   "ms": 0
+  },
+  {
+   "id": "page.airplane",
+   "group": "page",
+   "outcome": "failed",
+   "detail": "打开“Airplane mode”，回答是 failed：Opening it did not answer in time",
+   "ms": 0
+  },
+  {
+   "id": "page.hotspot",
+   "group": "page",
+   "outcome": "failed",
+   "detail": "打开“Mobile hotspot”，回答是 failed：Opening it did not answer in time",
+   "ms": 0
+  },
+  {
+   "id": "page.personalization",
+   "group": "page",
+   "outcome": "failed",
+   "detail": "打开“Personalization”，回答是 failed：Opening it did not answer in time",
+   "ms": 0
+  },
+  {
+   "id": "page.background",
+   "group": "page",
+   "outcome": "failed",
+   "detail": "打开“Background”，回答是 failed：Opening it did not answer in time",
+   "ms": 0
+  },
+  {
+   "id": "page.colors",
+   "group": "page",
+   "outcome": "failed",
+   "detail": "打开“Colors”，回答是 failed：Opening it did not answer in time",
+   "ms": 0
+  },
+  {
+   "id": "page.lock-screen",
+   "group": "page",
+   "outcome": "failed",
+   "detail": "打开“Lock screen”，回答是 failed：Opening it did not answer in time",
+   "ms": 0
+  },
+  {
+   "id": "page.themes",
+   "group": "page",
+   "outcome": "failed",
+   "detail": "打开“Themes”，回答是 failed：Opening it did not answer in time",
+   "ms": 0
+  },
+  {
+   "id": "page.fonts",
+   "group": "page",
+   "outcome": "failed",
+   "detail": "打开“Fonts”，回答是 failed：Opening it did not answer in time",
+   "ms": 0
+  },
+  {
+   "id": "page.taskbar",
+   "group": "page",
+   "outcome": "failed",
+   "detail": "打开“Taskbar”，回答是 failed：Opening it did not answer in time",
+   "ms": 0
+  },
+  {
+   "id": "page.start",
+   "group": "page",
+   "outcome": "failed",
+   "detail": "打开“Start”，回答是 failed：Opening it did not answer in time",
+   "ms": 0
+  },
+  {
+   "id": "page.apps",
+   "group": "page",
+   "outcome": "failed",
+   "detail": "打开“Installed apps”，回答是 failed：Opening it did not answer in time",
+   "ms": 0
+  },
+  {
+   "id": "page.default-apps",
+   "group": "page",
+   "outcome": "failed",
+   "detail": "打开“Default apps”，回答是 failed：Opening it did not answer in time",
+   "ms": 0
+  },
+  {
+   "id": "page.startup-apps",
+   "group": "page",
+   "outcome": "failed",
+   "detail": "打开“Startup apps”，回答是 failed：Opening it did not answer in time",
+   "ms": 0
+  },
+  {
+   "id": "page.your-info",
+   "group": "page",
+   "outcome": "failed",
+   "detail": "打开“Your info”，回答是 failed：Opening it did not answer in time",
+   "ms": 0
+  },
+  {
+   "id": "page.email-accounts",
+   "group": "page",
+   "outcome": "failed",
+   "detail": "打开“Email & accounts”，回答是 failed：Opening it did not answer in time",
+   "ms": 0
+  },
+  {
+   "id": "page.sign-in",
+   "group": "page",
+   "outcome": "failed",
+   "detail": "打开“Sign-in options”，回答是 failed：Opening it did not answer in time",
+   "ms": 0
+  },
+  {
+   "id": "page.other-users",
+   "group": "page",
+   "outcome": "failed",
+   "detail": "打开“Other users”，回答是 failed：Opening it did not answer in time",
+   "ms": 0
+  },
+  {
+   "id": "page.date-time",
+   "group": "page",
+   "outcome": "failed",
+   "detail": "打开“Date & time”，回答是 failed：Opening it did not answer in time",
+   "ms": 0
+  },
+  {
+   "id": "page.language",
+   "group": "page",
+   "outcome": "failed",
+   "detail": "打开“Language & region”，回答是 failed：Opening it did not answer in time",
+   "ms": 0
+  },
+  {
+   "id": "page.speech",
+   "group": "page",
+   "outcome": "failed",
+   "detail": "打开“Speech”，回答是 failed：Opening it did not answer in time",
+   "ms": 0
+  },
+  {
+   "id": "page.game-bar",
+   "group": "page",
+   "outcome": "failed",
+   "detail": "打开“Game Bar”，回答是 failed：Opening it did not answer in time",
+   "ms": 0
+  },
+  {
+   "id": "page.accessibility",
+   "group": "page",
+   "outcome": "failed",
+   "detail": "打开“Accessibility”，回答是 failed：Opening it did not answer in time",
+   "ms": 0
+  },
+  {
+   "id": "page.text-size",
+   "group": "page",
+   "outcome": "failed",
+   "detail": "打开“Text size”，回答是 failed：Opening it did not answer in time",
+   "ms": 0
+  },
+  {
+   "id": "page.mouse-pointer",
+   "group": "page",
+   "outcome": "failed",
+   "detail": "打开“Mouse pointer and touch”，回答是 failed：Opening it did not answer in time",
+   "ms": 0
+  },
+  {
+   "id": "page.narrator",
+   "group": "page",
+   "outcome": "failed",
+   "detail": "打开“Narrator”，回答是 failed：Opening it did not answer in time",
+   "ms": 0
+  },
+  {
+   "id": "page.magnifier",
+   "group": "page",
+   "outcome": "failed",
+   "detail": "打开“Magnifier”，回答是 failed：Opening it did not answer in time",
+   "ms": 0
+  },
+  {
+   "id": "page.privacy",
+   "group": "page",
+   "outcome": "failed",
+   "detail": "打开“Privacy & security”，回答是 failed：Opening it did not answer in time",
+   "ms": 0
+  },
+  {
+   "id": "page.location",
+   "group": "page",
+   "outcome": "failed",
+   "detail": "打开“Location”，回答是 failed：Opening it did not answer in time",
+   "ms": 0
+  },
+  {
+   "id": "page.camera",
+   "group": "page",
+   "outcome": "failed",
+   "detail": "打开“Camera”，回答是 failed：Opening it did not answer in time",
+   "ms": 0
+  },
+  {
+   "id": "page.microphone",
+   "group": "page",
+   "outcome": "failed",
+   "detail": "打开“Microphone access”，回答是 failed：Opening it did not answer in time",
+   "ms": 0
+  },
+  {
+   "id": "page.windows-security",
+   "group": "page",
+   "outcome": "failed",
+   "detail": "打开“Windows Security”，回答是 failed：Opening it did not answer in time",
+   "ms": 0
+  },
+  {
+   "id": "page.windows-update",
+   "group": "page",
+   "outcome": "failed",
+   "detail": "打开“Windows Update”，回答是 failed：Opening it did not answer in time",
+   "ms": 0
+  },
+  {
+   "id": "page.backup",
+   "group": "page",
+   "outcome": "failed",
+   "detail": "打开“Windows Backup”，回答是 failed：Opening it did not answer in time",
+   "ms": 0
+  },
+  {
+   "id": "page.troubleshoot",
+   "group": "page",
+   "outcome": "failed",
+   "detail": "打开“Troubleshoot”，回答是 failed：Opening it did not answer in time",
+   "ms": 0
+  },
+  {
+   "id": "page.recovery",
+   "group": "page",
+   "outcome": "failed",
+   "detail": "打开“Recovery”，回答是 failed：Opening it did not answer in time",
+   "ms": 0
+  },
+  {
+   "id": "page.activation",
+   "group": "page",
+   "outcome": "failed",
+   "detail": "打开“Activation”，回答是 failed：Opening it did not answer in time",
+   "ms": 0
+  },
+  {
+   "id": "page.developers",
+   "group": "page",
+   "outcome": "failed",
+   "detail": "打开“For developers”，回答是 failed：Opening it did not answer in time",
+   "ms": 0
+  },
+  {
+   "id": "setting.dark-mode.read",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "off（22394 毫秒）",
+   "ms": 22394
+  },
+  {
+   "id": "setting.dark-mode.same",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "写回 off，读到 off",
+   "ms": 47084
+  },
+  {
+   "id": "setting.dark-mode.change",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "off → on（45388 毫秒）",
+   "ms": 68410,
+   "shot": "setting-dark-mode-after.jpg"
+  },
+  {
+   "id": "setting.dark-mode.effect",
+   "group": "setting",
+   "outcome": "skipped",
+   "detail": "这次检查的时间用完了，这一项没有做。",
+   "ms": 0
+  },
+  {
+   "id": "setting.dark-mode.restore",
+   "group": "setting",
+   "outcome": "skipped",
+   "detail": "这次检查的时间用完了，这一项没有做。",
+   "ms": 0
+  },
+  {
+   "id": "setting.app-dark-mode.read",
+   "group": "setting",
+   "outcome": "skipped",
+   "detail": "这次检查的时间用完了，这一项没有做。",
+   "ms": 0
+  },
+  {
+   "id": "setting.system-dark-mode.read",
+   "group": "setting",
+   "outcome": "skipped",
+   "detail": "这次检查的时间用完了，这一项没有做。",
+   "ms": 0
+  },
+  {
+   "id": "setting.transparency.read",
+   "group": "setting",
+   "outcome": "skipped",
+   "detail": "这次检查的时间用完了，这一项没有做。",
+   "ms": 0
+  },
+  {
+   "id": "setting.clipboard-history.read",
+   "group": "setting",
+   "outcome": "skipped",
+   "detail": "这次检查的时间用完了，这一项没有做。",
+   "ms": 0
+  },
+  {
+   "id": "setting.brightness.read",
+   "group": "setting",
+   "outcome": "skipped",
+   "detail": "这次检查的时间用完了，这一项没有做。",
+   "ms": 0
+  },
+  {
+   "id": "gate.before",
+   "group": "gate",
+   "outcome": "skipped",
+   "detail": "这台机器上没有一项设置通过了读、写、改回，这一项做不了。",
+   "ms": 0
+  },
+  {
+   "id": "gate.selftest",
+   "group": "gate",
+   "outcome": "skipped",
+   "detail": "这次检查的时间用完了，这一项没有做。",
+   "ms": 0
+  },
+  {
+   "id": "gate.selftest-items",
+   "group": "gate",
+   "outcome": "skipped",
+   "detail": "这次检查的时间用完了，这一项没有做。",
+   "ms": 0
+  },
+  {
+   "id": "gate.after",
+   "group": "gate",
+   "outcome": "skipped",
+   "detail": "这台机器上没有一项设置通过了读、写、改回，这一项做不了。",
+   "ms": 0
+  },
+  {
+   "id": "tool.set.query",
+   "group": "tool",
+   "outcome": "skipped",
+   "detail": "这台机器上没有一项设置通过了读、写、改回，这一项做不了。",
+   "ms": 0
+  },
+  {
+   "id": "tool.set.invalid",
+   "group": "tool",
+   "outcome": "skipped",
+   "detail": "这台机器上没有一项设置通过了读、写、改回，这一项做不了。",
+   "ms": 0
+  },
+  {
+   "id": "tool.find",
+   "group": "tool",
+   "outcome": "skipped",
+   "detail": "这台机器上没有一项设置通过了读、写、改回，这一项做不了。",
+   "ms": 0
+  },
+  {
+   "id": "tool.set.security",
+   "group": "tool",
+   "outcome": "skipped",
+   "detail": "这次检查的时间用完了，这一项没有做。",
+   "ms": 0
+  },
+  {
+   "id": "tool.refuse",
+   "group": "tool",
+   "outcome": "skipped",
+   "detail": "这次检查的时间用完了，这一项没有做。",
+   "ms": 0
+  },
+  {
+   "id": "probe.explorer-advanced",
+   "group": "probe",
+   "outcome": "skipped",
+   "detail": "这次检查的时间用完了，这一项没有做。",
+   "ms": 0
+  },
+  {
+   "id": "probe.explorer",
+   "group": "probe",
+   "outcome": "skipped",
+   "detail": "这次检查的时间用完了，这一项没有做。",
+   "ms": 0
+  },
+  {
+   "id": "probe.search",
+   "group": "probe",
+   "outcome": "skipped",
+   "detail": "这次检查的时间用完了，这一项没有做。",
+   "ms": 0
+  },
+  {
+   "id": "probe.personalize",
+   "group": "probe",
+   "outcome": "skipped",
+   "detail": "这次检查的时间用完了，这一项没有做。",
+   "ms": 0
+  },
+  {
+   "id": "probe.dwm",
+   "group": "probe",
+   "outcome": "skipped",
+   "detail": "这次检查的时间用完了，这一项没有做。",
+   "ms": 0
+  },
+  {
+   "id": "probe.mouse",
+   "group": "probe",
+   "outcome": "skipped",
+   "detail": "这次检查的时间用完了，这一项没有做。",
+   "ms": 0
+  },
+  {
+   "id": "probe.desktop",
+   "group": "probe",
+   "outcome": "skipped",
+   "detail": "这次检查的时间用完了，这一项没有做。",
+   "ms": 0
+  },
+  {
+   "id": "probe.accessibility",
+   "group": "probe",
+   "outcome": "skipped",
+   "detail": "这次检查的时间用完了，这一项没有做。",
+   "ms": 0
+  },
+  {
+   "id": "probe.notifications",
+   "group": "probe",
+   "outcome": "skipped",
+   "detail": "这次检查的时间用完了，这一项没有做。",
+   "ms": 0
+  },
+  {
+   "id": "probe.game-bar",
+   "group": "probe",
+   "outcome": "skipped",
+   "detail": "这次检查的时间用完了，这一项没有做。",
+   "ms": 0
+  },
+  {
+   "id": "probe.storage-sense",
+   "group": "probe",
+   "outcome": "skipped",
+   "detail": "这次检查的时间用完了，这一项没有做。",
+   "ms": 0
+  },
+  {
+   "id": "probe.clipboard",
+   "group": "probe",
+   "outcome": "skipped",
+   "detail": "这次检查的时间用完了，这一项没有做。",
+   "ms": 0
+  },
+  {
+   "id": "probe.power-scheme",
+   "group": "probe",
+   "outcome": "skipped",
+   "detail": "这次检查的时间用完了，这一项没有做。",
+   "ms": 0
+  },
+  {
+   "id": "probe.power-display",
+   "group": "probe",
+   "outcome": "skipped",
+   "detail": "这次检查的时间用完了，这一项没有做。",
+   "ms": 0
+  },
+  {
+   "id": "probe.power-sleep",
+   "group": "probe",
+   "outcome": "skipped",
+   "detail": "这次检查的时间用完了，这一项没有做。",
+   "ms": 0
+  },
+  {
+   "id": "probe.sound-devices",
+   "group": "probe",
+   "outcome": "skipped",
+   "detail": "这次检查的时间用完了，这一项没有做。",
+   "ms": 0
+  },
+  {
+   "id": "probe.network-adapters",
+   "group": "probe",
+   "outcome": "skipped",
+   "detail": "这次检查的时间用完了，这一项没有做。",
+   "ms": 0
+  },
+  {
+   "id": "probe.start-apps",
+   "group": "probe",
+   "outcome": "skipped",
+   "detail": "这次检查的时间用完了，这一项没有做。",
+   "ms": 0
+  },
+  {
+   "id": "probe.brightness",
+   "group": "probe",
+   "outcome": "skipped",
+   "detail": "这次检查的时间用完了，这一项没有做。",
+   "ms": 0
+  },
+  {
+   "id": "probe.culture",
+   "group": "probe",
+   "outcome": "skipped",
+   "detail": "这次检查的时间用完了，这一项没有做。",
+   "ms": 0
+  },
+  {
+   "id": "final.restored",
+   "group": "final",
+   "outcome": "failed",
+   "detail": "结束时和开始时不一样的设置：dark-mode（应是 off，已再改回）",
+   "ms": 0
+  },
+  {
+   "id": "final.cleanup",
+   "group": "final",
+   "outcome": "passed",
+   "detail": "关掉了设置窗口和文件夹窗口，删掉了临时文件。",
+   "ms": 0
+  }
+ ],
+ "times": {
+  "catalog.scan": 28830,
+  "catalog.load": 2,
+  "catalog.rescan": 24430,
+  "setting.read": 22394,
+  "setting.change": 45388
+ },
+ "verified": [],
+ "untestable": []
+}

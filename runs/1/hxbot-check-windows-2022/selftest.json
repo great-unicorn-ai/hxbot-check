@@ -1,0 +1,102 @@
+{
+ "platform": "windows",
+ "system": "Windows 10.0.20348.0 (Windows_NT 10.0.20348 x64)",
+ "startedAt": 1794613830346,
+ "finishedAt": 1794613836896,
+ "items": [
+  {
+   "id": "catalog.apps",
+   "outcome": "passed",
+   "detail": "217 apps, 57 pages, 6 settings",
+   "ms": 528
+  },
+  {
+   "id": "catalog.known-app",
+   "outcome": "passed",
+   "detail": "Notepad",
+   "ms": 1
+  },
+  {
+   "id": "search.page",
+   "outcome": "passed",
+   "detail": "Bluetooth & devices",
+   "ms": 0
+  },
+  {
+   "id": "open.page",
+   "outcome": "passed",
+   "detail": "The About page of the system settings was opened.",
+   "ms": 516
+  },
+  {
+   "id": "setting.dark-mode.read",
+   "outcome": "passed",
+   "detail": "system only",
+   "ms": 354
+  },
+  {
+   "id": "setting.dark-mode.write-same",
+   "outcome": "passed",
+   "detail": "system only written, system only read back",
+   "ms": 778
+  },
+  {
+   "id": "setting.app-dark-mode.read",
+   "outcome": "passed",
+   "detail": "off",
+   "ms": 279
+  },
+  {
+   "id": "setting.app-dark-mode.write-same",
+   "outcome": "passed",
+   "detail": "off written, off read back",
+   "ms": 749
+  },
+  {
+   "id": "setting.system-dark-mode.read",
+   "outcome": "passed",
+   "detail": "on",
+   "ms": 251
+  },
+  {
+   "id": "setting.system-dark-mode.write-same",
+   "outcome": "passed",
+   "detail": "on written, on read back",
+   "ms": 761
+  },
+  {
+   "id": "setting.transparency.read",
+   "outcome": "passed",
+   "detail": "on",
+   "ms": 257
+  },
+  {
+   "id": "setting.transparency.write-same",
+   "outcome": "passed",
+   "detail": "on written, on read back",
+   "ms": 757
+  },
+  {
+   "id": "setting.clipboard-history.read",
+   "outcome": "passed",
+   "detail": "off",
+   "ms": 252
+  },
+  {
+   "id": "setting.clipboard-history.write-same",
+   "outcome": "passed",
+   "detail": "off written, off read back",
+   "ms": 534
+  },
+  {
+   "id": "setting.brightness.read",
+   "outcome": "skipped",
+   "detail": "No value right now: none",
+   "ms": 353
+  }
+ ],
+ "passed": 14,
+ "failed": 0,
+ "skipped": 1,
+ "file": "D:\\a\\hxbot-check\\hxbot-check\\out\\home\\Downloads\\HXBot-self-test-20261113T235030Z.json"
+}

@@ -1,0 +1,1495 @@
+{
+ "format": 1,
+ "machine": "macos-26",
+ "platform": "mac",
+ "system": "macOS 26.7.2 (Darwin 25.6.0 arm64)",
+ "startedAt": 1794613536313,
+ "finishedAt": 1794613714072,
+ "items": [
+  {
+   "id": "env.system",
+   "group": "env",
+   "outcome": "passed",
+   "detail": "macOS 26.7.2 (Darwin 25.6.0 arm64)；Node v24.22.2；语言 en-US；launchctl managername: Aqua",
+   "ms": 99
+  },
+  {
+   "id": "env.desktop",
+   "group": "env",
+   "outcome": "passed",
+   "detail": "有桌面会话。launchctl managername: Aqua",
+   "ms": 0
+  },
+  {
+   "id": "env.automation",
+   "group": "env",
+   "outcome": "passed",
+   "detail": "System Events answered: loginwindow",
+   "ms": 659
+  },
+  {
+   "id": "env.accessibility",
+   "group": "env",
+   "outcome": "passed",
+   "detail": "Finder has 0 windows.",
+   "ms": 183
+  },
+  {
+   "id": "catalog.scan",
+   "group": "catalog",
+   "outcome": "passed",
+   "detail": "107 个应用，42 个设置页，12 项设置；用时 602 毫秒",
+   "ms": 604
+  },
+  {
+   "id": "catalog.known",
+   "group": "catalog",
+   "outcome": "passed",
+   "detail": "找到：TextEdit（TextEdit）、Calculator（Calculator）、Preview（Preview）、Finder（Finder）、Safari（Safari）、System Settings（System Settings）、Terminal（Terminal）、Notes（Notes）",
+   "ms": 1
+  },
+  {
+   "id": "catalog.chinese",
+   "group": "catalog",
+   "outcome": "passed",
+   "detail": "107 个应用里有 71 个取到了中文名；核对的几个：对的 访达、终端、备忘录、系统设置、计算器、文本编辑",
+   "ms": 593
+  },
+  {
+   "id": "catalog.saved",
+   "group": "catalog",
+   "outcome": "passed",
+   "detail": "从存盘读入 161 个条目，用时 1 毫秒，没有再扫描。",
+   "ms": 1
+  },
+  {
+   "id": "catalog.rescan",
+   "group": "catalog",
+   "outcome": "passed",
+   "detail": "再扫描一次，161 个条目和第一次相同；用时 566 毫秒。",
+   "ms": 567
+  },
+  {
+   "id": "catalog.ids",
+   "group": "catalog",
+   "outcome": "passed",
+   "detail": "161 个编号，没有重复。",
+   "ms": 0
+  },
+  {
+   "id": "search.01",
+   "group": "search",
+   "outcome": "passed",
+   "detail": "“蓝牙” → page:bluetooth",
+   "ms": 2
+  },
+  {
+   "id": "search.02",
+   "group": "search",
+   "outcome": "passed",
+   "detail": "“蓝牙设置” → page:bluetooth",
+   "ms": 1
+  },
+  {
+   "id": "search.03",
+   "group": "search",
+   "outcome": "passed",
+   "detail": "“打开蓝牙设置” → page:bluetooth",
+   "ms": 2
+  },
+  {
+   "id": "search.04",
+   "group": "search",
+   "outcome": "passed",
+   "detail": "“bluetooth settings” → page:bluetooth",
+   "ms": 1
+  },
+  {
+   "id": "search.05",
+   "group": "search",
+   "outcome": "passed",
+   "detail": "“lanya” → page:bluetooth",
+   "ms": 0
+  },
+  {
+   "id": "search.06",
+   "group": "search",
+   "outcome": "passed",
+   "detail": "“wifi” → page:wifi",
+   "ms": 1
+  },
+  {
+   "id": "search.07",
+   "group": "search",
+   "outcome": "passed",
+   "detail": "“无线网络” → page:wifi",
+   "ms": 0
+  },
+  {
+   "id": "search.08",
+   "group": "search",
+   "outcome": "passed",
+   "detail": "“声音设置” → page:sound",
+   "ms": 2
+  },
+  {
+   "id": "search.09",
+   "group": "search",
+   "outcome": "passed",
+   "detail": "“显示器” → page:displays",
+   "ms": 1
+  },
+  {
+   "id": "search.10",
+   "group": "search",
+   "outcome": "passed",
+   "detail": "“壁纸” → page:wallpaper",
+   "ms": 2
+  },
+  {
+   "id": "search.11",
+   "group": "search",
+   "outcome": "passed",
+   "detail": "“键盘” → page:keyboard",
+   "ms": 1
+  },
+  {
+   "id": "search.12",
+   "group": "search",
+   "outcome": "passed",
+   "detail": "“打印机” → page:printers",
+   "ms": 1
+  },
+  {
+   "id": "search.13",
+   "group": "search",
+   "outcome": "passed",
+   "detail": "“通知” → page:notifications",
+   "ms": 0
+  },
+  {
+   "id": "search.14",
+   "group": "search",
+   "outcome": "failed",
+   "detail": "“关于本机”应得 page:about。认定：没有认定；前三名：page:about（About，100 分）；app:/System/Library/CoreServices/Applications/About This Mac.app（About This Mac，100 分）",
+   "ms": 25
+  },
+  {
+   "id": "search.15",
+   "group": "search",
+   "outcome": "passed",
+   "detail": "“软件更新” → page:software-update",
+   "ms": 1
+  },
+  {
+   "id": "search.16",
+   "group": "search",
+   "outcome": "passed",
+   "detail": "“隐私与安全性” → page:privacy",
+   "ms": 1
+  },
+  {
+   "id": "search.17",
+   "group": "search",
+   "outcome": "passed",
+   "detail": "“程序坞” → page:desktop-dock",
+   "ms": 1
+  },
+  {
+   "id": "search.18",
+   "group": "search",
+   "outcome": "passed",
+   "detail": "“深色模式” → setting:dark-mode",
+   "ms": 0
+  },
+  {
+   "id": "search.19",
+   "group": "search",
+   "outcome": "passed",
+   "detail": "“把深色模式打开” → setting:dark-mode",
+   "ms": 1
+  },
+  {
+   "id": "search.20",
+   "group": "search",
+   "outcome": "passed",
+   "detail": "“dark mode” → setting:dark-mode",
+   "ms": 1
+  },
+  {
+   "id": "search.21",
+   "group": "search",
+   "outcome": "passed",
+   "detail": "“音量” → setting:volume",
+   "ms": 0
+  },
+  {
+   "id": "search.22",
+   "group": "search",
+   "outcome": "passed",
+   "detail": "“把音量调到 30” → setting:volume",
+   "ms": 0
+  },
+  {
+   "id": "search.23",
+   "group": "search",
+   "outcome": "passed",
+   "detail": "“静音” → setting:mute",
+   "ms": 0
+  },
+  {
+   "id": "search.24",
+   "group": "search",
+   "outcome": "passed",
+   "detail": "“程序坞位置” → setting:dock-position",
+   "ms": 0
+  },
+  {
+   "id": "search.25",
+   "group": "search",
+   "outcome": "passed",
+   "detail": "“自动隐藏”交回了 2 个候选，没有替模型选。",
+   "ms": 1
+  },
+  {
+   "id": "search.26",
+   "group": "search",
+   "outcome": "passed",
+   "detail": "“终端” → Terminal",
+   "ms": 0
+  },
+  {
+   "id": "search.27",
+   "group": "search",
+   "outcome": "passed",
+   "detail": "“terminal” → Terminal",
+   "ms": 0
+  },
+  {
+   "id": "search.28",
+   "group": "search",
+   "outcome": "passed",
+   "detail": "“zhongduan” → Terminal",
+   "ms": 1
+  },
+  {
+   "id": "search.29",
+   "group": "search",
+   "outcome": "passed",
+   "detail": "“访达” → Finder",
+   "ms": 0
+  },
+  {
+   "id": "search.30",
+   "group": "search",
+   "outcome": "passed",
+   "detail": "“计算器” → Calculator",
+   "ms": 0
+  },
+  {
+   "id": "search.31",
+   "group": "search",
+   "outcome": "passed",
+   "detail": "“备忘录” → Notes",
+   "ms": 0
+  },
+  {
+   "id": "search.32",
+   "group": "search",
+   "outcome": "passed",
+   "detail": "“文本编辑” → TextEdit",
+   "ms": 1
+  },
+  {
+   "id": "search.33",
+   "group": "search",
+   "outcome": "passed",
+   "detail": "“设置” → System Settings",
+   "ms": 0
+  },
+  {
+   "id": "search.34",
+   "group": "search",
+   "outcome": "passed",
+   "detail": "“打开设置” → System Settings",
+   "ms": 1
+  },
+  {
+   "id": "search.35",
+   "group": "search",
+   "outcome": "passed",
+   "detail": "“系统设置” → System Settings",
+   "ms": 1
+  },
+  {
+   "id": "search.36",
+   "group": "search",
+   "outcome": "passed",
+   "detail": "“safari” → Safari",
+   "ms": 0
+  },
+  {
+   "id": "open.app.textedit",
+   "group": "open",
+   "outcome": "passed",
+   "detail": "进程 TextEdit 在 197 毫秒后出现；已关掉。",
+   "ms": 260
+  },
+  {
+   "id": "open.app.calculator",
+   "group": "open",
+   "outcome": "passed",
+   "detail": "进程 Calculator 在 120 毫秒后出现；已关掉。",
+   "ms": 158
+  },
+  {
+   "id": "open.app.preview",
+   "group": "open",
+   "outcome": "passed",
+   "detail": "进程 Preview 在 140 毫秒后出现；已关掉。",
+   "ms": 185
+  },
+  {
+   "id": "open.folder",
+   "group": "open",
+   "outcome": "passed",
+   "detail": "文件夹窗口从 0 个变成 1 个，用时 1520 毫秒。",
+   "ms": 3212,
+   "shot": "open-folder.jpg"
+  },
+  {
+   "id": "open.document",
+   "group": "open",
+   "outcome": "passed",
+   "detail": "TextEdit 在 128 毫秒后出现；已关掉。",
+   "ms": 1135,
+   "shot": "open-document.jpg"
+  },
+  {
+   "id": "open.url",
+   "group": "open",
+   "outcome": "passed",
+   "detail": "浏览器 Safari 在 93 毫秒后出现；已关掉。",
+   "ms": 2530,
+   "shot": "open-url.jpg"
+  },
+  {
+   "id": "open.refuse.script-sh",
+   "group": "open",
+   "outcome": "passed",
+   "detail": "script.sh 被拒绝，没有启动任何系统命令。",
+   "ms": 2
+  },
+  {
+   "id": "open.refuse.double-click-command",
+   "group": "open",
+   "outcome": "passed",
+   "detail": "double-click.command 被拒绝，没有启动任何系统命令。",
+   "ms": 1
+  },
+  {
+   "id": "open.refuse.program-exe",
+   "group": "open",
+   "outcome": "passed",
+   "detail": "program.exe 被拒绝，没有启动任何系统命令。",
+   "ms": 0
+  },
+  {
+   "id": "open.refuse.batch-bat",
+   "group": "open",
+   "outcome": "passed",
+   "detail": "batch.bat 被拒绝，没有启动任何系统命令。",
+   "ms": 1
+  },
+  {
+   "id": "open.refuse.shortcut-lnk",
+   "group": "open",
+   "outcome": "passed",
+   "detail": "shortcut.lnk 被拒绝，没有启动任何系统命令。",
+   "ms": 1
+  },
+  {
+   "id": "open.refuse.address-url",
+   "group": "open",
+   "outcome": "passed",
+   "detail": "address.url 被拒绝，没有启动任何系统命令。",
+   "ms": 1
+  },
+  {
+   "id": "open.refuse.macro-py",
+   "group": "open",
+   "outcome": "passed",
+   "detail": "macro.py 被拒绝，没有启动任何系统命令。",
+   "ms": 1
+  },
+  {
+   "id": "open.refuse.installer-msi",
+   "group": "open",
+   "outcome": "passed",
+   "detail": "installer.msi 被拒绝，没有启动任何系统命令。",
+   "ms": 0
+  },
+  {
+   "id": "open.refuse.tool",
+   "group": "open",
+   "outcome": "passed",
+   "detail": "tool 被拒绝，没有启动任何系统命令。",
+   "ms": 2
+  },
+  {
+   "id": "open.refuse.scheme",
+   "group": "open",
+   "outcome": "passed",
+   "detail": "4 个不是网页的地址都被拒绝，没有启动任何系统命令。",
+   "ms": 2
+  },
+  {
+   "id": "open.missing",
+   "group": "open",
+   "outcome": "failed",
+   "detail": "不存在的路径回答 not-found，不存在的名称回答 opened。",
+   "ms": 90
+  },
+  {
+   "id": "page.panes",
+   "group": "page",
+   "outcome": "failed",
+   "detail": "这台 Mac 没有这些面板标识：com.apple.ScreenSaver-Settings.extension com.apple.Passwords-Settings.extension。42 个地址里 38 个是这台 Mac 的设置面板；属于系统设置自身、无法这样核对的 2 个；这台 Mac 共有 241 个面板。这台 Mac 的面板：com.apple.Accessibility-Settings.extension com.apple.AccessibilitySettingsWidgetExtension com.apple.AccountsUISettings.AppIntents com.apple.AirDrop-Handoff-Settings.extension com.apple.Appearance-Settings.extension com.apple.AppleAccountIntents com.apple.AppleMediaServicesUI.ComposeReviewExtension com.apple.Arabesque com.apple.AskTo.AskToTestResponseUIExtension com.apple.AskToExtension com.apple.AskToViewExtension com.apple.Battery-Settings.extension com.apple.BiometricsAndPasswordSettingsAppIntentsExtension com.apple.BlackPowderInferenceExtension com.apple.BluetoothSettings com.apple.BluetoothSettingsApp.BluetoothSettingsAppIntentsWidget com.apple.CD-DVD-Settings.extension com.apple.ClassKit-Settings.extension com.apple.ClassKit.ClassKitAppIntents com.apple.Classroom-Settings.extension com.apple.ClassroomDeviceExpert com.apple.ConfigurationProfiles.FollowUp com.apple.ControlCenter-Settings.extension com.apple.CoreMotionFoundationModelExtension com.apple.Coverage-Settings.extension com.apple.Date-Time-Settings.extension com.apple.Desktop-Settings.extension com.apple.DiagnosticExtensions.StorageDESDXC com.apple.DiagnosticExtensions.StorageDESSD com.apple.DifferentialPrivacy.TelemetryAggregator com.apple.Displays-Settings.extension com.apple.ExtensionsSettings.DefaultExtensionEnablement com.apple.ExtensionsSettings.LegacyPluginEnablementExtension com.apple.FaceTime.FaceTimeNotificationExtension com.apple.Family-Settings.extension com.apple.FamilyExtensionHost.FamilyOutOfProcessUIExtension com.apple.Flurry com.apple.Focus-Settings.extension com.apple.FollowUpSettings.FollowUpSettingsExtension com.apple.Game-Center-Settings.extension com.apple.Game-Controller-Settings.extension com.apple.GameCenter.Settings.DeviceExpertExtension com.apple.GameCenterDiagnosticExtension com.apple.GenerativeFunctions.GenerativeExperiencesSafetyInferenceProvider com.apple.GenerativePlaygroundApp.remoteUIExtension com.apple.HeadphoneSettings com.apple.Home.PrivacySettingsExtension com.apple.HomeAppIntentsExtension com.apple.HostInferenceProviderService com.apple.HydraUSDAppIntents com.apple.ImagePlayground.NonUIExtension com.apple.InferenceProviderService com.apple.Internet-Accounts-Settings.extension com.apple.Keyboard-Settings.extension com.apple.LighthouseBitacoraFramework.BitacoraWorker com.apple.Localization-Settings.extension com.apple.Lock-Screen-Settings.extension com.apple.LoginItems-Settings.extension com.apple.MADViewServiceExtension com.apple.MediaExtensions-Settings com.apple.MediaMLPluginApp.MediaMLExtension com.apple.MediaRemoteAppIntentsExtension com.apple.MobileAddressBook.RemoteCatalystPosterExtension com.apple.Mouse-Settings.extension com.apple.NeptuneOneExtension com.apple.Network-Settings.extension com.apple.NetworkEndpointPickerUI.DDUIExtension com.apple.NetworkExtensionSettingsUI.NESettingsUIExtension com.apple.NewDeviceOutreach.NewDeviceOutreachIntents com.apple.Notifications-Settings.extension com.apple.PaperKit.extension.ui com.apple.Passwords.PasswordManagerAppIntentsExtension com.apple.Passwords.PasswordSettingsAppIntentsExtension com.apple.PhotosUIPrivate.PhotosPosterProvider com.apple.PlatformSSO.AccessKey com.apple.PlatformSSOToken com.apple.Print-Scan-Settings.extension com.apple.Profiles-Settings.extension com.apple.Profiles-Settings.intents com.apple.Screen-Time-Settings.extension com.apple.ScreenSaver.Computer-Name com.apple.ScreenSaver.Drift com.apple.ScreenSaver.Hello com.apple.ScreenSaver.Monterey com.apple.ScreenSaver.Ventu…",
+   "ms": 1677
+  },
+  {
+   "id": "page.wifi",
+   "group": "page",
+   "outcome": "passed",
+   "detail": "窗口显示：Wi‑Fi（3378 毫秒）",
+   "ms": 3378,
+   "shot": "page-wifi.jpg"
+  },
+  {
+   "id": "page.bluetooth",
+   "group": "page",
+   "outcome": "passed",
+   "detail": "窗口显示：Bluetooth（687 毫秒）",
+   "ms": 687,
+   "shot": "page-bluetooth.jpg"
+  },
+  {
+   "id": "page.network",
+   "group": "page",
+   "outcome": "passed",
+   "detail": "窗口显示：Network（1143 毫秒）",
+   "ms": 1143,
+   "shot": "page-network.jpg"
+  },
+  {
+   "id": "page.vpn",
+   "group": "page",
+   "outcome": "failed",
+   "detail": "打开“VPN”后窗口没有动，地址可能无效。窗口显示：Network",
+   "ms": 0,
+   "shot": "page-vpn.jpg"
+  },
+  {
+   "id": "page.notifications",
+   "group": "page",
+   "outcome": "passed",
+   "detail": "窗口显示：Notifications（1295 毫秒）",
+   "ms": 1295,
+   "shot": "page-notifications.jpg"
+  },
+  {
+   "id": "page.sound",
+   "group": "page",
+   "outcome": "passed",
+   "detail": "窗口显示：Sound（1150 毫秒）",
+   "ms": 1150,
+   "shot": "page-sound.jpg"
+  },
+  {
+   "id": "page.focus",
+   "group": "page",
+   "outcome": "passed",
+   "detail": "窗口显示：Focus（3317 毫秒）",
+   "ms": 3317,
+   "shot": "page-focus.jpg"
+  },
+  {
+   "id": "page.screen-time",
+   "group": "page",
+   "outcome": "passed",
+   "detail": "窗口显示：Screen Time（1791 毫秒）",
+   "ms": 1791,
+   "shot": "page-screen-time.jpg"
+  },
+  {
+   "id": "page.general",
+   "group": "page",
+   "outcome": "failed",
+   "detail": "打开“General”的命令成功了，但设置窗口没有出现。",
+   "ms": 0,
+   "shot": "page-general.jpg"
+  },
+  {
+   "id": "page.appearance",
+   "group": "page",
+   "outcome": "passed",
+   "detail": "窗口显示：Appearance（1109 毫秒）",
+   "ms": 1109,
+   "shot": "page-appearance.jpg"
+  },
+  {
+   "id": "page.accessibility",
+   "group": "page",
+   "outcome": "passed",
+   "detail": "窗口显示：Accessibility（1890 毫秒）",
+   "ms": 1890,
+   "shot": "page-accessibility.jpg"
+  },
+  {
+   "id": "page.control-center",
+   "group": "page",
+   "outcome": "passed",
+   "detail": "窗口显示：Menu Bar（2206 毫秒）",
+   "ms": 2206,
+   "shot": "page-control-center.jpg"
+  },
+  {
+   "id": "page.siri",
+   "group": "page",
+   "outcome": "passed",
+   "detail": "窗口显示：Siri（903 毫秒）",
+   "ms": 903,
+   "shot": "page-siri.jpg"
+  },
+  {
+   "id": "page.privacy",
+   "group": "page",
+   "outcome": "passed",
+   "detail": "窗口显示：Privacy & Security（1364 毫秒）",
+   "ms": 1364,
+   "shot": "page-privacy.jpg"
+  },
+  {
+   "id": "page.desktop-dock",
+   "group": "page",
+   "outcome": "passed",
+   "detail": "窗口显示：Desktop & Dock（1398 毫秒）",
+   "ms": 1398,
+   "shot": "page-desktop-dock.jpg"
+  },
+  {
+   "id": "page.displays",
+   "group": "page",
+   "outcome": "passed",
+   "detail": "窗口显示：Displays（1214 毫秒）",
+   "ms": 1214,
+   "shot": "page-displays.jpg"
+  },
+  {
+   "id": "page.wallpaper",
+   "group": "page",
+   "outcome": "passed",
+   "detail": "窗口显示：Wallpaper（1365 毫秒）",
+   "ms": 1365,
+   "shot": "page-wallpaper.jpg"
+  },
+  {
+   "id": "page.screen-saver",
+   "group": "page",
+   "outcome": "failed",
+   "detail": "打开“Screen Saver”后窗口没有动，地址可能无效。窗口显示：Wallpaper",
+   "ms": 0,
+   "shot": "page-screen-saver.jpg"
+  },
+  {
+   "id": "page.battery",
+   "group": "page",
+   "outcome": "passed",
+   "detail": "窗口显示：Energy（702 毫秒）",
+   "ms": 702,
+   "shot": "page-battery.jpg"
+  },
+  {
+   "id": "page.lock-screen",
+   "group": "page",
+   "outcome": "passed",
+   "detail": "窗口显示：Lock Screen（926 毫秒）",
+   "ms": 926,
+   "shot": "page-lock-screen.jpg"
+  },
+  {
+   "id": "page.touch-id",
+   "group": "page",
+   "outcome": "passed",
+   "detail": "窗口显示：Login Password（873 毫秒）",
+   "ms": 873,
+   "shot": "page-touch-id.jpg"
+  },
+  {
+   "id": "page.users",
+   "group": "page",
+   "outcome": "passed",
+   "detail": "窗口显示：Users & Groups（1170 毫秒）",
+   "ms": 1170,
+   "shot": "page-users.jpg"
+  },
+  {
+   "id": "page.passwords",
+   "group": "page",
+   "outcome": "passed",
+   "detail": "窗口显示：AutoFill & Passwords（2051 毫秒）",
+   "ms": 2051,
+   "shot": "page-passwords.jpg"
+  },
+  {
+   "id": "page.internet-accounts",
+   "group": "page",
+   "outcome": "passed",
+   "detail": "窗口显示：Internet Accounts（1016 毫秒）",
+   "ms": 1016,
+   "shot": "page-internet-accounts.jpg"
+  },
+  {
+   "id": "page.game-center",
+   "group": "page",
+   "outcome": "passed",
+   "detail": "窗口显示：Game Center（1004 毫秒）",
+   "ms": 1004,
+   "shot": "page-game-center.jpg"
+  },
+  {
+   "id": "page.wallet",
+   "group": "page",
+   "outcome": "passed",
+   "detail": "窗口显示：Wallet & Apple Pay（995 毫秒）",
+   "ms": 995,
+   "shot": "page-wallet.jpg"
+  },
+  {
+   "id": "page.keyboard",
+   "group": "page",
+   "outcome": "passed",
+   "detail": "窗口显示：Keyboard（2105 毫秒）",
+   "ms": 2105,
+   "shot": "page-keyboard.jpg"
+  },
+  {
+   "id": "page.mouse",
+   "group": "page",
+   "outcome": "passed",
+   "detail": "窗口显示：Mouse（1215 毫秒）",
+   "ms": 1215,
+   "shot": "page-mouse.jpg"
+  },
+  {
+   "id": "page.trackpad",
+   "group": "page",
+   "outcome": "unavailable",
+   "detail": "“Trackpad”要有相应的硬件才有，这台机器没有显示它。窗口显示：Mouse",
+   "ms": 0
+  },
+  {
+   "id": "page.printers",
+   "group": "page",
+   "outcome": "passed",
+   "detail": "窗口显示：Printers & Scanners（1622 毫秒）",
+   "ms": 1622,
+   "shot": "page-printers.jpg"
+  },
+  {
+   "id": "page.about",
+   "group": "page",
+   "outcome": "passed",
+   "detail": "窗口显示：About（1053 毫秒）",
+   "ms": 1053,
+   "shot": "page-about.jpg"
+  },
+  {
+   "id": "page.software-update",
+   "group": "page",
+   "outcome": "passed",
+   "detail": "窗口显示：Software Update（810 毫秒）",
+   "ms": 810,
+   "shot": "page-software-update.jpg"
+  },
+  {
+   "id": "page.storage",
+   "group": "page",
+   "outcome": "passed",
+   "detail": "窗口显示：Storage（741 毫秒）",
+   "ms": 741,
+   "shot": "page-storage.jpg"
+  },
+  {
+   "id": "page.airdrop",
+   "group": "page",
+   "outcome": "review",
+   "detail": "要的是“AirDrop & Handoff”，自动核对拿不准。窗口显示：AirDrop & Continuity",
+   "ms": 3201,
+   "shot": "page-airdrop.jpg"
+  },
+  {
+   "id": "page.login-items",
+   "group": "page",
+   "outcome": "passed",
+   "detail": "窗口显示：Login Items & Extensions（10112 毫秒）",
+   "ms": 10112,
+   "shot": "page-login-items.jpg"
+  },
+  {
+   "id": "page.language",
+   "group": "page",
+   "outcome": "passed",
+   "detail": "窗口显示：Language & Region（1093 毫秒）",
+   "ms": 1093,
+   "shot": "page-language.jpg"
+  },
+  {
+   "id": "page.date-time",
+   "group": "page",
+   "outcome": "passed",
+   "detail": "窗口显示：Date & Time（1151 毫秒）",
+   "ms": 1151,
+   "shot": "page-date-time.jpg"
+  },
+  {
+   "id": "page.sharing",
+   "group": "page",
+   "outcome": "passed",
+   "detail": "窗口显示：Sharing（1023 毫秒）",
+   "ms": 1023,
+   "shot": "page-sharing.jpg"
+  },
+  {
+   "id": "page.time-machine",
+   "group": "page",
+   "outcome": "passed",
+   "detail": "窗口显示：Time Machine（814 毫秒）",
+   "ms": 814,
+   "shot": "page-time-machine.jpg"
+  },
+  {
+   "id": "page.transfer-reset",
+   "group": "page",
+   "outcome": "passed",
+   "detail": "窗口显示：Transfer or Reset（1117 毫秒）",
+   "ms": 1117,
+   "shot": "page-transfer-reset.jpg"
+  },
+  {
+   "id": "page.startup-disk",
+   "group": "page",
+   "outcome": "passed",
+   "detail": "窗口显示：Startup Disk（506 毫秒）",
+   "ms": 506,
+   "shot": "page-startup-disk.jpg"
+  },
+  {
+   "id": "page.apple-account",
+   "group": "page",
+   "outcome": "passed",
+   "detail": "窗口显示：Sign in（434 毫秒）",
+   "ms": 434,
+   "shot": "page-apple-account.jpg"
+  },
+  {
+   "id": "setting.dark-mode.read",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "off（111 毫秒）",
+   "ms": 111
+  },
+  {
+   "id": "setting.dark-mode.same",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "写回 off，读到 off",
+   "ms": 604
+  },
+  {
+   "id": "setting.dark-mode.change",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "off → on（365 毫秒）",
+   "ms": 1162,
+   "shot": "setting-dark-mode-after.jpg"
+  },
+  {
+   "id": "setting.dark-mode.effect",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "换一条路读，也是 on。退出码 0：Dark",
+   "ms": 15
+  },
+  {
+   "id": "setting.dark-mode.restore",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "改回了 off",
+   "ms": 269
+  },
+  {
+   "id": "setting.volume.read",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "100（179 毫秒）",
+   "ms": 179
+  },
+  {
+   "id": "setting.volume.same",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "写回 100，读到 100",
+   "ms": 329
+  },
+  {
+   "id": "setting.volume.change",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "100 → 90（345 毫秒）",
+   "ms": 1238,
+   "shot": "setting-volume-after.jpg"
+  },
+  {
+   "id": "setting.volume.restore",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "改回了 100",
+   "ms": 365
+  },
+  {
+   "id": "setting.mute.read",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "off（247 毫秒）",
+   "ms": 247
+  },
+  {
+   "id": "setting.mute.same",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "写回 off，读到 off",
+   "ms": 425
+  },
+  {
+   "id": "setting.mute.change",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "off → on（403 毫秒）",
+   "ms": 1225,
+   "shot": "setting-mute-after.jpg"
+  },
+  {
+   "id": "setting.mute.restore",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "改回了 off",
+   "ms": 403
+  },
+  {
+   "id": "setting.alert-volume.read",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "100（189 毫秒）",
+   "ms": 189
+  },
+  {
+   "id": "setting.alert-volume.same",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "写回 100，读到 100",
+   "ms": 431
+  },
+  {
+   "id": "setting.alert-volume.change",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "100 → 90（334 毫秒）",
+   "ms": 1135,
+   "shot": "setting-alert-volume-after.jpg"
+  },
+  {
+   "id": "setting.alert-volume.restore",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "改回了 100",
+   "ms": 360
+  },
+  {
+   "id": "setting.input-volume.read",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "100（226 毫秒）",
+   "ms": 226
+  },
+  {
+   "id": "setting.input-volume.same",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "写回 100，读到 100",
+   "ms": 547
+  },
+  {
+   "id": "setting.input-volume.change",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "100 → 90（398 毫秒）",
+   "ms": 1226,
+   "shot": "setting-input-volume-after.jpg"
+  },
+  {
+   "id": "setting.input-volume.restore",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "改回了 100",
+   "ms": 533
+  },
+  {
+   "id": "setting.dock-autohide.read",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "off（234 毫秒）",
+   "ms": 234
+  },
+  {
+   "id": "setting.dock-autohide.same",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "写回 off，读到 off",
+   "ms": 251
+  },
+  {
+   "id": "setting.dock-autohide.change",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "off → on（380 毫秒）",
+   "ms": 1241,
+   "shot": "setting-dock-autohide-after.jpg"
+  },
+  {
+   "id": "setting.dock-autohide.effect",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "换一条路读，也是 on。退出码 0：1",
+   "ms": 17
+  },
+  {
+   "id": "setting.dock-autohide.restore",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "改回了 off",
+   "ms": 248
+  },
+  {
+   "id": "setting.dock-magnification.read",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "off（178 毫秒）",
+   "ms": 178
+  },
+  {
+   "id": "setting.dock-magnification.same",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "写回 off，读到 off",
+   "ms": 236
+  },
+  {
+   "id": "setting.dock-magnification.change",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "off → on（235 毫秒）",
+   "ms": 1090,
+   "shot": "setting-dock-magnification-after.jpg"
+  },
+  {
+   "id": "setting.dock-magnification.effect",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "换一条路读，也是 on。退出码 0：1",
+   "ms": 18
+  },
+  {
+   "id": "setting.dock-magnification.restore",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "改回了 off",
+   "ms": 279
+  },
+  {
+   "id": "setting.dock-recents.read",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "on（141 毫秒）",
+   "ms": 141
+  },
+  {
+   "id": "setting.dock-recents.same",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "写回 on，读到 on",
+   "ms": 206
+  },
+  {
+   "id": "setting.dock-recents.change",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "on → off（366 毫秒）",
+   "ms": 1209,
+   "shot": "setting-dock-recents-after.jpg"
+  },
+  {
+   "id": "setting.dock-recents.effect",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "换一条路读，也是 off。退出码 0：0",
+   "ms": 29
+  },
+  {
+   "id": "setting.dock-recents.restore",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "改回了 on",
+   "ms": 229
+  },
+  {
+   "id": "setting.menu-bar-autohide.read",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "off（137 毫秒）",
+   "ms": 137
+  },
+  {
+   "id": "setting.menu-bar-autohide.same",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "写回 off，读到 off",
+   "ms": 375
+  },
+  {
+   "id": "setting.menu-bar-autohide.change",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "off → on（335 毫秒）",
+   "ms": 1209,
+   "shot": "setting-menu-bar-autohide-after.jpg"
+  },
+  {
+   "id": "setting.menu-bar-autohide.effect",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "换一条路读，也是 on。退出码 0：1",
+   "ms": 20
+  },
+  {
+   "id": "setting.menu-bar-autohide.restore",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "改回了 off",
+   "ms": 402
+  },
+  {
+   "id": "setting.dock-position.read",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "bottom（139 毫秒）",
+   "ms": 139
+  },
+  {
+   "id": "setting.dock-position.same",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "写回 bottom，读到 bottom",
+   "ms": 291
+  },
+  {
+   "id": "setting.dock-position.change",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "bottom → right（378 毫秒）",
+   "ms": 1198,
+   "shot": "setting-dock-position-after.jpg"
+  },
+  {
+   "id": "setting.dock-position.effect",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "换一条路读，也是 right。退出码 0：right",
+   "ms": 23
+  },
+  {
+   "id": "setting.dock-position.restore",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "改回了 bottom",
+   "ms": 294
+  },
+  {
+   "id": "setting.dock-minimize-effect.read",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "genie（118 毫秒）",
+   "ms": 118
+  },
+  {
+   "id": "setting.dock-minimize-effect.same",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "写回 genie，读到 genie",
+   "ms": 261
+  },
+  {
+   "id": "setting.dock-minimize-effect.change",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "genie → scale（321 毫秒）",
+   "ms": 1296,
+   "shot": "setting-dock-minimize-effect-after.jpg"
+  },
+  {
+   "id": "setting.dock-minimize-effect.effect",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "换一条路读，也是 scale。退出码 0：scale",
+   "ms": 27
+  },
+  {
+   "id": "setting.dock-minimize-effect.restore",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "改回了 genie",
+   "ms": 362
+  },
+  {
+   "id": "setting.dock-size.read",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "32（135 毫秒）",
+   "ms": 135
+  },
+  {
+   "id": "setting.dock-size.same",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "写回 32，读到 31",
+   "ms": 310
+  },
+  {
+   "id": "setting.dock-size.change",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "32 → 42（287 毫秒）",
+   "ms": 1100,
+   "shot": "setting-dock-size-after.jpg"
+  },
+  {
+   "id": "setting.dock-size.effect",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "换一条路读，也是 42。退出码 0：63",
+   "ms": 19
+  },
+  {
+   "id": "setting.dock-size.restore",
+   "group": "setting",
+   "outcome": "passed",
+   "detail": "改回了 32",
+   "ms": 290
+  },
+  {
+   "id": "gate.before",
+   "group": "gate",
+   "outcome": "passed",
+   "detail": "自检之前改 setting:dark-mode：没有直接改，打开了设置页，值仍是 off。",
+   "ms": 1795
+  },
+  {
+   "id": "gate.selftest",
+   "group": "gate",
+   "outcome": "passed",
+   "detail": "自检 28 项通过、1 项失败、0 项跳过；dark-mode 现在记为“核对过”，可以直接改。",
+   "ms": 10760
+  },
+  {
+   "id": "gate.selftest-items",
+   "group": "gate",
+   "outcome": "passed",
+   "detail": "自检的 29 项里没有失败的（设置面板标识一项见 page.panes）。",
+   "ms": 0
+  },
+  {
+   "id": "gate.after",
+   "group": "gate",
+   "outcome": "passed",
+   "detail": "自检之后直接改成功：off → on → off，回答里带着原值。",
+   "ms": 1405
+  },
+  {
+   "id": "tool.set.query",
+   "group": "tool",
+   "outcome": "passed",
+   "detail": "用“把深色模式打开”找对了 setting:dark-mode，并改成了 on；已改回。",
+   "ms": 954
+  },
+  {
+   "id": "tool.set.invalid",
+   "group": "tool",
+   "outcome": "passed",
+   "detail": "给了不合法的值：回答“值不对”，并说明要的是 on or off；值没有变。",
+   "ms": 286
+  },
+  {
+   "id": "tool.find",
+   "group": "tool",
+   "outcome": "passed",
+   "detail": "查“深色模式”：第一名是 setting:dark-mode，标着可以直接改；1 个结果都标明了能不能直接改。",
+   "ms": 4
+  },
+  {
+   "id": "tool.set.security",
+   "group": "tool",
+   "outcome": "passed",
+   "detail": "对安全相关的页面调用 computer_set：只打开了页面，回答里标明是安全页面。",
+   "ms": 613,
+   "shot": "tool-security-page.jpg"
+  },
+  {
+   "id": "tool.refuse",
+   "group": "tool",
+   "outcome": "passed",
+   "detail": "助手没开 Computer Use、在任务里、参数给错这三种情况都被挡住，没有启动任何系统命令。",
+   "ms": 1
+  },
+  {
+   "id": "probe.languages",
+   "group": "probe",
+   "outcome": "passed",
+   "detail": "26 毫秒，退出码 0：( \"en-US\" )",
+   "ms": 26
+  },
+  {
+   "id": "probe.volume-settings",
+   "group": "probe",
+   "outcome": "passed",
+   "detail": "263 毫秒，退出码 0：output volume:100, input volume:100, alert volume:100, output muted:false",
+   "ms": 263
+  },
+  {
+   "id": "probe.dock-properties",
+   "group": "probe",
+   "outcome": "passed",
+   "detail": "271 毫秒，退出码 0：show indicators:true, minimize into application:false, autohide:false, magnification size:1.0, class:dock preferences object, dock size:0.303571432829, autohide menu bar:false, double click behavior:zoom, magnification:false, show recents:true, minimize effect:genie, screen edge:bottom, animate:true",
+   "ms": 272
+  },
+  {
+   "id": "probe.appearance-properties",
+   "group": "probe",
+   "outcome": "unavailable",
+   "detail": "209 毫秒，退出码 1：40:50: execution error: System Events got an error: AppleEvent handler failed. (-10000)",
+   "ms": 209
+  },
+  {
+   "id": "probe.dock-minimize-to-application",
+   "group": "probe",
+   "outcome": "unavailable",
+   "detail": "23 毫秒，退出码 1：2026-11-13 23:48:24.662 defaults[5208:20279] The domain/default pair of (com.apple.dock, minimize-to-application) does not exist",
+   "ms": 23
+  },
+  {
+   "id": "probe.dock-process-indicators",
+   "group": "probe",
+   "outcome": "unavailable",
+   "detail": "23 毫秒，退出码 1：2026-11-13 23:48:24.685 defaults[5209:20281] The domain/default pair of (com.apple.dock, show-process-indicators) does not exist",
+   "ms": 23
+  },
+  {
+   "id": "probe.dock-launch-animation",
+   "group": "probe",
+   "outcome": "unavailable",
+   "detail": "12 毫秒，退出码 1：2026-11-13 23:48:24.696 defaults[5210:20284] The domain/default pair of (com.apple.dock, launchanim) does not exist",
+   "ms": 12
+  },
+  {
+   "id": "probe.dock-large-size",
+   "group": "probe",
+   "outcome": "unavailable",
+   "detail": "16 毫秒，退出码 1：2026-11-13 23:48:24.712 defaults[5211:20286] The domain/default pair of (com.apple.dock, largesize) does not exist",
+   "ms": 16
+  },
+  {
+   "id": "probe.dock-tile-size",
+   "group": "probe",
+   "outcome": "passed",
+   "detail": "23 毫秒，退出码 0：50",
+   "ms": 23
+  },
+  {
+   "id": "probe.dock-orientation",
+   "group": "probe",
+   "outcome": "passed",
+   "detail": "20 毫秒，退出码 0：bottom",
+   "ms": 20
+  },
+  {
+   "id": "probe.spaces-rearrange",
+   "group": "probe",
+   "outcome": "unavailable",
+   "detail": "18 毫秒，退出码 1：2026-11-13 23:48:24.774 defaults[5214:20295] The domain/default pair of (com.apple.dock, mru-spaces) does not exist",
+   "ms": 18
+  },
+  {
+   "id": "probe.finder-hidden-files",
+   "group": "probe",
+   "outcome": "unavailable",
+   "detail": "23 毫秒，退出码 1：2026-11-13 23:48:24.796 defaults[5216:20298] The domain/default pair of (com.apple.finder, AppleShowAllFiles) does not exist",
+   "ms": 23
+  },
+  {
+   "id": "probe.finder-extensions",
+   "group": "probe",
+   "outcome": "unavailable",
+   "detail": "18 毫秒，退出码 1：2026-11-13 23:48:24.816 defaults[5218:20303] The domain/default pair of (kCFPreferencesAnyApplication, AppleShowAllExtensions) does not exist",
+   "ms": 18
+  },
+  {
+   "id": "probe.finder-path-bar",
+   "group": "probe",
+   "outcome": "unavailable",
+   "detail": "20 毫秒，退出码 1：2026-11-13 23:48:24.836 defaults[5219:20305] The domain/default pair of (com.apple.finder, ShowPathbar) does not exist",
+   "ms": 20
+  },
+  {
+   "id": "probe.finder-status-bar",
+   "group": "probe",
+   "outcome": "unavailable",
+   "detail": "20 毫秒，退出码 1：2026-11-13 23:48:24.857 defaults[5220:20307] The domain/default pair of (com.apple.finder, ShowStatusBar) does not exist",
+   "ms": 20
+  },
+  {
+   "id": "probe.stage-manager",
+   "group": "probe",
+   "outcome": "unavailable",
+   "detail": "18 毫秒，退出码 1：2026-11-13 23:48:24.874 defaults[5221:20310] The domain/default pair of (com.apple.WindowManager, GloballyEnabled) does not exist",
+   "ms": 18
+  },
+  {
+   "id": "probe.clock",
+   "group": "probe",
+   "outcome": "passed",
+   "detail": "20 毫秒，退出码 0：{ ShowAMPM = 1; ShowDate = 0; ShowDayOfWeek = 1; }",
+   "ms": 20
+  },
+  {
+   "id": "probe.clock-24-hours",
+   "group": "probe",
+   "outcome": "unavailable",
+   "detail": "14 毫秒，退出码 1：2026-11-13 23:48:24.909 defaults[5224:20317] The domain/default pair of (kCFPreferencesAnyApplication, AppleICUForce24HourTime) does not exist",
+   "ms": 14
+  },
+  {
+   "id": "probe.battery-percentage",
+   "group": "probe",
+   "outcome": "unavailable",
+   "detail": "20 毫秒，退出码 1：2026-11-13 23:48:24.928 defaults[5225:20319] The domain/default pair of (com.apple.controlcenter, BatteryShowPercentage) does not exist",
+   "ms": 20
+  },
+  {
+   "id": "probe.sound-feedback",
+   "group": "probe",
+   "outcome": "unavailable",
+   "detail": "21 毫秒，退出码 1：2026-11-13 23:48:24.949 defaults[5226:20324] The domain/default pair of (kCFPreferencesAnyApplication, com.apple.sound.beep.feedback) does not exist",
+   "ms": 21
+  },
+  {
+   "id": "probe.sound-interface",
+   "group": "probe",
+   "outcome": "unavailable",
+   "detail": "28 毫秒，退出码 1：2026-11-13 23:48:24.973 defaults[5227:20328] The domain/default pair of (kCFPreferencesAnyApplication, com.apple.sound.uiaudio.enabled) does not exist",
+   "ms": 28
+  },
+  {
+   "id": "probe.screenshot",
+   "group": "probe",
+   "outcome": "passed",
+   "detail": "31 毫秒，退出码 0：{ \"last-analytics-stamp\" = \"816306259.076794\"; }",
+   "ms": 31
+  },
+  {
+   "id": "probe.wallpaper",
+   "group": "probe",
+   "outcome": "passed",
+   "detail": "161 毫秒，退出码 0：/System/Library/Desktop Pictures/Solid Colors/Black.png",
+   "ms": 161
+  },
+  {
+   "id": "probe.network-ports",
+   "group": "probe",
+   "outcome": "passed",
+   "detail": "71 毫秒，退出码 0：Hardware Port: Ethernet Device: en0 Ethernet Address: 8e:51:f9:04:af:18 Hardware Port: Ethernet Adapter (en1) Device: en1 Ethernet Address: 2e:8f:a7:7c:e8:0c VLAN Configurations ===================",
+   "ms": 71
+  },
+  {
+   "id": "probe.power",
+   "group": "probe",
+   "outcome": "passed",
+   "detail": "31 毫秒，退出码 0：System-wide power settings: Currently in use: powernap 1 sleep 0 (sleep prevented by addonsd, powerd) Sleep On Power Button 1 ttyskeepawake 1 tcpkeepalive 1 disksleep 0 standby 0 displaysleep 0 (display sleep prevented by addonsd)",
+   "ms": 31
+  },
+  {
+   "id": "probe.visible-processes",
+   "group": "probe",
+   "outcome": "passed",
+   "detail": "191 毫秒，退出码 0：Finder",
+   "ms": 191
+  },
+  {
+   "id": "probe.settings-current-pane",
+   "group": "probe",
+   "outcome": "unavailable",
+   "detail": "6331 毫秒，退出码 1：68:70: execution error: System Settings got an error: AppleEvent timed out. (-1712)",
+   "ms": 6331
+  },
+  {
+   "id": "final.restored",
+   "group": "final",
+   "outcome": "failed",
+   "detail": "结束时和开始时不一样的设置：dock-size（应是 32，已再改回）",
+   "ms": 0
+  },
+  {
+   "id": "final.cleanup",
+   "group": "final",
+   "outcome": "passed",
+   "detail": "关掉了设置窗口和文件夹窗口，删掉了临时文件。",
+   "ms": 0
+  }
+ ],
+ "times": {
+  "catalog.scan": 602,
+  "catalog.load": 1,
+  "catalog.rescan": 566,
+  "open.app": 140,
+  "open.folder": 2750,
+  "open.page.command": 50,
+  "page.read": 162,
+  "open.page": 1143,
+  "setting.read": 141,
+  "setting.change": 345,
+  "tool.set": 668
+ },
+ "verified": [
+  "dark-mode",
+  "volume",
+  "mute",
+  "alert-volume",
+  "input-volume",
+  "dock-autohide",
+  "dock-magnification",
+  "dock-recents",
+  "menu-bar-autohide",
+  "dock-position",
+  "dock-minimize-effect",
+  "dock-size"
+ ],
+ "untestable": []
+}

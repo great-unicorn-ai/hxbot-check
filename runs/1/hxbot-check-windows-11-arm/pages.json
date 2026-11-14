@@ -1,0 +1,344 @@
+[
+ {
+  "key": "display",
+  "wanted": "Display",
+  "opened": false,
+  "seen": []
+ },
+ {
+  "key": "night-light",
+  "wanted": "Night light",
+  "opened": false,
+  "seen": []
+ },
+ {
+  "key": "sound",
+  "wanted": "Sound",
+  "opened": false,
+  "seen": []
+ },
+ {
+  "key": "notifications",
+  "wanted": "Notifications",
+  "opened": false,
+  "seen": []
+ },
+ {
+  "key": "focus",
+  "wanted": "Focus",
+  "opened": false,
+  "seen": []
+ },
+ {
+  "key": "power",
+  "wanted": "Power & sleep",
+  "opened": false,
+  "seen": []
+ },
+ {
+  "key": "storage",
+  "wanted": "Storage",
+  "opened": false,
+  "seen": []
+ },
+ {
+  "key": "multitasking",
+  "wanted": "Multitasking",
+  "opened": false,
+  "seen": []
+ },
+ {
+  "key": "clipboard",
+  "wanted": "Clipboard",
+  "opened": false,
+  "seen": []
+ },
+ {
+  "key": "about",
+  "wanted": "About",
+  "opened": false,
+  "seen": []
+ },
+ {
+  "key": "bluetooth",
+  "wanted": "Bluetooth & devices",
+  "opened": false,
+  "seen": []
+ },
+ {
+  "key": "printers",
+  "wanted": "Printers & scanners",
+  "opened": false,
+  "seen": []
+ },
+ {
+  "key": "mouse",
+  "wanted": "Mouse",
+  "opened": false,
+  "seen": []
+ },
+ {
+  "key": "touchpad",
+  "wanted": "Touchpad",
+  "opened": false,
+  "seen": []
+ },
+ {
+  "key": "typing",
+  "wanted": "Typing",
+  "opened": false,
+  "seen": []
+ },
+ {
+  "key": "network",
+  "wanted": "Network & internet",
+  "opened": false,
+  "seen": []
+ },
+ {
+  "key": "wifi",
+  "wanted": "Wi-Fi",
+  "opened": false,
+  "seen": []
+ },
+ {
+  "key": "ethernet",
+  "wanted": "Ethernet",
+  "opened": false,
+  "seen": []
+ },
+ {
+  "key": "vpn",
+  "wanted": "VPN",
+  "opened": false,
+  "seen": []
+ },
+ {
+  "key": "proxy",
+  "wanted": "Proxy",
+  "opened": false,
+  "seen": []
+ },
+ {
+  "key": "airplane",
+  "wanted": "Airplane mode",
+  "opened": false,
+  "seen": []
+ },
+ {
+  "key": "hotspot",
+  "wanted": "Mobile hotspot",
+  "opened": false,
+  "seen": []
+ },
+ {
+  "key": "personalization",
+  "wanted": "Personalization",
+  "opened": false,
+  "seen": []
+ },
+ {
+  "key": "background",
+  "wanted": "Background",
+  "opened": false,
+  "seen": []
+ },
+ {
+  "key": "colors",
+  "wanted": "Colors",
+  "opened": false,
+  "seen": []
+ },
+ {
+  "key": "lock-screen",
+  "wanted": "Lock screen",
+  "opened": false,
+  "seen": []
+ },
+ {
+  "key": "themes",
+  "wanted": "Themes",
+  "opened": false,
+  "seen": []
+ },
+ {
+  "key": "fonts",
+  "wanted": "Fonts",
+  "opened": false,
+  "seen": []
+ },
+ {
+  "key": "taskbar",
+  "wanted": "Taskbar",
+  "opened": false,
+  "seen": []
+ },
+ {
+  "key": "start",
+  "wanted": "Start",
+  "opened": false,
+  "seen": []
+ },
+ {
+  "key": "apps",
+  "wanted": "Installed apps",
+  "opened": false,
+  "seen": []
+ },
+ {
+  "key": "default-apps",
+  "wanted": "Default apps",
+  "opened": false,
+  "seen": []
+ },
+ {
+  "key": "startup-apps",
+  "wanted": "Startup apps",
+  "opened": false,
+  "seen": []
+ },
+ {
+  "key": "your-info",
+  "wanted": "Your info",
+  "opened": false,
+  "seen": []
+ },
+ {
+  "key": "email-accounts",
+  "wanted": "Email & accounts",
+  "opened": false,
+  "seen": []
+ },
+ {
+  "key": "sign-in",
+  "wanted": "Sign-in options",
+  "opened": false,
+  "seen": []
+ },
+ {
+  "key": "other-users",
+  "wanted": "Other users",
+  "opened": false,
+  "seen": []
+ },
+ {
+  "key": "date-time",
+  "wanted": "Date & time",
+  "opened": false,
+  "seen": []
+ },
+ {
+  "key": "language",
+  "wanted": "Language & region",
+  "opened": false,
+  "seen": []
+ },
+ {
+  "key": "speech",
+  "wanted": "Speech",
+  "opened": false,
+  "seen": []
+ },
+ {
+  "key": "game-bar",
+  "wanted": "Game Bar",
+  "opened": false,
+  "seen": []
+ },
+ {
+  "key": "accessibility",
+  "wanted": "Accessibility",
+  "opened": false,
+  "seen": []
+ },
+ {
+  "key": "text-size",
+  "wanted": "Text size",
+  "opened": false,
+  "seen": []
+ },
+ {
+  "key": "mouse-pointer",
+  "wanted": "Mouse pointer and touch",
+  "opened": false,
+  "seen": []
+ },
+ {
+  "key": "narrator",
+  "wanted": "Narrator",
+  "opened": false,
+  "seen": []
+ },
+ {
+  "key": "magnifier",
+  "wanted": "Magnifier",
+  "opened": false,
+  "seen": []
+ },
+ {
+  "key": "privacy",
+  "wanted": "Privacy & security",
+  "opened": false,
+  "seen": []
+ },
+ {
+  "key": "location",
+  "wanted": "Location",
+  "opened": false,
+  "seen": []
+ },
+ {
+  "key": "camera",
+  "wanted": "Camera",
+  "opened": false,
+  "seen": []
+ },
+ {
+  "key": "microphone",
+  "wanted": "Microphone access",
+  "opened": false,
+  "seen": []
+ },
+ {
+  "key": "windows-security",
+  "wanted": "Windows Security",
+  "opened": false,
+  "seen": []
+ },
+ {
+  "key": "windows-update",
+  "wanted": "Windows Update",
+  "opened": false,
+  "seen": []
+ },
+ {
+  "key": "backup",
+  "wanted": "Windows Backup",
+  "opened": false,
+  "seen": []
+ },
+ {
+  "key": "troubleshoot",
+  "wanted": "Troubleshoot",
+  "opened": false,
+  "seen": []
+ },
+ {
+  "key": "recovery",
+  "wanted": "Recovery",
+  "opened": false,
+  "seen": []
+ },
+ {
+  "key": "activation",
+  "wanted": "Activation",
+  "opened": false,
+  "seen": []
+ },
+ {
+  "key": "developers",
+  "wanted": "For developers",
+  "opened": false,
+  "seen": []
+ }
+]
