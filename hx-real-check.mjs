@@ -7760,11 +7760,13 @@ async function hxInstallApp(deps, input) {
       });
       return refusedByMacOS(copy.stderr) ? await appManagement(deps) : { status: "failed", reason: hxRunFailure("ditto", copy) };
     }
-    const old = join2(applications, `.${incoming.name}.hxbot-old.app`);
+    const shown = join2(applications, `${incoming.name} ${installed?.version.replace(/[/:]/gu, "-") ?? ""}.app`);
+    const old = installed && !await files.exists(shown) ? shown : join2(applications, `.${incoming.name}.hxbot-old.app`);
     if (installed) {
-      await files.remove(old).catch(() => {
-        return;
-      });
+      if (old !== shown)
+        await files.remove(old).catch(() => {
+          return;
+        });
       try {
         await files.rename(target, old);
       } catch (error) {
@@ -7883,7 +7885,7 @@ async function hxInstallRealCheck(input) {
     items.check("I2", "已经装了时先问（confirm），不动原来的", asked.status === "confirm" && asked.installed.version === "1.0" && asked.incoming.version === "2.0", line(asked));
     const replaced = await hxInstallApp(deps, { path: zip, replace: true });
     const leftovers = (await readdir2("/Applications")).filter((name) => name.includes("hxbot-"));
-    const inTrash = (await readdir2(trash).catch(() => [])).some((name) => name.startsWith(`.${NAME}.hxbot-old.app`));
+    const inTrash = (await readdir2(trash).catch(() => [])).some((name) => name.startsWith(`${NAME} 1.0.app`));
     items.check("I3", "同意替换后装上新版本，旧版进废纸篓，不留临时文件", replaced.status === "installed" && replaced.app.version === "2.0" && replaced.replaced?.version === "1.0" && inTrash && leftovers.length === 0, `${line(replaced)}；废纸篓里有旧版：${inTrash}；“应用程序”文件夹里的临时文件：${leftovers.join(", ") || "无"}`);
     const fromImage = await hxInstallApp(deps, { path: dmg, replace: true });
     const mounted = await run("/usr/bin/hdiutil", ["info"]).then((result) => result.stdout.includes("hxbot-dmg-"));
