@@ -1,0 +1,13 @@
+{
+  "pane": "Privacy_ScreenCapture",
+  "row": "provisioner",
+  "driver_ready": true,
+  "window": {
+    "app": "System Settings",
+    "title": "Screen & System Audio Recording"
+  },
+  "pid": 4870,
+  "rows_before": {},
+  "row_found": false,
+  "switch_found": false
+}

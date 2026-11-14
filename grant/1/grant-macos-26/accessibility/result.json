@@ -1,0 +1,13 @@
+{
+  "pane": "Privacy_Accessibility",
+  "row": "provisioner",
+  "driver_ready": true,
+  "window": {
+    "app": "System Settings",
+    "title": "Accessibility"
+  },
+  "pid": 5199,
+  "rows_before": {},
+  "row_found": false,
+  "switch_found": false
+}
