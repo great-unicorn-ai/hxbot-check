@@ -1,0 +1,227 @@
+System Settings — Screen & System Audio Recording (pid 1291, window 29)
+[0] window "Screen & System Audio Recording"
+  [1] field
+   [2] button "Search"
+   [3] row
+   [4] row
+     [5] text "Sign in, with your Apple Account"
+   [6] row
+   [7] row
+     [8] text "Software Update Available, 1 new item" = "1"
+   [9] row
+   [10] row
+     [11] text "Wi‑Fi"
+   [12] row
+     [13] text "Bluetooth"
+   [14] row
+     [15] text "Network"
+   [16] row
+     [17] text "Energy"
+   [18] row
+   [19] row
+     [20] text "General"
+   [21] row
+     [22] text "Accessibility"
+   [23] row
+     [24] text "Appearance"
+   [25] row
+     [26] text "Siri"
+   [27] row
+     [28] text "Control Center"
+   [29] row
+     [30] text "Desktop & Dock"
+   [31] row
+     [32] text "Displays"
+   [33] row
+     [34] text "Screen Saver"
+   [35] row
+     [36] text "Spotlight"
+   [37] row
+     [38] text "Wallpaper"
+   [39] row
+   [40] row
+     [41] text "Notifications"
+   [42] row
+     [43] text "Sound"
+   [44] row
+     [45] text "Focus"
+   [46] row
+     [47] text "Screen Time"
+   [48] row
+   [49] row
+     [50] text "Lock Screen"
+   [51] row
+     [52] text "Privacy & Security"
+   [53] row
+     [54] text "Login Password"
+   [55] row
+     [56] text "Users & Groups"
+   [57] row
+   [58] row
+     [59] text "Internet Accounts"
+   [60] row
+     [61] text "Game Center"
+   [62] row
+     [63] text "iCloud"
+   [64] row
+     [65] text "Wallet & Apple Pay"
+   [66] row
+   [67] row
+     [68] text "Keyboard"
+   [69] row
+     [70] text "Mouse"
+   [71] row
+     [72] text "Printers & Scanners"
+   [73] button
+   [74] button
+   [75] button
+   [76] button
+   [77] row
+     [78] check "bash_Toggle" = "1" (selected)
+   [79] row
+     [80] check "hosted-compute-agent_Toggle" = "1" (selected)
+   [81] row
+     [82] check "provisioner_Toggle" = "1" (selected)
+  [83] button "Add"
+   [84] row
+  [85] button "Add"
+  [87] button "Back"
+ [88] button
+ [89] button
+ [90] button
+[91] menu
+ [92] menu "Apple"
+  [93] menu
+   [94] menu "About This Mac"
+   [95] menu "System Information"
+   [96] menu "System Settings…, 1 update"
+   [97] menu "App Store"
+   [98] menu "Recent Items"
+    [99] menu
+     [100] menu "Installer"
+     [101] menu "Show “Installer” in Finder"
+     [102] menu "System Settings"
+     [103] menu "Show “System Settings” in Finder"
+     [104] menu "AnkaGuestAddons.pkg"
+     [105] menu "Show “AnkaGuestAddons.pkg” in Finder"
+     [106] menu "Clear Menu"
+   [107] menu "Force Quit…"
+   [108] menu "Force Quit System Settings"
+   [109] menu "Sleep"
+   [110] menu "Restart…"
+   [111] menu "Restart"
+   [112] menu "Shut Down…"
+   [113] menu "Shut Down"
+   [114] menu "Lock Screen"
+   [115] menu "Log Out Anka…"
+   [116] menu "Log Out Anka"
+ [117] menu "System Settings"
+  [118] menu
+   [119] menu "About System Settings"
+   [120] menu "Services"
+    [121] menu
+     [122] menu "Activity Monitor"
+     [123] menu "Allocations & Leaks"
+     [124] menu "File Activity"
+     [125] menu "System Trace"
+     [126] menu "Time Profile Active Application"
+     [127] menu "Time Profile App Under Mouse"
+     [128] menu "Time Profile Entire System"
+     [129] menu "Toggle Instruments Recording"
+     [130] menu "Services Settings…"
+   [131] menu "Hide System Settings"
+   [132] menu "Hide Others"
+   [133] menu "Quit System Settings"
+   [134] menu "Quit and Keep Windows"
+ [135] menu "Edit"
+  [136] menu
+   [137] menu "AutoFill"
+    [138] menu
+   [139] menu "Start Dictation…"
+   [140] menu "Emoji & Symbols"
+ [141] menu "View"
+  [142] menu
+   [143] menu "Back"
+   [144] menu "Search"
+   [145] menu "About"
+   [146] menu "Accessibility"
+   [147] menu "AirDrop & Handoff"
+   [148] menu "Appearance"
+   [149] menu "Apple Account"
+   [150] menu "AppleCare & Warranty"
+   [151] menu "Bluetooth"
+   [152] menu "Control Center"
+   [153] menu "Date & Time"
+   [154] menu "Desktop & Dock"
+   [155] menu "Device Management"
+   [156] menu "Displays"
+   [157] menu "Energy"
+   [158] menu "Focus"
+   [159] menu "Game Center"
+   [160] menu "iCloud"
+   [161] menu "Internet Accounts"
+   [162] menu "Keyboard"
+   [163] menu "Language & Region"
+   [164] menu "Lock Screen"
+   [165] menu "Login Items & Extensions"
+   [166] menu "Login Password"
+   [167] menu "Mouse"
+   [168] menu "Network"
+   [169] menu "Notifications"
+   [170] menu "Printers & Scanners"
+   [171] menu "Privacy & Security"
+   [172] menu "Screen Saver"
+   [173] menu "Screen Time"
+   [174] menu "Sharing"
+   [175] menu "Siri"
+   [176] menu "Software Update"
+   [177] menu "Sound"
+   [178] menu "Spotlight"
+   [179] menu "Startup Disk"
+   [180] menu "Storage"
+   [181] menu "Time Machine"
+   [182] menu "Transfer or Reset"
+   [183] menu "Users & Groups"
+   [184] menu "Wallet & Apple Pay"
+   [185] menu "Wallpaper"
+   [186] menu "Wi‑Fi"
+ [187] menu "Window"
+  [188] menu
+   [189] menu "Close"
+   [190] menu "Close All"
+   [191] menu "Minimize"
+   [192] menu "Minimize All"
+   [193] menu "Zoom"
+   [194] menu "Zoom All"
+   [195] menu "Fill"
+   [196] menu "Center"
+   [197] menu "Move & Resize"
+    [198] menu
+     [199] menu "Left"
+     [200] menu "Right"
+     [201] menu "Top"
+     [202] menu "Bottom"
+     [203] menu "Top Left"
+     [204] menu "Top Right"
+     [205] menu "Bottom Left"
+     [206] menu "Bottom Right"
+     [207] menu "Left & Right"
+     [208] menu "Left & Quarters"
+     [209] menu "Right & Left"
+     [210] menu "Right & Quarters"
+     [211] menu "Top & Bottom"
+     [212] menu "Top & Quarters"
+     [213] menu "Bottom & Top"
+     [214] menu "Bottom & Quarters"
+     [215] menu "Quarters"
+   [216] menu "Bring All to Front"
+   [217] menu "Arrange in Front"
+ [218] menu "Help"
+  [219] menu
+   [220] menu "System Settings Help"
+   [221] menu "macOS Help"
+   [222] menu "User Manual"
+   [223] menu "macOS Support"
+   [224] menu "Apple Virtual Machine 1 Specifications"
+   [225] menu "Hardware Support"
+The driver did not read the whole window.

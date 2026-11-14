@@ -1,0 +1,76 @@
+{
+  "pane": "Privacy_Accessibility",
+  "row": "provisioner",
+  "driver_ready": true,
+  "window": {
+    "app": "System Settings",
+    "title": "Accessibility"
+  },
+  "pid": 1508,
+  "rows_before": {
+    "ankarund": "1",
+    "bash": "1",
+    "hosted-compute-agent": "1",
+    "osascript": "1",
+    "provisioner": "1",
+    "runprovisioner": "1",
+    "sshd-keygen-wrapper": "1",
+    "start_hca": "1",
+    "Terminal": "1",
+    "Xcode Helper": "1"
+  },
+  "rows_by_text": {},
+  "switch_found": true,
+  "switch": {
+    "index": 86,
+    "role": "AXCheckBox",
+    "value": "1",
+    "token": true
+  },
+  "click_background": {
+    "ok": true,
+    "worked": true,
+    "reason": ""
+  },
+  "rows_after": {
+    "ankarund": "1",
+    "bash": "1",
+    "hosted-compute-agent": "1",
+    "osascript": "1",
+    "provisioner": "0",
+    "runprovisioner": "1",
+    "sshd-keygen-wrapper": "1",
+    "start_hca": "1",
+    "Terminal": "1",
+    "Xcode Helper": "1"
+  },
+  "changed": [
+    "provisioner"
+  ],
+  "only_that_row_changed": true,
+  "sheet_texts": [
+    "text: Login Password",
+    "field: Password",
+    "button: Modify Settings",
+    "button: Cancel",
+    "menu: Login Password"
+  ],
+  "cancel_found": true,
+  "cancel_click": true,
+  "rows_after_cancel": {
+    "ankarund": "1",
+    "bash": "1",
+    "hosted-compute-agent": "1",
+    "osascript": "1",
+    "provisioner": "1",
+    "runprovisioner": "1",
+    "sshd-keygen-wrapper": "1",
+    "start_hca": "1",
+    "Terminal": "1",
+    "Xcode Helper": "1"
+  },
+  "back_as_before": true,
+  "windows_after": [
+    "\"title\":\"Accessibility\""
+  ]
+}

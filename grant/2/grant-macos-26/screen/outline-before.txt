@@ -1,0 +1,77 @@
+System Settings — Screen & System Audio Recording (pid 2012, window 34)
+[0] window "Screen & System Audio Recording"
+   [1] row
+   [2] row
+     [3] text "Sign in, with your Apple Account"
+   [4] row
+   [5] row
+     [6] text "Software Update Available, 1 new item" = "1"
+   [7] row
+   [8] row
+     [9] text "Wi‑Fi"
+   [10] row
+     [11] text "Bluetooth"
+   [12] row
+     [13] text "Network"
+   [14] row
+     [15] text "Energy"
+   [16] row
+   [17] row
+     [18] text "General"
+   [19] row
+     [20] text "Accessibility"
+   [21] row
+     [22] text "Appearance"
+   [23] row
+     [24] text "Menu Bar"
+   [25] row
+     [26] text "Desktop & Dock"
+   [27] row
+     [28] text "Displays"
+   [29] row
+     [30] text "Spotlight"
+   [31] row
+     [32] text "Wallpaper"
+   [33] row
+     [34] text "Siri"
+   [35] row
+   [36] row
+     [37] text "Notifications"
+   [38] row
+     [39] text "Sound"
+   [40] row
+     [41] text "Focus"
+   [42] row
+     [43] text "Screen Time"
+   [44] row
+   [45] row
+     [46] text "Lock Screen"
+   [47] row
+     [48] text "Privacy & Security"
+   [49] row
+     [50] text "Login Password"
+   [51] row
+     [52] text "Users & Groups"
+   [53] row
+   [54] row
+     [55] text "Internet Accounts"
+   [56] row
+     [57] text "Game Center"
+   [58] row
+     [59] text "iCloud"
+   [60] row
+     [61] text "Wallet & Apple Pay"
+   [62] row
+   [63] row
+     [64] text "Keyboard"
+   [65] row
+     [66] text "Mouse"
+   [67] row
+     [68] text "Printers & Scanners"
+   [69] button
+   [70] button
+   [71] button
+   [72] button
+  [73] field "Search"
+   [74] button "Search"
+The driver did not read the whole window.
