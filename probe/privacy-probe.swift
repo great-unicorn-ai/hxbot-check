@@ -106,16 +106,32 @@ for (name, url) in panes {
     result["value_before"] = valueBefore
     result["value_after"] = valueAfter
     result["new_windows"] = Array(after.subtracting(before)).sorted()
-    result["auth_window"] = after.contains { $0.contains("SecurityAgent") || $0.contains("coreautha") || $0.contains("LocalAuthentication") }
+    let auth: (String) -> Bool = { $0.contains("SecurityAgent") || $0.contains("coreautha") || $0.contains("LocalAuthentication") }
+    result["auth_window_before"] = before.contains(where: auth)
+    result["auth_window_new"] = after.subtracting(before).contains(where: auth)
+    result["windows_after"] = Array(after).sorted()
+    var sheetTexts: [String] = []
     var sheets = 0
     if let windows = attr(element, kAXWindowsAttribute as String) as? [AXUIElement] {
       for window in windows {
         if let children = attr(window, kAXChildrenAttribute as String) as? [AXUIElement] {
-          sheets += children.filter { text(attr($0, kAXRoleAttribute as String)) == "AXSheet" }.count
+          for sheet in children where text(attr(sheet, kAXRoleAttribute as String)) == "AXSheet" {
+            sheets += 1
+            var none: [Found] = []
+            var words: [String] = []
+            walk(sheet, 0, &none, &words)
+            if let buttons = attr(sheet, kAXChildrenAttribute as String) as? [AXUIElement] {
+              for button in buttons where text(attr(button, kAXRoleAttribute as String)) == "AXButton" {
+                words.append("[" + text(attr(button, kAXTitleAttribute as String)) + "]")
+              }
+            }
+            sheetTexts.append(contentsOf: words)
+          }
         }
       }
     }
     result["sheets"] = sheets
+    result["sheet_texts"] = sheetTexts
     shot("\(name)-after")
   } else {
     result["pressed"] = NSNull()

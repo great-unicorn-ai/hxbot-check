@@ -94,6 +94,6 @@ r run_without_ldv "$("$W/v3/Probe.app/Contents/MacOS/probe" 2>&1 | head -1)"
 r spctl "$(spctl -a -vv "$A1" 2>&1 | head -1)"
 # the requirement must also hold for the other build (what TCC checks after an update)
 codesign -v -R="$DR1" "$A2" 2>>"$OUT/codesign.log"; r v2_satisfies_v1_requirement $?
-sudo security remove-trusted-cert -d "$W/cert.pem" 2>/dev/null
+# no remove-trusted-cert: it asks for a password in a window (the runner is thrown away anyway)
 security delete-keychain "$KC" 2>/dev/null
 cat "$R"
