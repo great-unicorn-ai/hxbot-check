@@ -9,6 +9,11 @@ name: HXBot computer check
 on:
   push:
     branches: [main]
+    # Only a change of the check itself runs it again; the real-model check (hx-real-check) has its own workflow.
+    paths:
+      - hx-computer-check.mjs
+      - .github/workflows/hx-computer-check.yml
+  workflow_dispatch:
 
 permissions:
   contents: read
