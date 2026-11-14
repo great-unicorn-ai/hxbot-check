@@ -94,6 +94,19 @@ r run_without_ldv "$("$W/v3/Probe.app/Contents/MacOS/probe" 2>&1 | head -1)"
 r spctl "$(spctl -a -vv "$A1" 2>&1 | head -1)"
 # the requirement must also hold for the other build (what TCC checks after an update)
 codesign -v -R="$DR1" "$A2" 2>>"$OUT/codesign.log"; r v2_satisfies_v1_requirement $?
+# the rest of a one-time certificate script on a user's Mac: fingerprint read back from the .p12,
+# a check import into a throwaway keychain, the password kept in the default keychain and read back
+SHA1_P12="$("$O" pkcs12 -in "$W/cert.p12" -passin env:PASS -nokeys 2>/dev/null | "$O" x509 -noout -fingerprint -sha1 | sed 's/.*=//; s/://g' | tr '[:lower:]' '[:upper:]')"
+r sha1_from_p12_same "$([ -n "$SHA1_P12" ] && [ "$SHA1_P12" = "$SHA1" ] && echo yes || echo no)"
+security create-keychain -p "$PASS" "$W/check.keychain" >/dev/null 2>&1; r check_keychain_create $?
+security import "$W/cert.p12" -k "$W/check.keychain" -P "$PASS" -T /usr/bin/codesign >/dev/null 2>&1; r check_keychain_import $?
+security delete-keychain "$W/check.keychain" 2>/dev/null; r check_keychain_delete $?
+r default_keychain "$(security default-keychain 2>&1 | tr -d ' "' | sed "s#$HOME#~#")"
+limit 30 security add-generic-password -U -a "$USER" -s "probe signing" -l "probe signing" -w "$PASS"; r password_store $?
+BACK="$(limit 30 security find-generic-password -a "$USER" -s "probe signing" -w 2>/dev/null)"
+r password_read_back "$([ "$BACK" = "$PASS" ] && echo same || echo different)"
+limit 30 security delete-generic-password -a "$USER" -s "probe signing" >/dev/null 2>&1; r password_delete $?
+r base64_bytes "$(base64 -i "$W/cert.p12" | wc -c | tr -d ' ')"
 # no remove-trusted-cert: it asks for a password in a window (the runner is thrown away anyway)
 security delete-keychain "$KC" 2>/dev/null
 cat "$R"
