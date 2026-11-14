@@ -1,0 +1,318 @@
+{
+  "accessibility_trusted" : true,
+  "macos" : "Version 15.8.2 (Build 24H232)",
+  "panes" : [
+    {
+      "auth_window" : true,
+      "labels" : [
+        "Sign in, with your Apple Account",
+        "1",
+        "Wi‑Fi",
+        "Bluetooth",
+        "Network",
+        "Energy",
+        "General",
+        "Accessibility",
+        "Appearance",
+        "Siri",
+        "Control Center",
+        "Desktop & Dock",
+        "Displays",
+        "Screen Saver",
+        "Spotlight",
+        "Wallpaper",
+        "Notifications",
+        "Sound",
+        "Focus",
+        "Screen Time",
+        "Lock Screen",
+        "Privacy & Security",
+        "Login Password",
+        "Users & Groups",
+        "Internet Accounts",
+        "Game Center",
+        "iCloud",
+        "Wallet & Apple Pay",
+        "Keyboard",
+        "Mouse",
+        "Printers & Scanners",
+        "bash",
+        "hosted-compute-agent",
+        "provisioner",
+        "No Items",
+        "Screen & System Audio Recording"
+      ],
+      "new_windows" : [
+        "System Settings"
+      ],
+      "pane" : "screen_recording",
+      "press_result" : 0,
+      "pressed" : {
+        "description" : "",
+        "enabled" : "1",
+        "role" : "AXCheckBox",
+        "subrole" : "AXSwitch",
+        "title" : "",
+        "value" : "1"
+      },
+      "sheets" : 1,
+      "toggles" : [
+        {
+          "description" : "",
+          "enabled" : "1",
+          "role" : "AXCheckBox",
+          "subrole" : "AXSwitch",
+          "title" : "",
+          "value" : "1"
+        },
+        {
+          "description" : "",
+          "enabled" : "1",
+          "role" : "AXCheckBox",
+          "subrole" : "AXSwitch",
+          "title" : "",
+          "value" : "1"
+        },
+        {
+          "description" : "",
+          "enabled" : "1",
+          "role" : "AXCheckBox",
+          "subrole" : "AXSwitch",
+          "title" : "",
+          "value" : "1"
+        }
+      ],
+      "value_after" : "0",
+      "value_before" : "1"
+    },
+    {
+      "labels" : [
+        "Sign in, with your Apple Account",
+        "1",
+        "Wi‑Fi",
+        "Bluetooth",
+        "Network",
+        "Energy",
+        "General",
+        "Accessibility",
+        "Appearance",
+        "Siri",
+        "Control Center",
+        "Desktop & Dock",
+        "Displays",
+        "Screen Saver",
+        "Spotlight",
+        "Wallpaper",
+        "Notifications",
+        "Sound",
+        "Focus",
+        "Screen Time",
+        "Lock Screen",
+        "Privacy & Security",
+        "Login Password",
+        "Users & Groups",
+        "Internet Accounts",
+        "Game Center",
+        "iCloud",
+        "Wallet & Apple Pay",
+        "Keyboard",
+        "Mouse",
+        "Printers & Scanners",
+        "Allow the applications below to update or delete other applications.",
+        "No Items",
+        "App Management"
+      ],
+      "pane" : "app_management",
+      "pressed" : null,
+      "toggles" : [
+
+      ]
+    },
+    {
+      "labels" : [
+        "Sign in, with your Apple Account",
+        "1",
+        "Wi‑Fi",
+        "Bluetooth",
+        "Network",
+        "Energy",
+        "General",
+        "Accessibility",
+        "Appearance",
+        "Siri",
+        "Control Center",
+        "Desktop & Dock",
+        "Displays",
+        "Screen Saver",
+        "Spotlight",
+        "Wallpaper",
+        "Notifications",
+        "Sound",
+        "Focus",
+        "Screen Time",
+        "Lock Screen",
+        "Privacy & Security",
+        "Login Password",
+        "Users & Groups",
+        "Internet Accounts",
+        "Game Center",
+        "iCloud",
+        "Wallet & Apple Pay",
+        "Keyboard",
+        "Mouse",
+        "Printers & Scanners",
+        "Allow the applications below to control other applications. This will provide access to documents and data in those applications, and to perform actions with them.",
+        "Automation"
+      ],
+      "pane" : "automation",
+      "pressed" : null,
+      "toggles" : [
+
+      ]
+    },
+    {
+      "auth_window" : true,
+      "labels" : [
+        "Sign in, with your Apple Account",
+        "1",
+        "Wi‑Fi",
+        "Bluetooth",
+        "Network",
+        "Energy",
+        "General",
+        "Accessibility",
+        "Appearance",
+        "Siri",
+        "Control Center",
+        "Desktop & Dock",
+        "Displays",
+        "Screen Saver",
+        "Spotlight",
+        "Wallpaper",
+        "Notifications",
+        "Sound",
+        "Focus",
+        "Screen Time",
+        "Lock Screen",
+        "Privacy & Security",
+        "Login Password",
+        "Users & Groups",
+        "Internet Accounts",
+        "Game Center",
+        "iCloud",
+        "Wallet & Apple Pay",
+        "Keyboard",
+        "Mouse",
+        "Printers & Scanners",
+        "Allow the applications below to control your computer.",
+        "ankarund",
+        "bash",
+        "hosted-compute-agent",
+        "osascript",
+        "provisioner",
+        "runprovisioner",
+        "sshd-keygen-wrapper",
+        "start_hca"
+      ],
+      "new_windows" : [
+        "System Settings"
+      ],
+      "pane" : "accessibility",
+      "press_result" : 0,
+      "pressed" : {
+        "description" : "",
+        "enabled" : "1",
+        "role" : "AXCheckBox",
+        "subrole" : "AXSwitch",
+        "title" : "",
+        "value" : "1"
+      },
+      "sheets" : 1,
+      "toggles" : [
+        {
+          "description" : "",
+          "enabled" : "1",
+          "role" : "AXCheckBox",
+          "subrole" : "AXSwitch",
+          "title" : "",
+          "value" : "1"
+        },
+        {
+          "description" : "",
+          "enabled" : "1",
+          "role" : "AXCheckBox",
+          "subrole" : "AXSwitch",
+          "title" : "",
+          "value" : "1"
+        },
+        {
+          "description" : "",
+          "enabled" : "1",
+          "role" : "AXCheckBox",
+          "subrole" : "AXSwitch",
+          "title" : "",
+          "value" : "1"
+        },
+        {
+          "description" : "",
+          "enabled" : "1",
+          "role" : "AXCheckBox",
+          "subrole" : "AXSwitch",
+          "title" : "",
+          "value" : "1"
+        },
+        {
+          "description" : "",
+          "enabled" : "1",
+          "role" : "AXCheckBox",
+          "subrole" : "AXSwitch",
+          "title" : "",
+          "value" : "1"
+        },
+        {
+          "description" : "",
+          "enabled" : "1",
+          "role" : "AXCheckBox",
+          "subrole" : "AXSwitch",
+          "title" : "",
+          "value" : "1"
+        },
+        {
+          "description" : "",
+          "enabled" : "1",
+          "role" : "AXCheckBox",
+          "subrole" : "AXSwitch",
+          "title" : "",
+          "value" : "1"
+        },
+        {
+          "description" : "",
+          "enabled" : "1",
+          "role" : "AXCheckBox",
+          "subrole" : "AXSwitch",
+          "title" : "",
+          "value" : "1"
+        },
+        {
+          "description" : "",
+          "enabled" : "1",
+          "role" : "AXCheckBox",
+          "subrole" : "AXSwitch",
+          "title" : "",
+          "value" : "1"
+        },
+        {
+          "description" : "",
+          "enabled" : "1",
+          "role" : "AXCheckBox",
+          "subrole" : "AXSwitch",
+          "title" : "",
+          "value" : "1"
+        }
+      ],
+      "value_after" : "0",
+      "value_before" : "1"
+    }
+  ],
+  "screen_capture_preflight" : true
+}
