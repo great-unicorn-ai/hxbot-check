@@ -1,0 +1,36 @@
+macos=26.7.2
+make_cert=0
+make_p12=0
+sha1=2D8DFA81745CB39E4ABF0113FD261714C4CFEC7C
+import=0
+partition_list=0
+valid_identities_before_trust=0
+authorizationdb=255
+trust=0
+valid_identities_after_trust=1
+find_identity_line=1) 2D8DFA81745CB39E4ABF0113FD261714C4CFEC7C "HXBot Code Signing"
+sign_v1=0
+sign_v2=0
+sign_v3_without_ldv=0
+verify_deep_strict=0
+dr_v1=identifier "org.example.hxprobe" and certificate root = H"2d8dfa81745cb39e4abf0113fd261714c4cfec7c"
+dr_v2=identifier "org.example.hxprobe" and certificate root = H"2d8dfa81745cb39e4abf0113fd261714c4cfec7c"
+same_dr_for_two_builds=yes
+dr_has_sha1=1
+dr_has_identifier=1
+runtime_flag=1
+team_identifier=not set
+run_with_ldv=loaded 1
+run_v2=loaded 2
+run_without_ldv=loaded 3
+spctl=/var/folders/h5/t85nd63d71x27_8gl5gw3l_w0000gn/T/tmp.mRm0tMJtVg/v1/Probe.app: rejected
+v2_satisfies_v1_requirement=0
+sha1_from_p12_same=yes
+check_keychain_create=0
+check_keychain_import=0
+check_keychain_delete=0
+default_keychain=~/Library/Keychains/login.keychain-db
+password_store=0
+password_read_back=same
+password_delete=0
+base64_bytes=4485
