@@ -7070,10 +7070,11 @@ function hxChatModel(endpoint, options = {}) {
         temperature: 0.2
       });
       let last = "";
+      let url = endpoint.url;
       for (let attempt = 0;attempt <= RETRIES; attempt += 1) {
         let response;
         try {
-          response = await send(endpoint.url, {
+          response = await send(url, {
             method: "POST",
             headers: {
               "content-type": "application/json",
@@ -7082,11 +7083,18 @@ function hxChatModel(endpoint, options = {}) {
               ...endpoint.headers
             },
             body,
+            redirect: "manual",
             signal: AbortSignal.timeout(TURN_TIMEOUT_MS)
           });
         } catch (error) {
           last = error instanceof Error ? error.message : String(error);
           await wait(2000 * 2 ** attempt);
+          continue;
+        }
+        const location = response.headers.get("location");
+        if (response.status >= 300 && response.status < 400 && location) {
+          url = new URL(location, url).toString();
+          last = `${response.status} to ${url}`;
           continue;
         }
         const text = await response.text();
@@ -7129,10 +7137,10 @@ function hxOpenCodeFreeModels(catalog, key = "public") {
   }
   return found;
 }
-function hxGitHubModel(token, model = "openai/gpt-4.1-mini") {
+function hxGitHubModel(token, model = "openai/gpt-4.1-mini", organization) {
   return {
-    name: `GitHub Models ${model}`,
-    url: "https://models.github.ai/inference/chat/completions",
+    name: `GitHub Models ${model}${organization ? ` (${organization})` : ""}`,
+    url: organization ? `https://models.github.ai/orgs/${encodeURIComponent(organization)}/inference/chat/completions` : "https://models.github.ai/inference/chat/completions",
     key: token,
     model,
     headers: { accept: "application/vnd.github+json", "x-github-api-version": "2022-11-28" }
@@ -13919,6 +13927,7 @@ function hxRiskyLabel(label) {
   return label.normalize("NFKC").toLowerCase().split(/[^\p{L}\p{N}]+/u).some((word) => RISKY_WORDS.has(word));
 }
 var MIN_SIDE = 120;
+var FRONT = { kind: "desktop", display_id: "primary" };
 function readWindows(content) {
   if (!content || !Array.isArray(content.windows))
     return [];
@@ -13993,6 +14002,7 @@ class HxStepRun {
   #wait;
   #window = null;
   #read = null;
+  #keysToFront = false;
   #borrowed = false;
   constructor(options) {
     this.#driver = options.driver;
@@ -14082,6 +14092,21 @@ class HxStepRun {
   #target() {
     const window = this.#window;
     return window ? { kind: "window", pid: window.pid, window_id: window.windowId } : {};
+  }
+  #keysTarget() {
+    return this.#keysToFront ? FRONT : this.#target();
+  }
+  async#landed(field, text) {
+    await this.#wait(300);
+    this.#read = null;
+    const read = await this.#readWindow();
+    if (typeof read === "string")
+      return null;
+    const same = read.elements.find((element) => element.index === field.index && element.role === field.role) ?? read.elements.find((element) => element.role === field.role && element.label === field.label);
+    if (!same?.value)
+      return null;
+    const tail = hxPlainName(text).slice(-24);
+    return tail.length === 0 ? null : hxPlainName(same.value).includes(tail);
   }
   async#find(target) {
     const read = await this.#readWindow();
@@ -14187,21 +14212,37 @@ class HxStepRun {
           return { stop: "failed", reason: "type needs text." };
         let route = "keyboard";
         let label = "";
+        let field = null;
         if (step.target) {
           const found = await this.#find(step.target);
           if ("stop" in found)
             return found;
+          field = found.element;
           label = describe2(found.element);
           const focused = await this.#click(found.element, null, {}, ["foreground"]);
           if ("reason" in focused)
             return { stop: "failed", reason: focused.reason };
           route = focused.route;
         }
-        const typed = actionEffect(await this.#driver.call("type_text", { text: step.text, target: this.#target() }, 30000));
+        let typed = actionEffect(await this.#driver.call("type_text", { text: step.text, target: this.#keysTarget() }, 30000));
         if (!typed.worked)
           return { stop: "failed", reason: typed.reason || "The text was not typed." };
         this.#borrowed = true;
-        return { what: `${label ? `${label}: ` : ""}${step.text.length} characters`, route, sure: typed.sure };
+        let landed = field ? await this.#landed(field, step.text) : null;
+        if (landed === false && !this.#keysToFront) {
+          typed = actionEffect(await this.#driver.call("type_text", { text: step.text, target: FRONT }, 30000));
+          if (!typed.worked)
+            return { stop: "failed", reason: typed.reason || "The text was not typed." };
+          this.#keysToFront = true;
+          landed = field ? await this.#landed(field, step.text) : null;
+        }
+        if (landed === false)
+          return { stop: "failed", reason: "The text did not reach the field." };
+        return {
+          what: `${label ? `${label}: ` : ""}${step.text.length} characters`,
+          route,
+          sure: landed === true || typed.sure
+        };
       }
       case "key":
       case "hotkey": {
@@ -14213,8 +14254,8 @@ class HxStepRun {
         const answer = step.act === "key" ? await this.#driver.call("press_key", {
           key: step.key ?? "",
           modifiers: step.modifiers ?? [],
-          target: this.#target()
-        }) : await this.#driver.call("hotkey", { keys, target: this.#target() });
+          target: this.#keysTarget()
+        }) : await this.#driver.call("hotkey", { keys, target: this.#keysTarget() });
         const effect = actionEffect(answer);
         if (!effect.worked)
           return { stop: "failed", reason: effect.reason || "The key was not pressed." };
@@ -14693,7 +14734,7 @@ async function hxStepsRealCheck(input) {
     const typed = await run.run(steps);
     await wait(2000);
     const afterSteps = await readFile(file, "utf8").catch(() => "");
-    items.check("S5", "固定步骤：在文字框里输入并保存，文件里有这段文字", typed.status === "done" && afterSteps.includes(token), `${typed.status}${typed.stoppedAt ? `：${typed.stoppedAt.reason}` : ""}；文件：${afterSteps.slice(0, 200)}`);
+    items.check("S5", "固定步骤：在文字框里输入并保存，文件里有这段文字", typed.status === "done" && afterSteps.includes(token), `${typed.status}${typed.stoppedAt ? `：${typed.stoppedAt.reason}` : ""}；${typed.steps.map((step) => `${step.what} [${step.route}${step.checked ? ", checked" : ""}]`).join("；")}；文件：${afterSteps.slice(0, 200)}`);
     const risky = await run.run([{ act: "menu", path: ["Edit", "Delete"] }]);
     items.check("S6", "“删除”这类步骤先停下来问（status confirm），不执行", risky.status === "confirm", risky.stoppedAt?.reason ?? risky.status);
     stops.stop("check");
@@ -20645,8 +20686,12 @@ async function endpoints() {
     } catch {}
   }
   const token = process.env.GITHUB_TOKEN;
-  if (token)
+  const owner = process.env.GITHUB_REPOSITORY_OWNER;
+  if (token) {
     found.push(hxGitHubModel(token, "openai/gpt-4.1-mini"), hxGitHubModel(token, "openai/gpt-4o-mini"));
+    if (owner)
+      found.push(hxGitHubModel(token, "openai/gpt-4.1-mini", owner));
+  }
   return found;
 }
 async function merge2(folder, expected) {
