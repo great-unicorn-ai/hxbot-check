@@ -1,0 +1,48 @@
+{
+ "green": false,
+ "clean": false,
+ "failed": 1,
+ "review": 0,
+ "missing": [],
+ "verified": {
+  "mac": [
+   "alert-volume",
+   "dark-mode",
+   "dock-autohide",
+   "dock-indicators",
+   "dock-launch-animation",
+   "dock-magnification",
+   "dock-magnification-size",
+   "dock-minimize-effect",
+   "dock-minimize-into-app",
+   "dock-position",
+   "dock-recents",
+   "dock-size",
+   "input-volume",
+   "menu-bar-autohide",
+   "mute",
+   "volume"
+  ],
+  "windows": [
+   "accent-start-taskbar",
+   "accent-title-bars",
+   "app-dark-mode",
+   "clipboard-history",
+   "clock-seconds",
+   "dark-mode",
+   "game-mode",
+   "notifications",
+   "screen-off-minutes",
+   "sleep-minutes",
+   "storage-sense",
+   "system-dark-mode",
+   "task-view-button",
+   "taskbar-alignment",
+   "transparency"
+  ]
+ },
+ "untestable": {
+  "mac": [],
+  "windows": []
+ }
+}
