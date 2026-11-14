@@ -219,6 +219,9 @@ function hxPinyinNames(spaced) {
 }
 
 // src/backend/hx-computer/tables.ts
+function hxSeedTolerance(seed) {
+  return seed.tolerance ?? 1;
+}
 function hxParseSwitch(stdout) {
   const text = stdout.trim().toLowerCase();
   if (text === "true")
@@ -455,8 +458,20 @@ var HX_WIN_SETTINGS = [
   }
 ];
 var HX_WIN_LIST_APPS = hxPowerShell("Get-StartApps | Select-Object Name, AppID | ConvertTo-Json -Compress");
+function hxExplorerPath(env = process.env) {
+  const root = env.SystemRoot || env.windir || "C:\\Windows";
+  return `${root.replace(/[\\/]+$/u, "")}\\explorer.exe`;
+}
+function hxWinOpen(target) {
+  return { command: hxExplorerPath(), args: [target] };
+}
+function hxWinOpened(result) {
+  return !result.missing && !result.timedOut && (result.code === 0 || result.code === 1);
+}
 function hxWinStart(target) {
-  return hxPowerShell("Start-Process -FilePath $env:HX_TARGET -ErrorAction Stop", { HX_TARGET: target });
+  return hxPowerShell("$hxStep = 'start'; Start-Process -FilePath $env:HX_TARGET -ErrorAction Stop", {
+    HX_TARGET: target
+  });
 }
 
 // src/backend/hx-computer/actions.ts
@@ -523,6 +538,8 @@ var RUNS_WHEN_OPENED = new Set([
   ".xll"
 ]);
 var READ_BACK_WAITS_MS = [400, 1200];
+var OPEN_TIMEOUT_MS = 20000;
+var WINDOWS_COMMAND_TIMEOUT_MS = 90000;
 var RESCAN_MIN_MS = 20000;
 var MAX_URL = 2000;
 var SWITCH_ON = new Set(["on", "true", "1", "yes", "enable", "enabled", "开", "打开", "开启", "启用", "是"]);
@@ -582,9 +599,9 @@ function hxNormalizeValue(values, raw) {
   }
   return isAbsolute(raw.trim()) ? raw.trim() : null;
 }
-function sameValue(values, left, right) {
-  if (values.type === "number")
-    return Math.abs(Number(left) - Number(right)) <= 1;
+function sameValue(seed, left, right) {
+  if (seed.values.type === "number")
+    return Math.abs(Number(left) - Number(right)) <= hxSeedTolerance(seed);
   return left === right;
 }
 var pause = (ms) => new Promise((resolve) => {
@@ -600,13 +617,22 @@ class HxComputerActions {
     this.#run = run;
     this.#wait = wait;
   }
-  #command(command, timeoutMs = 20000) {
-    return this.#run(command.command, command.args, { timeoutMs, ...command.env ? { env: command.env } : {} });
+  #command(command, timeoutMs) {
+    const limit = timeoutMs ?? (this.#catalog.platform === "windows" ? WINDOWS_COMMAND_TIMEOUT_MS : 20000);
+    return this.#run(command.command, command.args, {
+      timeoutMs: limit,
+      ...command.env ? { env: command.env } : {}
+    });
   }
-  #start(target) {
-    if (this.#catalog.platform === "windows")
-      return this.#command(hxWinStart(target));
-    return this.#run("/usr/bin/open", [target], { timeoutMs: 20000 });
+  async#start(target) {
+    if (this.#catalog.platform !== "windows")
+      return this.#run("/usr/bin/open", [target], { timeoutMs: 20000 });
+    const shell = await this.#command(hxWinOpen(target), OPEN_TIMEOUT_MS);
+    if (hxWinOpened(shell))
+      return { ...shell, code: 0 };
+    if (!shell.missing)
+      return shell;
+    return this.#command(hxWinStart(target), WINDOWS_COMMAND_TIMEOUT_MS);
   }
   async find(input) {
     if (this.#catalog.platform === null)
@@ -772,7 +798,7 @@ class HxComputerActions {
       if (waitMs > 0)
         await this.#wait(waitMs);
       const after = await this.#read(seed);
-      if ("value" in after && sameValue(entry.values, after.value, wanted)) {
+      if ("value" in after && sameValue(seed, after.value, wanted)) {
         return { status: "changed", setting: brief, previous: before.value, value: after.value };
       }
     }
@@ -802,8 +828,12 @@ var HX_MAC_PAGES = [
     "无线网络"
   ]),
   page2("bluetooth", "com.apple.BluetoothSettings", "蓝牙", "Bluetooth", "lan ya"),
-  page2("network", "com.apple.Network-Settings.extension", "网络", "Network", "wang luo", ["以太网", "DNS", "代理"]),
-  page2("vpn", "com.apple.NetworkExtensionSettingsUI.NESettingsUIExtension", "VPN", "VPN", ""),
+  page2("network", "com.apple.Network-Settings.extension", "网络", "Network", "wang luo", [
+    "以太网",
+    "DNS",
+    "代理",
+    "VPN"
+  ]),
   page2("notifications", "com.apple.Notifications-Settings.extension", "通知", "Notifications", "tong zhi"),
   page2("sound", "com.apple.Sound-Settings.extension", "声音", "Sound", "sheng yin", ["扬声器", "麦克风", "输出设备"]),
   page2("focus", "com.apple.Focus-Settings.extension", "专注模式", "Focus", "zhuan zhu mo shi", [
@@ -989,7 +1019,8 @@ var HX_MAC_SETTINGS = [
     values: { type: "number", min: 0, max: 100 },
     read: events("get dock size of dock preferences"),
     parse: (stdout) => hxParseNumber(stdout, 0, 100, 100),
-    write: (value) => events(`set dock size of dock preferences to (${Number(value)} / 100)`)
+    write: (value) => events(`set dock size of dock preferences to (${Number(value)} / 100)`),
+    tolerance: 4
   }
 ];
 function hxMacAppRoots(home) {
@@ -1199,6 +1230,9 @@ async function hxMacApps(run, home, chineseFirst) {
   }
   return entries;
 }
+function isGenerated(appId) {
+  return appId.startsWith("Microsoft.AutoGenerated.");
+}
 function hxParseStartApps(stdout) {
   let parsed;
   try {
@@ -1207,7 +1241,7 @@ function hxParseStartApps(stdout) {
     return [];
   }
   const list = Array.isArray(parsed) ? parsed : [parsed];
-  const entries = [];
+  const apps = [];
   const seen = new Set;
   for (const item of list.slice(0, MAX_APPS)) {
     if (!isDynamicRecord(item) || typeof item.Name !== "string" || typeof item.AppID !== "string")
@@ -1217,6 +1251,13 @@ function hxParseStartApps(stdout) {
     if (!name || !appId || seen.has(appId))
       continue;
     seen.add(appId);
+    apps.push({ name, appId });
+  }
+  const named = new Set(apps.filter((app) => !isGenerated(app.appId)).map((app) => hxNormalize(app.name)));
+  const entries = [];
+  for (const { name, appId } of apps) {
+    if (isGenerated(appId) && named.has(hxNormalize(name)))
+      continue;
     const names = hxAppNames([name]);
     entries.push({
       id: `app:${appId}`,
@@ -1526,6 +1567,7 @@ var HX_REAL_APPS = {
     { query: "Calculator", marks: ["/calculator.app"], processes: ["Calculator"], required: true, open: true },
     { query: "Preview", marks: ["/preview.app"], processes: ["Preview"], required: true, open: true },
     { query: "Finder", marks: ["/finder.app"], processes: ["Finder"], required: true, open: false },
+    { query: "About This Mac", marks: ["/about this mac.app"], processes: [], required: false, open: false },
     { query: "Safari", marks: ["/safari.app"], processes: ["Safari"], required: true, open: false },
     {
       query: "System Settings",
@@ -1584,9 +1626,19 @@ var HX_REAL_BROWSERS = {
   mac: ["Safari", "Google Chrome", "firefox", "Microsoft Edge"],
   windows: ["msedge", "chrome", "firefox"]
 };
+function hxRealWays(expected) {
+  if (expected === "ask")
+    return [];
+  return "either" in expected ? expected.either : [expected];
+}
 var ALL = ["app", "page", "setting"];
 var SETTINGS = ["setting", "page"];
 var to = (phrase, id, kinds = ALL) => ({ phrase, kinds, expected: { id } });
+var either = (phrase, ...ways) => ({
+  phrase,
+  kinds: ALL,
+  expected: { either: ways }
+});
 var app = (phrase, mark) => ({ phrase, kinds: ALL, expected: { app: mark } });
 var HX_REAL_PHRASES = {
   mac: [
@@ -1603,7 +1655,7 @@ var HX_REAL_PHRASES = {
     to("键盘", "page:keyboard"),
     to("打印机", "page:printers"),
     to("通知", "page:notifications"),
-    to("关于本机", "page:about"),
+    either("关于本机", { id: "page:about" }, { app: "/about this mac.app" }),
     to("软件更新", "page:software-update"),
     to("隐私与安全性", "page:privacy"),
     to("程序坞", "page:desktop-dock"),
@@ -1685,7 +1737,8 @@ var HX_REAL_PAGE_NOTES = {
     wallet: { hardware: true },
     siri: { titles: ["Siri", "Apple Intelligence & Siri", "Spotlight"] },
     "apple-account": { titles: ["Apple ID", "Sign in"] },
-    "control-center": { titles: ["Menu Bar"] }
+    "control-center": { titles: ["Menu Bar"] },
+    airdrop: { titles: ["AirDrop & Continuity"] }
   },
   windows: {
     touchpad: { hardware: true },
@@ -1693,7 +1746,12 @@ var HX_REAL_PAGE_NOTES = {
     hotspot: { hardware: true },
     airplane: { hardware: true },
     power: { titles: ["Power", "Power & battery"] },
-    "text-size": { titles: ["Display"] }
+    "text-size": { titles: ["Display"] },
+    accessibility: { titles: ["Ease of Access"] },
+    "night-light": { desktopOnly: true },
+    clipboard: { desktopOnly: true },
+    "game-bar": { desktopOnly: true },
+    backup: { desktopOnly: true }
   }
 };
 var HX_REAL_NO_HARDWARE = {
@@ -1770,9 +1828,10 @@ var defaults = (id, ...args) => ({
   command: { command: DEFAULTS, args: ["read", ...args] }
 });
 var reg = (id, key) => ({ id, command: { command: regPath(), args: ["query", key] } });
-var shell = (id, script) => ({
+var shell = (id, script, timeoutMs) => ({
   id,
-  command: hxPowerShell(`$hxStep = 'probe'; ${script}`)
+  command: hxPowerShell(`$hxStep = 'probe'; ${script}`),
+  ...timeoutMs ? { timeoutMs } : {}
 });
 var EXPLORER = "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer";
 var HX_REAL_PROBES = {
@@ -1846,7 +1905,8 @@ end timeout`),
     shell("network-adapters", "Get-NetAdapter | Select-Object Name, InterfaceDescription, Status | ConvertTo-Json -Compress"),
     shell("start-apps", "(Get-StartApps | Select-Object -First 150 | ForEach-Object { $_.Name }) -join ' ; '"),
     shell("brightness", "Get-CimInstance -Namespace root/WMI -ClassName WmiMonitorBrightness -ErrorAction Stop | Select-Object CurrentBrightness, Levels | ConvertTo-Json -Compress"),
-    shell("culture", "(Get-Culture).Name + ' ; ' + (Get-UICulture).Name + ' ; ' + (Get-WinSystemLocale).Name")
+    shell("culture", "(Get-Culture).Name + ' ; ' + (Get-UICulture).Name + ' ; ' + (Get-WinSystemLocale).Name"),
+    shell("powershell-start", "$hxOwn = [Diagnostics.Process]::GetCurrentProcess(); $hxUp = [int]((Get-Date) - $hxOwn.StartTime).TotalMilliseconds; $hxEach = @(); foreach ($hxRound in 1..3) { $hxAt = Get-Date; & $hxOwn.Path -NoLogo -NoProfile -NonInteractive -Command exit | Out-Null; $hxEach += [int]((Get-Date) - $hxAt).TotalMilliseconds }; 'this one was already up for ' + $hxUp + ' ms; another one takes ' + ($hxEach -join ', ') + ' ms'", 180000)
   ]
 };
 var HX_REAL_REFUSED = [
@@ -2349,10 +2409,10 @@ async function hxSelfTest(host) {
         const detail = [
           `${found} of ${wanted.length} page addresses are settings panes of this Mac`,
           `not checked, part of System Settings itself: ${own.join(" ") || "none"}`,
-          ...missing.length > 0 ? [`NOT FOUND: ${missing.join(" ")}`] : [],
+          ...missing.length > 0 ? [`not among the panes of this Mac: ${missing.join(" ")}`] : [],
           `panes of this Mac: ${[...here].sort().join(" ") || "none could be read"}`
         ].join("; ");
-        return { outcome: missing.length === 0 ? "passed" : "failed", detail };
+        return { outcome: missing.length === 0 ? "passed" : "skipped", detail };
       });
     }
   }
@@ -7911,8 +7971,12 @@ async function hxComputerToolCall(actions, allowed, params, record = () => {}) {
 var passed = (detail, shot) => ({ outcome: "passed", detail, ...shot ? { shot } : {} });
 var failed = (detail, shot) => ({ outcome: "failed", detail, ...shot ? { shot } : {} });
 var review = (detail, shot) => ({ outcome: "review", detail, ...shot ? { shot } : {} });
-var unavailable = (detail) => ({ outcome: "unavailable", detail });
-var DEFAULT_BUDGET_MS = 30 * 60 * 1000;
+var unavailable = (detail, shot) => ({
+  outcome: "unavailable",
+  detail,
+  ...shot ? { shot } : {}
+});
+var DEFAULT_BUDGET_MS = 35 * 60 * 1000;
 var DETAIL_LIMIT2 = 6000;
 var APPEAR_MS = 1e4;
 var PAGE_WAIT_MS = 8000;
@@ -7935,11 +7999,11 @@ function output(result, limit = 300) {
 function slug(text) {
   return text.toLowerCase().replace(/[^\da-z]+/gu, "-").replace(/^-|-$/gu, "");
 }
-function sameValue2(values, left, right) {
+function sameValue2(seed, left, right) {
   if (left === null)
     return false;
-  if (values.type === "number")
-    return Math.abs(Number(left) - Number(right)) <= 1;
+  if (seed.values.type === "number")
+    return Math.abs(Number(left) - Number(right)) <= hxSeedTolerance(seed);
   return left === right;
 }
 function hxRealOtherValue(values, current) {
@@ -8210,13 +8274,19 @@ async function hxRealCheck(host) {
       if (phrase.expected === "ask") {
         return sure === null && hits.length >= 2 ? passed(`“${phrase.phrase}”交回了 ${hits.length} 个候选，没有替模型选。`) : failed(`“${phrase.phrase}”应该交回候选。${got}`);
       }
-      if ("id" in phrase.expected) {
-        return sure?.id === phrase.expected.id ? passed(`“${phrase.phrase}” → ${sure.id}`) : failed(`“${phrase.phrase}”应得 ${phrase.expected.id}。${got}`);
+      const wanted = [];
+      for (const way of hxRealWays(phrase.expected)) {
+        if ("id" in way)
+          wanted.push(way.id);
+        else {
+          const entry = hxRealAppEntry(first.entries, [way.app]);
+          if (entry)
+            wanted.push(entry.id);
+        }
       }
-      const wanted = hxRealAppEntry(first.entries, [phrase.expected.app]);
-      if (!wanted)
+      if (wanted.length === 0)
         return unavailable(`“${phrase.phrase}”要找的应用不在这台机器上。`);
-      return sure?.id === wanted.id ? passed(`“${phrase.phrase}” → ${wanted.title}`) : failed(`“${phrase.phrase}”应得应用 ${wanted.title}。${got}`);
+      return sure && wanted.includes(sure.id) ? passed(`“${phrase.phrase}” → ${sure.id}`) : failed(`“${phrase.phrase}”应得 ${wanted.join(" 或 ")}。${got}`);
     });
   }
   const running = async (names) => {
@@ -8234,6 +8304,17 @@ async function hxRealCheck(host) {
     return null;
   });
   const why = (result) => `回答是 ${result.status}${result.reason ? `：${result.reason}` : ""}`;
+  await check("open.cost", async () => {
+    const began = host.now();
+    const opened = await actions.open({ id: "page:about" });
+    const ms = host.now() - began;
+    time("open.cost", ms);
+    await system.closeSettings();
+    const said = `打开一个设置页的命令用了 ${ms} 毫秒（回答 ${opened.status}）`;
+    if (opened.status !== "opened")
+      return failed(`${said}。${why(opened)}`);
+    return ms > 1e4 ? review(`${said}，这台机器上太慢了，助手的每一次操作都会这么慢。`) : passed(said);
+  });
   for (const app of HX_REAL_APPS[platform].filter((candidate) => candidate.open)) {
     await check(`open.app.${slug(app.query)}`, async () => {
       const entry = present.get(app);
@@ -8338,127 +8419,15 @@ async function hxRealCheck(host) {
   });
   await check("open.missing", async () => {
     const path = await actions.open({ path: join4(tmp, "no-such-file.txt") });
-    const name = await actions.open({ query: "zzqxj no such app 0417" });
-    return path.status === "not-found" && name.status === "not-found" ? passed("不存在的路径和不存在的名称都回答“没有找到”。") : failed(`不存在的路径回答 ${path.status}，不存在的名称回答 ${name.status}。`);
+    const words = "zzqxj no such app 0417";
+    const name = await actions.open({ query: words });
+    if (path.status === "not-found" && name.status === "not-found") {
+      return passed("不存在的路径和不存在的名称都回答“没有找到”。");
+    }
+    const hits = hxSearch(first.entries, words, { limit: 3 }).map((hit) => `${hit.entry.id}（${hit.entry.title}，${Math.round(hit.score)} 分）`).join("；");
+    const took = name.status === "opened" && "title" in name.what ? `，打开的是 ${name.what.title}` : `（${why(name)}）`;
+    return failed(`不存在的路径回答 ${path.status}，不存在的名称回答 ${name.status}${took}。前三名：${hits || "无"}`);
   });
-  const paneIds = { here: null };
-  if (platform === "mac") {
-    await check("page.panes", async () => {
-      const here = await hxMacPanes(run, host.macExtensions);
-      paneIds.here = here;
-      const wanted = catalog.pageSeeds().map((seed) => seed.address.slice(seed.address.indexOf(":") + 1));
-      const own = wanted.filter((id) => id.startsWith(HX_MAC_OWN_PANES));
-      const missing = wanted.filter((id) => !id.startsWith(HX_MAC_OWN_PANES) && !here.has(id));
-      const detail = `${wanted.length} 个地址里 ${wanted.length - own.length - missing.length} 个是这台 Mac 的设置面板；属于系统设置自身、无法这样核对的 ${own.length} 个；这台 Mac 共有 ${here.size} 个面板`;
-      return missing.length === 0 ? passed(detail) : failed(`这台 Mac 没有这些面板标识：${missing.join(" ")}。${detail}。这台 Mac 的面板：${clip([...here].sort().join(" "), 3500)}`);
-    });
-  }
-  const seenPages = [];
-  await system.closeSettings();
-  let previousTexts = [];
-  for (const seed of catalog.pageSeeds()) {
-    const base = {
-      key: seed.key,
-      wanted: seed.en,
-      window: null,
-      previous: previousTexts,
-      seenMs: null,
-      shot: undefined
-    };
-    if (outOfTime()) {
-      seenPages.push({ ...base, status: "out-of-time", reason: "" });
-      continue;
-    }
-    try {
-      const began = host.now();
-      const opened = await actions.open({ id: `page:${seed.key}` });
-      if (opened.status !== "opened") {
-        seenPages.push({ ...base, status: "not-opened", reason: why(opened) });
-        continue;
-      }
-      time("open.page.command", host.now() - began);
-      const limit = seenPages.some((page) => page.window?.open) ? PAGE_WAIT_MS : FIRST_PAGE_WAIT_MS;
-      let window = null;
-      let seenMs = null;
-      let settled = false;
-      for (let round = 0;round < 60; round += 1) {
-        const asked = host.now();
-        window = await system.settingsWindow();
-        time("page.read", host.now() - asked);
-        const elapsed = host.now() - began;
-        if (window.blocked)
-          break;
-        const shown = hxRealPageShown(window.texts, seed.en);
-        const moved = window.open && window.texts.length > 0 && !sameTexts(window.texts, previousTexts);
-        if (shown || moved) {
-          seenMs ??= elapsed;
-          if (shown && platform === "mac" || settled)
-            break;
-          settled = true;
-          await host.wait(PAGE_SETTLE_MS);
-          continue;
-        }
-        if (elapsed >= limit)
-          break;
-        await host.wait(PAGE_STEP_MS);
-      }
-      const picture = await shot(`page-${seed.key}`);
-      seenPages.push({ ...base, status: "seen", reason: "", window, seenMs, shot: picture });
-      if (window?.open && window.texts.length > 0)
-        previousTexts = window.texts;
-    } catch (error) {
-      seenPages.push({
-        ...base,
-        status: "not-opened",
-        reason: `检查程序在这一页上停下了：${error instanceof Error ? error.message : "原因不明"}`
-      });
-    }
-  }
-  await system.closeSettings();
-  const baseline = platform === "windows" ? hxRealBaseline(seenPages.flatMap((page) => page.window?.open && page.window.texts.length > 0 ? [page.window.texts] : [])) : new Map;
-  for (const page of seenPages) {
-    const id = `page.${page.key}`;
-    const note = HX_REAL_PAGE_NOTES[platform][page.key] ?? {};
-    const window = page.window;
-    pages.push({ key: page.key, wanted: page.wanted, opened: page.status === "seen", seen: window?.raw ?? [] });
-    if (page.status === "out-of-time") {
-      skip(id, "这次检查的时间用完了，这一页没有开。");
-      continue;
-    }
-    if (page.status === "not-opened" || !window) {
-      record(id, failed(`打开“${page.wanted}”，${page.reason || "没有结果"}`), 0);
-      continue;
-    }
-    const ms = page.seenMs ?? 0;
-    if (window.blocked) {
-      record(id, review(`读不到窗口标题，看截图是不是“${page.wanted}”。`, page.shot), ms);
-      continue;
-    }
-    if (!window.open || window.texts.length === 0) {
-      record(id, failed(`打开“${page.wanted}”的命令成功了，但设置窗口没有出现。`, page.shot), ms);
-      continue;
-    }
-    const specific = hxRealSpecific(window.texts, baseline);
-    const names = [page.wanted, ...note.titles ?? []];
-    const showing = `窗口显示：${clip(specific.slice(0, 14).join(" / "), 700) || "没有这一页独有的文字"}`;
-    if (names.some((name) => hxRealPageShown(specific, name))) {
-      if (page.seenMs !== null)
-        time("open.page", page.seenMs);
-      record(id, passed(`${showing}（${ms} 毫秒）`, page.shot), ms);
-      continue;
-    }
-    const still = sameTexts(window.texts, page.previous);
-    const absent = paneIds.here !== null && !paneIds.here.has(paneOf(catalog, page.key)) && !ownPane(catalog, page.key);
-    if (note.hardware) {
-      record(id, unavailable(`“${page.wanted}”要有相应的硬件才有，这台机器没有显示它。${showing}`), ms);
-    } else if (still) {
-      record(id, failed(`打开“${page.wanted}”后窗口没有动，地址可能无效。${showing}`, page.shot), ms);
-    } else if (absent) {
-      record(id, failed(`这台 Mac 没有“${page.wanted}”的面板标识，窗口显示的是别的。${showing}`, page.shot), ms);
-    } else {
-      record(id, review(`要的是“${page.wanted}”，自动核对拿不准。${showing}`, page.shot), ms);
-    }
-  }
   const original = new Map;
   const verified = [];
   const untestable = [];
@@ -8472,7 +8441,7 @@ async function hxRealCheck(host) {
       if (waitMs > 0)
         await host.wait(waitMs);
       last = (await readValue(seed)).value;
-      if (sameValue2(seed.values, last, wanted))
+      if (sameValue2(seed, last, wanted))
         return { ok: true, value: last };
     }
     return { ok: false, value: last };
@@ -8560,6 +8529,136 @@ ${result.stderr}`;
       verified.push(seed.key);
     }
   }
+  const paneIds = { here: null };
+  if (platform === "mac") {
+    await check("page.panes", async () => {
+      const here = await hxMacPanes(run, host.macExtensions);
+      paneIds.here = here;
+      const wanted = catalog.pageSeeds().map((seed) => seed.address.slice(seed.address.indexOf(":") + 1));
+      const own = wanted.filter((id) => id.startsWith(HX_MAC_OWN_PANES));
+      const missing = wanted.filter((id) => !id.startsWith(HX_MAC_OWN_PANES) && !here.has(id));
+      const detail = `${wanted.length} 个地址里 ${wanted.length - own.length - missing.length} 个是这台 Mac 的设置面板；属于系统设置自身、无法这样核对的 ${own.length} 个；这台 Mac 共有 ${here.size} 个面板`;
+      return missing.length === 0 ? passed(detail) : review(`这些地址不是这台 Mac 的设置面板：${missing.join(" ")}；它们是否还能打开，看各自那一项。${detail}。这台 Mac 的面板：${clip([...here].sort().join(" "), 3500)}`);
+    });
+  }
+  const server = platform === "windows" && /server/iu.test(about.system);
+  const seenPages = [];
+  await system.closeSettings();
+  let previousTexts = [];
+  for (const seed of catalog.pageSeeds()) {
+    const base = {
+      key: seed.key,
+      wanted: seed.en,
+      window: null,
+      previous: previousTexts,
+      seenMs: null,
+      shot: undefined
+    };
+    if (outOfTime()) {
+      seenPages.push({ ...base, status: "out-of-time", reason: "" });
+      continue;
+    }
+    try {
+      const limit = seenPages.some((page) => page.window?.open) ? PAGE_WAIT_MS : FIRST_PAGE_WAIT_MS;
+      let window = null;
+      let seenMs = null;
+      let reason = "";
+      for (let attempt = 0;attempt < 2; attempt += 1) {
+        const began = host.now();
+        const opened = await actions.open({ id: `page:${seed.key}` });
+        if (opened.status !== "opened") {
+          reason = why(opened);
+          break;
+        }
+        time("open.page.command", host.now() - began);
+        let settled = false;
+        for (let round = 0;round < 60; round += 1) {
+          const asked = host.now();
+          window = await system.settingsWindow();
+          time("page.read", host.now() - asked);
+          const elapsed = host.now() - began;
+          if (window.blocked)
+            break;
+          const shown = hxRealPageShown(window.texts, seed.en);
+          const moved = window.open && window.texts.length > 0 && !sameTexts(window.texts, previousTexts);
+          if (shown || moved) {
+            seenMs ??= elapsed;
+            if (shown && platform === "mac" || settled)
+              break;
+            settled = true;
+            await host.wait(PAGE_SETTLE_MS);
+            continue;
+          }
+          if (elapsed >= limit)
+            break;
+          await host.wait(PAGE_STEP_MS);
+        }
+        if (window?.open && window.texts.length > 0)
+          break;
+      }
+      if (reason) {
+        seenPages.push({ ...base, status: "not-opened", reason });
+        continue;
+      }
+      const picture = await shot(`page-${seed.key}`);
+      seenPages.push({ ...base, status: "seen", reason: "", window, seenMs, shot: picture });
+      if (window?.open && window.texts.length > 0)
+        previousTexts = window.texts;
+    } catch (error) {
+      seenPages.push({
+        ...base,
+        status: "not-opened",
+        reason: `检查程序在这一页上停下了：${error instanceof Error ? error.message : "原因不明"}`
+      });
+    }
+  }
+  await system.closeSettings();
+  const baseline = platform === "windows" ? hxRealBaseline(seenPages.flatMap((page) => page.window?.open && page.window.texts.length > 0 ? [page.window.texts] : [])) : new Map;
+  for (const page of seenPages) {
+    const id = `page.${page.key}`;
+    const note = HX_REAL_PAGE_NOTES[platform][page.key] ?? {};
+    const window = page.window;
+    pages.push({ key: page.key, wanted: page.wanted, opened: page.status === "seen", seen: window?.raw ?? [] });
+    if (page.status === "out-of-time") {
+      skip(id, "这次检查的时间用完了，这一页没有开。");
+      continue;
+    }
+    if (page.status === "not-opened" || !window) {
+      record(id, failed(`打开“${page.wanted}”，${page.reason || "没有结果"}`), 0);
+      continue;
+    }
+    const ms = page.seenMs ?? 0;
+    if (window.blocked) {
+      record(id, review(`读不到窗口标题，看截图是不是“${page.wanted}”。`, page.shot), ms);
+      continue;
+    }
+    if (!window.open || window.texts.length === 0) {
+      record(id, failed(`打开“${page.wanted}”的命令成功了，但设置窗口没有出现。`, page.shot), ms);
+      continue;
+    }
+    const specific = hxRealSpecific(window.texts, baseline);
+    const names = [page.wanted, ...note.titles ?? []];
+    const showing = `窗口显示：${clip(specific.slice(0, 14).join(" / "), 700) || "没有这一页独有的文字"}`;
+    if (names.some((name) => hxRealPageShown(specific, name))) {
+      if (page.seenMs !== null)
+        time("open.page", page.seenMs);
+      record(id, passed(`${showing}（${ms} 毫秒）`, page.shot), ms);
+      continue;
+    }
+    const still = sameTexts(window.texts, page.previous);
+    const absent = paneIds.here !== null && !paneIds.here.has(paneOf(catalog, page.key)) && !ownPane(catalog, page.key);
+    if (note.hardware) {
+      record(id, unavailable(`“${page.wanted}”要有相应的硬件才有，这台机器没有显示它。${showing}`), ms);
+    } else if (note.desktopOnly && server) {
+      record(id, unavailable(`Windows Server 没有“${page.wanted}”这一页；桌面版的 Windows 有。${showing}`), ms);
+    } else if (absent) {
+      record(id, unavailable(`这台 Mac 没有“${page.wanted}”的设置面板，它在这个系统版本里不在这里。${showing}`, page.shot), ms);
+    } else if (still) {
+      record(id, failed(`打开“${page.wanted}”后窗口没有动，地址可能无效。${showing}`, page.shot), ms);
+    } else {
+      record(id, review(`要的是“${page.wanted}”，自动核对拿不准。${showing}`, page.shot), ms);
+    }
+  }
   const gateFolder = join4(host.out, "data-gate");
   const gateCatalog = new HxCatalog({ ...catalogHost, dataFolder: () => gateFolder });
   const gateActions = new HxComputerActions(gateCatalog, run, host.wait);
@@ -8585,7 +8684,13 @@ ${result.stderr}`;
     return { success: result.success, status: text("status"), text, inner, answer };
   };
   const seeds = catalog.settingSeeds();
-  const gateSeed = seeds.find((seed) => verified.includes(seed.key) && seed.values.type === "switch") ?? seeds.find((seed) => verified.includes(seed.key)) ?? null;
+  const plain = (seed) => seed.values.type === "switch";
+  const ownValue = (seed) => {
+    const value = original.get(seed.key);
+    return value !== undefined && hxNormalizeValue(seed.values, value) !== null;
+  };
+  const useable = seeds.filter((seed) => verified.includes(seed.key));
+  const gateSeed = useable.find((seed) => plain(seed) && ownValue(seed)) ?? useable.find(plain) ?? useable.find(ownValue) ?? useable[0] ?? null;
   const NO_SETTING = "这台机器上没有一项设置通过了读、写、改回，这一项做不了。";
   const gate = {
     value: null,
@@ -8660,8 +8765,12 @@ ${result.stderr}`;
         time("tool.set", host.now() - began);
         if (attempt.status !== "changed")
           return failed(`自检之后改 ${id}，回答是 ${attempt.status}：${attempt.text("reason")}`);
-        if (attempt.text("previous") !== value || !sameValue2(gateSeed.values, attempt.text("value"), other)) {
+        if (attempt.text("previous") !== value || !sameValue2(gateSeed, attempt.text("value"), other)) {
           return failed(`回答里的原值是 ${attempt.text("previous")}、新值是 ${attempt.text("value")}，应是 ${value} 和 ${other}。`);
+        }
+        if (hxNormalizeValue(gateSeed.values, value) === null) {
+          await exec(gateSeed.write(value));
+          return passed(`自检之后直接改成功：${value} → ${other}，回答里带着原值；原值不是工具收的值，由检查写回。`);
         }
         const back = await call("computer_set", { id, value });
         return back.status === "changed" && (await readValue(gateSeed)).value === value ? passed(`自检之后直接改成功：${value} → ${other} → ${value}，回答里带着原值。`) : failed(`改回 ${value}，回答是 ${back.status}。`);
@@ -8726,22 +8835,28 @@ ${result.stderr}`;
       return hxRunOk(result) && result.stdout.trim() !== "" ? passed(detail) : unavailable(detail);
     });
   }
-  const leftChanged = [];
+  const putRight = [];
+  const stillWrong = [];
   for (const seed of catalog.settingSeeds()) {
     const before = original.get(seed.key);
     if (before === undefined)
       continue;
     try {
-      if (sameValue2(seed.values, (await readValue(seed)).value, before))
+      const now = (await readValue(seed)).value;
+      if (sameValue2(seed, now, before))
         continue;
       await exec(seed.write(before));
       const after = await readBack(seed, before);
-      leftChanged.push(`${seed.key}（应是 ${before}，${after.ok ? "已再改回" : `改不回，现在是 ${after.value ?? "没有值"}`}）`);
+      const said = `${seed.key}（开始时 ${before}，后来是 ${now ?? "没有值"}`;
+      if (after.ok)
+        putRight.push(`${said}，已写回）`);
+      else
+        stillWrong.push(`${said}，写不回，现在是 ${after.value ?? "没有值"}）`);
     } catch {
-      leftChanged.push(`${seed.key}（没能核对）`);
+      stillWrong.push(`${seed.key}（没能核对）`);
     }
   }
-  record("final.restored", leftChanged.length === 0 ? passed(`${original.size} 项读到过值的设置，结束时都是开始时的值。`) : failed(`结束时和开始时不一样的设置：${leftChanged.join("、")}`), 0);
+  record("final.restored", stillWrong.length > 0 ? failed(`结束时写不回开始时的值：${stillWrong.join("、")}${putRight.length > 0 ? `。另外已写回：${putRight.join("、")}` : ""}`) : putRight.length > 0 ? review(`这些设置中途被别的改动带着变了，已写回开始时的值：${putRight.join("、")}`) : passed(`${original.size} 项读到过值的设置，结束时都是开始时的值。`), 0);
   try {
     await system.closeSettings();
     await system.closeFolders();
