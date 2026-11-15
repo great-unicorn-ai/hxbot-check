@@ -13750,8 +13750,8 @@ class HxStepRun {
       return null;
     if (Date.now() - this.#frontSeenAt < HX_FRONT_SEEN_MS)
       return null;
-    const now = await front.frontPid();
-    if (now === null || now === window.pid) {
+    const now = await front.front();
+    if (now === null || now.pid === window.pid || now.windowId === window.windowId) {
       if (now !== null)
         this.#frontSeenAt = Date.now();
       return null;
@@ -21909,7 +21909,7 @@ var WIN_USER322 = `Add-Type -Namespace HXF -Name W -MemberDefinition @'
 [DllImport("user32.dll")] public static extern void keybd_event(byte v, byte s, uint f, System.UIntPtr e);
 '@;
 `;
-var WIN_FRONT_PID = `${WIN_USER322}$p = 0; [void][HXF.W]::GetWindowThreadProcessId([HXF.W]::GetForegroundWindow(), [ref]$p); "$p"`;
+var WIN_FRONT_PID = `${WIN_USER322}$h = [HXF.W]::GetForegroundWindow(); $p = 0; [void][HXF.W]::GetWindowThreadProcessId($h, [ref]$p); "$p $($h.ToInt64())"`;
 var WIN_RELEASE = `${WIN_USER322}foreach ($v in 0x10,0x11,0x12,0xA0,0xA1,0xA2,0xA3,0xA4,0xA5,0x5B,0x5C) { [HXF.W]::keybd_event([byte]$v, 0, 2, [System.UIntPtr]::Zero) }; 'ok'`;
 function powershell(text) {
   return [
@@ -21922,17 +21922,21 @@ function powershell(text) {
     Buffer.from(text, "utf16le").toString("base64")
   ];
 }
-function pidOf(text) {
-  const value = Number.parseInt(text.trim(), 10);
-  return Number.isFinite(value) && value > 0 ? value : null;
+function frontOf(text) {
+  const [pidText, windowText] = text.trim().split(/\s+/u);
+  const pid = Number.parseInt(pidText ?? "", 10);
+  if (!Number.isFinite(pid) || pid <= 0)
+    return null;
+  const windowId = Number.parseInt(windowText ?? "", 10);
+  return { pid, windowId: Number.isFinite(windowId) && windowId > 0 ? windowId : null };
 }
 function hxFrontWatch(run, platform = process.platform) {
   if (platform === "darwin") {
     const jxa = (script, env) => run("/usr/bin/osascript", ["-l", "JavaScript", "-e", script], { timeoutMs: 1e4, ...env ? { env } : {} });
     return {
-      async frontPid() {
+      async front() {
         const result = await jxa(MAC_FRONT_PID);
-        return hxRunOk(result) ? pidOf(result.stdout) : null;
+        return hxRunOk(result) ? frontOf(result.stdout) : null;
       },
       async releaseModifiers() {
         await jxa(MAC_RELEASE);
@@ -21942,9 +21946,9 @@ function hxFrontWatch(run, platform = process.platform) {
   if (platform === "win32") {
     const ps = (script, env) => run(HX_POWERSHELL, powershell(script), { timeoutMs: 20000, ...env ? { env } : {} });
     return {
-      async frontPid() {
+      async front() {
         const result = await ps(WIN_FRONT_PID);
-        return hxRunOk(result) ? pidOf(result.stdout) : null;
+        return hxRunOk(result) ? frontOf(result.stdout) : null;
       },
       async releaseModifiers() {
         await ps(WIN_RELEASE);
@@ -22111,10 +22115,10 @@ var WIN_USER323 = `Add-Type -Namespace HXQ -Name K -MemberDefinition '[DllImport
 `;
 var WIN_HELD = `${WIN_USER323}$n = 0; foreach ($v in 0x10,0x11,0x12,0xA0,0xA1,0xA2,0xA3,0xA4,0xA5,0x5B,0x5C) { if ([HXQ.K]::GetAsyncKeyState($v) -band 0x8000) { $n++ } }; "$n"`;
 var WIN_PRESS_SHIFT = `${WIN_USER323}[HXQ.K]::keybd_event([byte]0x10, 0, 0, [System.UIntPtr]::Zero); 'ok'`;
-async function clipboardText(mac) {
+async function hxCheckClipboardText(mac) {
   return mac ? (await hxRun("/usr/bin/pbpaste", [], { timeoutMs: 1e4 })).stdout : await output(HX_POWERSHELL, ps("Get-Clipboard -Raw"));
 }
-async function setClipboard(mac, text) {
+async function hxCheckSetClipboard(mac, text) {
   if (mac) {
     await new Promise((done) => {
       const child = spawn3("/usr/bin/pbcopy", [], { stdio: ["pipe", "ignore", "ignore"] });
@@ -22138,7 +22142,7 @@ async function hxQuietRealCheck(input) {
     return;
   }
   const sentinel = `hxbot-quiet-${Date.now()}`;
-  await setClipboard(mac, sentinel);
+  await hxCheckSetClipboard(mac, sentinel);
   const work = await mkdtemp5(join7(tmpdir6(), "hxbot-quiet-"));
   const file = join7(work, "hxbot-quiet.txt");
   await writeFile4(file, `HXBot quiet check
@@ -22160,7 +22164,7 @@ async function hxQuietRealCheck(input) {
       target = (await winPids("notepad")).find((pid) => !before.has(pid)) ?? null;
     }
   }
-  const first = await front.frontPid();
+  const first = (await front.front())?.pid ?? null;
   items.check("Q1", "读得到最前面的应用", first !== null, `front ${first ?? "none"}; target ${target ?? "none"}`);
   if (target === null)
     items.add("Q2", "把目标应用叫回前台", "fail", `${mac ? "文本编辑" : "记事本"}没有打开`);
@@ -22172,9 +22176,9 @@ async function hxQuietRealCheck(input) {
     else
       spawn3("explorer.exe", [work], { detached: true, stdio: "ignore" }).unref();
     await sleep3(2500);
-    const away = await front.frontPid();
+    const away = (await front.front())?.pid ?? null;
     await sleep3(1000);
-    const later = await front.frontPid();
+    const later = (await front.front())?.pid ?? null;
     items.check("Q2", "用户切走以后，HXBot 看得出来，也不把目标应用拉回前台", away !== null && away !== target && later === away, `target ${target}; after the move ${away ?? "none"}; a second later ${later ?? "none"}`);
   }
   const press = mac ? await output("/usr/bin/osascript", ["-l", "JavaScript", "-e", MAC_PRESS_SHIFT]) : await output(HX_POWERSHELL, ps(WIN_PRESS_SHIFT));
@@ -22242,7 +22246,7 @@ async function hxQuietRealCheck(input) {
     agent.once("error", () => done());
   });
   items.check("Q7", "助手的进程和它启动的命令以“低于正常”的优先级运行", mac ? said.trim() === "10" : said.trim() === "BelowNormal", said.trim());
-  const after = await clipboardText(mac);
+  const after = await hxCheckClipboardText(mac);
   items.check("Q6", "用户的剪贴板在检查前后不变", after.trim() === sentinel, `${JSON.stringify(after.slice(0, 80))}`);
   if (target !== null) {
     if (mac)
@@ -23081,7 +23085,11 @@ async function hxStepsRealCheck(input) {
 `, "utf8");
     app.open(file);
     const stops = new HxComputerStops;
-    const run = new HxStepRun({ driver: driver.socket, stopped: () => stops.stopped("check") });
+    const run = new HxStepRun({
+      driver: driver.socket,
+      stopped: () => stops.stopped("check"),
+      front: hxFrontWatch(hxRun, platform)
+    });
     let opened = "no_window";
     for (let attempt = 0;attempt < 20 && opened; attempt += 1) {
       await wait(1000);
@@ -23097,8 +23105,12 @@ async function hxStepsRealCheck(input) {
       { act: "type", target: { role: "field" }, text: ` ${token}` },
       { act: "hotkey", keys: app.saveKeys }
     ];
+    const sentinel = `hxbot-clip-${randomUUID().slice(0, 8)}`;
+    await hxCheckSetClipboard(platform === "darwin", sentinel);
     const typed = await run.run(steps);
     await wait(2000);
+    const clip = await hxCheckClipboardText(platform === "darwin");
+    items.check("S9", "驱动输入文字以后，剪贴板还是用户原来的内容", clip.trim() === sentinel, JSON.stringify(clip.slice(0, 80)));
     const afterSteps = await readFile2(file, "utf8").catch(() => "");
     items.check("S5", "固定步骤：在文字框里输入并保存，文件里有这段文字", typed.status === "done" && afterSteps.includes(token), `${typed.status}${typed.stoppedAt ? `：${typed.stoppedAt.reason}` : ""}；${typed.steps.map((step) => `${step.what} [${step.route}${step.checked ? ", checked" : ""}]`).join("；")}；文件：${afterSteps.slice(0, 200)}`);
     const risky = await run.run([{ act: "menu", path: ["Edit", "Delete"] }]);
