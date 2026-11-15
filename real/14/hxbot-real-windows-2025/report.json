@@ -1,0 +1,174 @@
+{
+  "machine": "windows-2025",
+  "model": "",
+  "startedAt": "2026-11-15T09:06:11.178Z",
+  "seconds": 86.332,
+  "items": [
+    {
+      "id": "M1",
+      "title": "有可用的真实模型",
+      "status": "skip",
+      "detail": "没有配模型（仓库 Secret HX_CHECK_MODEL_URL、HX_CHECK_MODEL_KEY、HX_CHECK_MODEL）；GitHub Models openai/gpt-4.1-mini：GitHub Models openai/gpt-4.1-mini: 200 text/plain: not JSON: OK\r\n；GitHub Models openai/gpt-4.1-mini (great-unicorn-ai)：GitHub Models openai/gpt-4.1-mini (great-unicorn-ai): 200 text/plain: not JSON: OK\r\n"
+    },
+    {
+      "id": "S1",
+      "title": "电脑操控驱动启动并答复（serve --socket）",
+      "status": "pass",
+      "detail": "Cua Driver daemon listening on \\\\.\\pipe\\hxbot-check-6b31e5d0-cc08-436e-8c58-0af4b9c29221\n"
+    },
+    {
+      "id": "S2",
+      "title": "授权",
+      "status": "skip",
+      "detail": "Windows 不需要额外授权"
+    },
+    {
+      "id": "S3",
+      "title": "打开 Notepad，找到它的窗口",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "S4",
+      "title": "读出窗口提纲，有可输入的文字框",
+      "status": "pass",
+      "detail": "notepad.exe — hxbot-check.txt - Notepad (pid 10008, window 262522)\n [0] field \"Text Editor\" = \"HXBot check\"\n [1] titlebar \"hxbot-check.txt - Notepad\"\n   [2] menu \"System\"\n  [3] button \"Minimize\"\n  [4] button \"Maximize\"\n  [5] button \"Close\"\n  [6] menu \"File\"\n  [7] menu \"Edit\"\n  [8] menu \"Format\"\n  [9] menu \"View\"\n  [10] menu \"Help\"\nThe driver did not read the whole window."
+    },
+    {
+      "id": "S5",
+      "title": "固定步骤：在文字框里输入并保存，文件里有这段文字",
+      "status": "pass",
+      "detail": "done；Text Editor: 15 characters [foreground, checked]；ctrl+s [keyboard]；文件：HXBot check\n HXBot-1f4d391a"
+    },
+    {
+      "id": "S6",
+      "title": "“删除”这类步骤先停下来问（status confirm），不执行",
+      "status": "pass",
+      "detail": "\"Delete\" sends, pays, buys, deletes or publishes. Ask the user in the chat first; after a yes, repeat the step with confirmed true."
+    },
+    {
+      "id": "S7",
+      "title": "按停止键后，下一步不再执行",
+      "status": "pass",
+      "detail": "stopped"
+    },
+    {
+      "id": "S8",
+      "title": "真实模型：列计划、一步步输入并保存",
+      "status": "skip",
+      "detail": "没有可用的模型"
+    },
+    {
+      "id": "I1",
+      "title": "安装应用（computer_install）",
+      "status": "skip",
+      "detail": "这台机器是 win32，安装应用只在 Mac 上检查"
+    },
+    {
+      "id": "A1",
+      "title": "列出正在运行的应用",
+      "status": "pass",
+      "detail": "Windows Explorer、Notepad、Windows Terminal Host"
+    },
+    {
+      "id": "A2",
+      "title": "打开文件后把记事本切到前台",
+      "status": "pass",
+      "detail": "{\"status\":\"done\",\"action\":\"front\",\"app\":\"Notepad\",\"route\":\"direct\",\"tried\":[]}"
+    },
+    {
+      "id": "A3",
+      "title": "窗口放到左半边",
+      "status": "pass",
+      "detail": "{\"status\":\"done\",\"action\":\"window\",\"app\":\"Notepad\",\"route\":\"direct\",\"tried\":[],\"detail\":\"left: 0, 0, 512, 720\"}"
+    },
+    {
+      "id": "A4",
+      "title": "Windows 的菜单交给逐步操作（use-steps）",
+      "status": "pass",
+      "detail": "{\"status\":\"use-steps\",\"reason\":\"Menus of Windows apps go through the controls: Use computer_look on the app's window and computer_do (a menu or a click step); a screenshot with capture_screen is the last way.\",\"tried\":[{\"route\":\"command\",\"why\":\"Windows has no script interface for another app's menus\"}]}"
+    },
+    {
+      "id": "A5",
+      "title": "隐藏（Windows：最小化）",
+      "status": "pass",
+      "detail": "{\"status\":\"done\",\"action\":\"hide\",\"app\":\"Notepad\",\"route\":\"direct\",\"tried\":[]}"
+    },
+    {
+      "id": "A6",
+      "title": "正常退出并核对已经退出",
+      "status": "pass",
+      "detail": "{\"status\":\"done\",\"action\":\"quit\",\"app\":\"Notepad\",\"route\":\"direct\",\"tried\":[],\"detail\":\"quit normally\"}"
+    },
+    {
+      "id": "A7",
+      "title": "在 HXBot 里运行一段 PowerShell 脚本，读回输出",
+      "status": "pass",
+      "detail": "{\"status\":\"ran\",\"language\":\"powershell\",\"output\":\"Microsoft Windows NT 10.0.26100.0\",\"truncated\":false}"
+    },
+    {
+      "id": "A8",
+      "title": "有没保存的改动时退出：应用自己问（waiting），强制退出没同意先问，同意后退出",
+      "status": "pass",
+      "detail": "{\"status\":\"done\",\"action\":\"quit\",\"app\":\"Notepad\",\"route\":\"direct\",\"tried\":[],\"detail\":\"quit normally\"}；{\"status\":\"confirm\",\"reason\":\"Force quit loses what Notepad has not saved. Ask the user in the chat first; after a yes, call again with force and conf；{\"status\":\"done\",\"action\":\"quit\",\"app\":\"Notepad\",\"route\":\"direct\",\"tried\":[],\"detail\":\"quit normally\"}"
+    },
+    {
+      "id": "A9",
+      "title": "读默认浏览器",
+      "status": "pass",
+      "detail": "{\"status\":\"default\",\"kind\":\"browser\",\"target\":\"web pages\",\"app\":\"MSEdgeHTM\",\"route\":\"direct\"}"
+    },
+    {
+      "id": "A10",
+      "title": "改默认浏览器：打开“默认应用”页（status page）",
+      "status": "pass",
+      "detail": "{\"status\":\"page\",\"reason\":\"Windows lets only the user change default apps, so HXBot opened Settings › Apps › Default apps (now: MSEdgeHTM). Find Microsoft Edge there with computer_look and set it for web pages with computer_do, or tell the user what to click.\"}"
+    },
+    {
+      "id": "Q1",
+      "title": "读得到最前面的应用",
+      "status": "pass",
+      "detail": "front 10008; target 7420"
+    },
+    {
+      "id": "Q2",
+      "title": "用户切走以后，把目标应用叫回前台；叫不回来时按键不发出（单元测试）",
+      "status": "fail",
+      "detail": "target 7420; after the move 10008; bring false; then 10008"
+    },
+    {
+      "id": "Q3",
+      "title": "修饰键卡在“按下”时，松开以后没有按下的修饰键",
+      "status": "fail",
+      "detail": "press ok\r\n [#< CLIXML\r\n<Objs Version=\"1.1.0.1\" xmlns=\"http://schemas.microsoft.com/powershell/2004/04\"><Obj S=\"progress\" RefId=\"0\"><TN RefId=\"0\"><T>System.Management.Automation.PSCustomObject</T><T>System.Object<]; held before 2\r\n [#< CLIXML\r\n<Objs Version=\"1.1.0.1\" xmlns=\"http://schemas.microsoft.com/powershell/2004/04\"><Obj S=\"progress\" RefId=\"0\"><TN RefId=\"0\"><T>System.Management.Automation.PSCustomObject</T><T>System.Object<]; held after 0\r\n [#< CLIXML\r\n<Objs Version=\"1.1.0.1\" xmlns=\"http://schemas.microsoft.com/powershell/2004/04\"><Obj S=\"progress\" RefId=\"0\"><TN RefId=\"0\"><T>System.Management.Automation.PSCustomObject</T><T>System.Object<]"
+    },
+    {
+      "id": "Q4",
+      "title": "后台读目录的命令以最低优先级运行",
+      "status": "pass",
+      "detail": "Idle #< CLIXML\r\n<Objs Version=\"1.1.0.1\" xmlns=\"http://schemas.microsoft.com/powershell/2004/04\"><Obj S=\"progress\" RefId=\"0\"><TN RefId=\"0\"><T>System.Management.Automation.PSCustomObject</T><T>System.Object<"
+    },
+    {
+      "id": "Q5",
+      "title": "停助手的进程树：它打开的记事本留下，后台的 ping 和 PowerShell 停下",
+      "status": "fail",
+      "detail": "shell gone true; ping 0 gone false; notepad 0 kept false; 0.7 s"
+    },
+    {
+      "id": "Q6",
+      "title": "用户的剪贴板在检查前后不变",
+      "status": "fail",
+      "detail": "\"hxbot-quiet-1794733591605\\r\\n [#< CLIXML\\r\\n<Objs Version=\\\"1.1.0.1\\\" xmlns=\\\"http://sc\""
+    }
+  ],
+  "models": [
+    {
+      "name": "GitHub Models openai/gpt-4.1-mini",
+      "answer": "GitHub Models openai/gpt-4.1-mini: 200 text/plain: not JSON: OK\r\n"
+    },
+    {
+      "name": "GitHub Models openai/gpt-4.1-mini (great-unicorn-ai)",
+      "answer": "GitHub Models openai/gpt-4.1-mini (great-unicorn-ai): 200 text/plain: not JSON: OK\r\n"
+    }
+  ]
+}
