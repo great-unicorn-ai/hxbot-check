@@ -21954,10 +21954,8 @@ function hxFrontWatch(run, platform = process.platform) {
   return null;
 }
 
-// src/backend/windows-process-tree.ts
-import { execFile as execFile4 } from "node:child_process";
-
 // src/backend/hx-process-keep.ts
+import { constants as constants2, setPriority as setPriority2 } from "node:os";
 var HX_TREE_LIST_MS = 4000;
 var LIST_TREE = `$root = [int]$env:HX_PID
 $all = @(Get-CimInstance Win32_Process -Property ProcessId,ParentProcessId)
@@ -22006,8 +22004,14 @@ async function hxTreeWithoutApps(root, run = hxRun) {
 function hxTaskkillArgs(pids) {
   return [...pids.flatMap((pid) => ["/PID", String(pid)]), "/F"];
 }
+function hxLowerAgentPriority(pid) {
+  try {
+    setPriority2(pid, constants2.priority.PRIORITY_BELOW_NORMAL);
+  } catch {}
+}
 
 // src/backend/windows-process-tree.ts
+import { execFile as execFile4 } from "node:child_process";
 class ProcessTreeFailed extends TaggedError3()("ProcessTreeFailed", {
   cause: Defect()
 }) {
@@ -22223,6 +22227,21 @@ async function hxQuietRealCheck(input) {
         return;
       });
   }
+  const agent = mac ? spawn3("/bin/sh", ["-c", "sleep 1; /bin/sh -c 'ps -o nice= -p $$'"], { stdio: ["ignore", "pipe", "ignore"] }) : spawn3(HX_POWERSHELL, ps("Start-Sleep -Seconds 2; [string](Get-Process -Id $PID).PriorityClass"), {
+    stdio: ["ignore", "pipe", "ignore"],
+    windowsHide: true
+  });
+  if (agent.pid !== undefined)
+    hxLowerAgentPriority(agent.pid);
+  let said = "";
+  agent.stdout?.on("data", (chunk) => {
+    said += chunk.toString("utf8");
+  });
+  await new Promise((done) => {
+    agent.once("exit", () => done());
+    agent.once("error", () => done());
+  });
+  items.check("Q7", "助手的进程和它启动的命令以“低于正常”的优先级运行", mac ? said.trim() === "10" : said.trim() === "BelowNormal", said.trim());
   const after = await clipboardText(mac);
   items.check("Q6", "用户的剪贴板在检查前后不变", after.trim() === sentinel, `${JSON.stringify(after.slice(0, 80))}`);
   if (target !== null) {
