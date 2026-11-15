@@ -15524,6 +15524,11 @@ var HX_INSTALL_FILES = {
   remove: (path) => rm2(path, { recursive: true, force: true })
 };
 var LONG_MS = 300000;
+var ATTACH_TRIES = 4;
+var ATTACH_WAIT_MS = 3000;
+function attachBusy(text) {
+  return /temporarily unavailable|resource busy/iu.test(text);
+}
 function plistValue(output) {
   return output.trim().split(`
 `)[0]?.trim() ?? "";
@@ -15576,9 +15581,18 @@ async function unpack(deps, source) {
   }
   if (kind === ".dmg") {
     const mount = await files.makeTemp("hxbot-dmg-");
-    const attach = await run("/usr/bin/hdiutil", ["attach", "-nobrowse", "-readonly", "-noautoopen", "-mountpoint", mount, source], { timeoutMs: LONG_MS });
-    if (!hxRunOk(attach))
+    const wait = deps.wait ?? ((ms) => new Promise((done) => setTimeout(done, ms)));
+    let attach = await run("/usr/bin/hdiutil", ["attach", "-nobrowse", "-readonly", "-noautoopen", "-mountpoint", mount, source], { timeoutMs: LONG_MS });
+    for (let tried = 1;tried < ATTACH_TRIES && !hxRunOk(attach) && attachBusy(attach.stderr + attach.stdout); tried++) {
+      await wait(ATTACH_WAIT_MS * tried);
+      attach = await run("/usr/bin/hdiutil", ["attach", "-nobrowse", "-readonly", "-noautoopen", "-mountpoint", mount, source], { timeoutMs: LONG_MS });
+    }
+    if (!hxRunOk(attach)) {
+      await files.remove(mount).catch(() => {
+        return;
+      });
       return { status: "failed", reason: hxRunFailure("hdiutil", attach) };
+    }
     const done = async () => {
       await run("/usr/bin/hdiutil", ["detach", mount, "-quiet"], { timeoutMs: 60000 });
       await files.remove(mount).catch(() => {
@@ -27755,6 +27769,7 @@ var RULES = [
 var HARD = /复杂|全面|深入|系统性|完整的|整个|所有|全部|从零|端到端|多个|好几个|三年|架构|十倍|微服务|\b(?:complex|comprehensive|thorough|in-depth|end-to-end|from scratch|entire|whole|every|all pages|across|architecture|production|three-year|ten times)\b/iu;
 var EASY = /简单|快速|一句话|小改|拼写错误|顺手|\b(?:simple|quick|briefly|typo|one-liner|rename)\b/iu;
 var FOLLOW_UP = /^(?:继续|接着|接着做|好的?|好呀|可以|行|嗯|对|是的|没问题|就这样|按你说的|照做|再改一下|再改改|再来一次|再试试|再详细一点|展开说说|下一步|然后呢|ok|okay|yes|yep|sure|go on|continue|keep going|next|do it|go ahead|sounds good|more detail|again)[\s。！!.,，~～]*$/iu;
+var GREETING = /^(?:你好|您好|嗨|哈喽|在吗|在不在|早上好|上午好|下午好|晚上好|早|谢谢|多谢|感谢|辛苦了|hi|hello|hey|hiya|good (?:morning|afternoon|evening)|thanks|thank you|thx)[\s。！!.,，~～?？]*$/iu;
 var REDO = /^(?:重做|重来|重新做|再做一遍|换个模型重做|换更强的模型|redo|try again|do it again|retry)[\s。！!.,，~～]*$/iu;
 function fileTokens(attachment) {
   if (IMAGE.test(attachment.name))
@@ -27808,6 +27823,10 @@ function hxClassifyWork(input) {
     return result("long-context", 1, { difficulty: "high" });
   if (images.length > 0)
     return result("vision", 1);
+  if (input.attachments.length === 0 && GREETING.test(text)) {
+    signals.push("greeting");
+    return result("chat", 0.95);
+  }
   if (input.previous && REDO.test(text)) {
     signals.push("redo");
     return result(input.previous.work, 1, { redo: true, difficulty: "high" });
@@ -28399,6 +28418,9 @@ class HxAutoRouter {
         choice = hxStrongerModel({ work: kind, needs, tokens: classification.tokens, settings, candidates: usable(candidates), current: null }, currentCandidate?.model ?? { provider: agent.provider, id: agent.model, name: agent.model }, settings.crossProvider);
     } else if (classification.followUp && previous) {
       by = "follow-up";
+    } else if (host.continuing?.(agentId, work.taskId) === true && currentCandidate?.unavailable === null && hxCanTake(currentCandidate, needs, classification.tokens)) {
+      by = "follow-up";
+      signals.push("continuing");
     } else {
       if (confidence < HX_JUDGE_BELOW && settings.judge === "rules+model") {
         const judged = await this.#judge(agentId, work, candidates, previous?.work ?? null);
@@ -28515,6 +28537,11 @@ function refOfAgent(agent) {
     model: agent.model,
     ...agent.providerAccountId === null ? {} : { providerAccountId: agent.providerAccountId }
   };
+}
+function hxCanTake(candidate, needs, tokens) {
+  if (needs.includes("vision") && !candidate.profile.vision)
+    return false;
+  return !needs.includes("long-context") || candidate.profile.window * 0.7 >= tokens;
 }
 function usable(candidates) {
   return candidates.filter((candidate) => candidate.unavailable === null);
