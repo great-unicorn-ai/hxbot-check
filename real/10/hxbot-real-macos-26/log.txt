@@ -1,0 +1,3 @@
+[2026-11-14T23:42:16.266Z] test apps: /var/folders/h5/t85nd63d71x27_8gl5gw3l_w0000gn/T/hxbot-install-check-6PTVEn/v1/HXInstallCheck.app, /var/folders/h5/t85nd63d71x27_8gl5gw3l_w0000gn/T/hxbot-install-check-6PTVEn/HXInstallCheck-2.0.zip, /var/folders/h5/t85nd63d71x27_8gl5gw3l_w0000gn/T/hxbot-install-check-6PTVEn/v3/HXInstallCheck.app → /var/folders/h5/t85nd63d71x27_8gl5gw3l_w0000gn/T/hxbot-install-check-6PTVEn/HXInstallCheck-3.0.dmg
+
+[2026-11-14T23:42:47.664Z] opened TextEdit: false
