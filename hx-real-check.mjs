@@ -7322,7 +7322,7 @@ async function hxMcpBridge(url, group) {
 }
 
 // src/backend/hx-check/app-run.ts
-import { execFile as execFile2 } from "node:child_process";
+import { execFile as execFile2, spawn as spawn2 } from "node:child_process";
 import { mkdtemp as mkdtemp2, writeFile as writeFile2 } from "node:fs/promises";
 import { tmpdir as tmpdir3 } from "node:os";
 import { join as join3 } from "node:path";
@@ -13327,6 +13327,7 @@ function superRefine(fn, params) {
 import { execFile } from "node:child_process";
 var DEFAULT_TIMEOUT_MS = 15000;
 var MAX_OUTPUT_BYTES = 8 * 1024 * 1024;
+var EXIT_GRACE_MS = 2000;
 function hxRunOk(result) {
   return result.code === 0 && !result.timedOut && !result.missing;
 }
@@ -13340,13 +13341,15 @@ function hxRunFailure(command, result) {
   return `${command} ended with code ${result.code ?? "none"}${text ? `: ${text.slice(0, 300)}` : ""}`;
 }
 var hxRun = (command, args, options = {}) => new Promise((resolve) => {
-  execFile(command, [...args], {
+  let grace;
+  const child = execFile(command, [...args], {
     timeout: options.timeoutMs ?? DEFAULT_TIMEOUT_MS,
     maxBuffer: MAX_OUTPUT_BYTES,
     windowsHide: true,
     encoding: "utf8",
     env: options.env ? { ...process.env, ...options.env } : process.env
   }, (error, stdout, stderr) => {
+    clearTimeout(grace);
     if (!error) {
       resolve({ code: 0, stdout, stderr, timedOut: false, missing: false });
       return;
@@ -13358,6 +13361,13 @@ var hxRun = (command, args, options = {}) => new Promise((resolve) => {
       timedOut: error.killed === true,
       missing: error.code === "ENOENT"
     });
+  });
+  child.once("exit", () => {
+    grace = setTimeout(() => {
+      child.stdout?.destroy();
+      child.stderr?.destroy();
+    }, EXIT_GRACE_MS);
+    grace.unref();
   });
 });
 
@@ -14448,12 +14458,16 @@ var WIN_TIMEOUT_MS = 90000;
 var JXA_ENV = `ObjC.import('Foundation'); ObjC.import('AppKit');
 function env(n) { const v = $.NSProcessInfo.processInfo.environment.objectForKey(n); return v.isNil() ? '' : ObjC.unwrap(v); }
 function same(a, b) { return String(a || '').toLowerCase() === String(b || '').toLowerCase(); }
+function num(v) { const u = ObjC.unwrap(v); return typeof u === 'number' ? u : Number(u); }
+function flag(v) { const u = ObjC.unwrap(v); return u === true || u === 1; }
+// A regular app: activation policy 0 (it has a Dock icon). Where the bridge gives no number, an app in a bundle counts.
+function regular(a) { const p = num(a.activationPolicy); if (!Number.isNaN(p)) return p === 0; return /.app$/i.test(ObjC.unwrap(a.bundleURL.lastPathComponent) || ''); }
 function running() {
   const list = $.NSWorkspace.sharedWorkspace.runningApplications; const out = [];
-  for (let i = 0; i < list.count; i++) { const a = list.objectAtIndex(i); if (a.activationPolicy !== 0) continue; out.push(a); }
+  for (let i = 0; i < num(list.count); i++) { const a = list.objectAtIndex(i); if (regular(a)) out.push(a); }
   return out;
 }
-function info(a) { return { name: ObjC.unwrap(a.localizedName) || '', id: ObjC.unwrap(a.bundleIdentifier) || '', pid: a.processIdentifier, active: a.active, hidden: a.hidden }; }
+function info(a) { return { name: ObjC.unwrap(a.localizedName) || '', id: ObjC.unwrap(a.bundleIdentifier) || '', pid: num(a.processIdentifier), active: flag(a.active), hidden: flag(a.hidden) }; }
 function find(want) {
   const all = running();
   return all.find((a) => same(ObjC.unwrap(a.bundleIdentifier), want)) || all.find((a) => same(ObjC.unwrap(a.localizedName), want))
@@ -14462,9 +14476,9 @@ function find(want) {
 `;
 var MAC_LIST = `${JXA_ENV}JSON.stringify(running().map(info));`;
 var MAC_FIND = `${JXA_ENV}const a = find(env('HX_APP')); JSON.stringify(a ? info(a) : null);`;
-var MAC_FRONT = `${JXA_ENV}const a = find(env('HX_APP')); JSON.stringify(a ? { sent: a.activateWithOptions(1) } : null);`;
-var MAC_HIDE = `${JXA_ENV}const a = find(env('HX_APP')); JSON.stringify(a ? { sent: a.hide() } : null);`;
-var MAC_QUIT = `${JXA_ENV}const a = find(env('HX_APP')); JSON.stringify(a ? { sent: env('HX_FORCE') === '1' ? a.forceTerminate() : a.terminate() } : null);`;
+var MAC_FRONT = `${JXA_ENV}const a = find(env('HX_APP')); JSON.stringify(a ? { sent: flag(a.activateWithOptions(1)) } : null);`;
+var MAC_HIDE = `${JXA_ENV}const a = find(env('HX_APP')); JSON.stringify(a ? { sent: flag(a.hide()) } : null);`;
+var MAC_QUIT = `${JXA_ENV}const a = find(env('HX_APP')); JSON.stringify(a ? { sent: flag(env('HX_FORCE') === '1' ? a.forceTerminate() : a.terminate()) } : null);`;
 var MAC_FRONTMOST = `${JXA_ENV}const f = $.NSWorkspace.sharedWorkspace.frontmostApplication; JSON.stringify(f.isNil() ? null : info(f));`;
 var MAC_DEFAULT = `${JXA_ENV}ObjC.import('CoreServices');
 function cf(ref) { if (!ref) return ''; try { return ObjC.unwrap(ObjC.castRefToObject(ref)) || ''; } catch (e) { return ''; } }
@@ -15104,16 +15118,25 @@ async function hxAppRealCheck(input) {
     if (mac)
       await run("/usr/bin/open", ["-a", "TextEdit", file]);
     else
-      await run("cmd.exe", ["/c", "start", "", "notepad.exe", file]);
+      spawn2("notepad.exe", [file], { detached: true, stdio: "ignore" }).unref();
     for (let i = 0;i < 40; i++) {
       await sleep(500);
       const listed = await hxAppControl(deps, { action: "list" });
+      if (i === 0)
+        log(`list after open: ${line2(listed)}`);
       if (listed.status === "apps" && listed.apps.some((app) => app.name === appName || app.id.toLowerCase() === appName.toLowerCase() || app.id === "com.apple.TextEdit"))
         return true;
     }
     return false;
   };
   try {
+    if (mac) {
+      const probe = await hxRunScript(scripts, {
+        language: "jxa",
+        script: "ObjC.import('AppKit'); const l = $.NSWorkspace.sharedWorkspace.runningApplications; const a = l.objectAtIndex(0); JSON.stringify({ count: [typeof l.count, String(l.count)], policy: [typeof a.activationPolicy, String(ObjC.unwrap(a.activationPolicy))], pid: [typeof a.processIdentifier, String(a.processIdentifier)], active: [typeof a.active, String(ObjC.unwrap(a.active))] })"
+      });
+      log(`jxa bridge: ${line2(probe)}`);
+    }
     const listed = await hxAppControl(deps, { action: "list" });
     items.check("A1", "列出正在运行的应用", listed.status === "apps" && listed.apps.length > 0 && (!mac || listed.apps.some((app) => app.id === "com.apple.finder")), listed.status === "apps" ? listed.apps.map((app) => app.name).slice(0, 12).join("、") : line2(listed));
     const opened = await open();
@@ -15712,9 +15735,15 @@ async function hxInstallRealCheck(input) {
 
 // src/backend/hx-check/report.ts
 class HxRealItems {
+  added;
   items = [];
+  constructor(added) {
+    this.added = added;
+  }
   add(id, title, status, detail = "") {
-    this.items.push({ id, title, status, detail: detail.slice(0, 1500) });
+    const item = { id, title, status, detail: detail.slice(0, 1500) };
+    this.items.push(item);
+    this.added?.(item);
     return status;
   }
   check(id, title, ok, detail = "") {
@@ -15933,7 +15962,7 @@ function hxScriptedModel() {
 }
 
 // src/backend/hx-check/steps-run.ts
-import { spawn as spawn2 } from "node:child_process";
+import { spawn as spawn3 } from "node:child_process";
 import { randomUUID } from "node:crypto";
 import { readFile as readFile2, writeFile as writeFile4 } from "node:fs/promises";
 import { tmpdir as tmpdir6 } from "node:os";
@@ -16454,20 +16483,20 @@ function editor(platform) {
       app: "TextEdit",
       choice: { app: "TextEdit" },
       saveKeys: ["cmd", "s"],
-      open: (file) => spawn2("open", ["-a", "TextEdit", file], { stdio: "ignore" })
+      open: (file) => spawn3("open", ["-a", "TextEdit", file], { stdio: "ignore" })
     };
   if (platform === "win32")
     return {
       app: "Notepad",
       choice: { title: "hxbot-check" },
       saveKeys: ["ctrl", "s"],
-      open: (file) => spawn2("notepad.exe", [file], { stdio: "ignore", detached: true })
+      open: (file) => spawn3("notepad.exe", [file], { stdio: "ignore", detached: true })
     };
   return null;
 }
 async function startDriver(executable, platform) {
   const address = platform === "win32" ? `\\\\.\\pipe\\hxbot-check-${randomUUID()}` : join6(tmpdir6(), `hxc-${process.pid}.sock`);
-  const child = spawn2(executable, ["serve", "--socket", address, "--no-overlay"], {
+  const child = spawn3(executable, ["serve", "--socket", address, "--no-overlay"], {
     env: {
       ...process.env,
       CUA_DRIVER_EMBEDDED: "1",
@@ -22587,7 +22616,23 @@ async function main() {
   const log = (line) => {
     lines.push(`[${new Date().toISOString()}] ${line}`);
   };
-  const items = new HxRealItems;
+  const items = new HxRealItems((item) => {
+    process.stdout.write(`${item.status}	${item.id}	${item.title}	${item.detail.slice(0, 300)}
+`);
+  });
+  const part = async (name, id, minutes, work) => {
+    process.stdout.write(`== ${name}
+`);
+    log(`== ${name}`);
+    let timer;
+    const late = new Promise((done) => {
+      timer = setTimeout(() => done("late"), minutes * 60000);
+    });
+    const ended = await Promise.race([work().then(() => "done"), late]);
+    clearTimeout(timer);
+    if (ended === "late")
+      items.add(id, `${name}没有在 ${minutes} 分钟内跑完`, "fail", "最后做到哪一步见 log.txt");
+  };
   let brain = null;
   let tried = [];
   if (selfTest)
@@ -22602,17 +22647,17 @@ async function main() {
   if (parts.has("steps")) {
     const driver = option(args, "--driver");
     if (driver)
-      await hxStepsRealCheck({ brain, items, log, driver: resolve(driver), platform: process.platform, folder: out });
+      await part("逐步操作", "S99", 20, () => hxStepsRealCheck({ brain, items, log, driver: resolve(driver), platform: process.platform, folder: out }));
     else
       items.add("S1", "电脑操控驱动", "skip", "没有给 --driver");
   }
   if (parts.has("install"))
-    await hxInstallRealCheck({ items, log, platform: process.platform });
+    await part("安装应用", "I99", 8, () => hxInstallRealCheck({ items, log, platform: process.platform }));
   if (parts.has("apps"))
-    await hxAppRealCheck({ items, log, platform: process.platform });
+    await part("应用命令", "A98", 10, () => hxAppRealCheck({ items, log, platform: process.platform }));
   if (parts.has("team")) {
     if (brain)
-      await hxTeamRealCheck({ brain, items, log });
+      await part("协作全流程", "T99", 20, () => hxTeamRealCheck({ brain, items, log }));
     else
       items.add("T1", "协作全流程", "skip", "没有可用的模型");
   }
