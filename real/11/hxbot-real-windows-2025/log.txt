@@ -1,0 +1,11 @@
+[2026-11-15T00:04:06.969Z] == 逐步操作
+
+[2026-11-15T00:04:11.478Z] == 安装应用
+
+[2026-11-15T00:04:11.479Z] == 应用命令
+
+[2026-11-15T00:04:15.916Z] list after open: {"status":"apps","apps":[{"name":"Windows Explorer","id":"explorer","pid":7920,"title":""},{"name":"Notepad","id":"notepad","pid":2784,"title":"hxbot-app-check.txt - Notepad"},{"name":"Notepad","id":"notepad","pid":9636,"title":"hxbot-check.txt - Notepad"},{"name":"Windows Terminal Host","id":"WindowsTerminal","pid":1108,"title":"C:\\ProgramData\\GitHub\\HostedComputeAgent\\hosted-compute-agent"}]}
+
+[2026-11-15T00:04:15.916Z] opened notepad: true
+
+[2026-11-15T00:04:21.621Z] list after open: {"status":"apps","apps":[{"name":"Windows Explorer","id":"explorer","pid":7920,"title":""},{"name":"Notepad","id":"notepad","pid":9636,"title":"hxbot-check.txt - Notepad"},{"name":"Notepad","id":"notepad","pid":9840,"title":"hxbot-app-check.txt - Notepad"},{"name":"Windows Terminal Host","id":"WindowsTerminal","pid":1108,"title":"C:\\ProgramData\\GitHub\\HostedComputeAgent\\hosted-compute-agent"}]}

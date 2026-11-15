@@ -1,0 +1,132 @@
+{
+  "machine": "windows-2025",
+  "model": "",
+  "startedAt": "2026-11-15T00:04:06.383Z",
+  "seconds": 30.969,
+  "items": [
+    {
+      "id": "M1",
+      "title": "有可用的真实模型",
+      "status": "skip",
+      "detail": "没有配模型（仓库 Secret HX_CHECK_MODEL_URL、HX_CHECK_MODEL_KEY、HX_CHECK_MODEL）；GitHub Models openai/gpt-4.1-mini：GitHub Models openai/gpt-4.1-mini: 200 text/plain: not JSON: OK\r\n；GitHub Models openai/gpt-4.1-mini (great-unicorn-ai)：GitHub Models openai/gpt-4.1-mini (great-unicorn-ai): 200 text/plain: not JSON: OK\r\n"
+    },
+    {
+      "id": "S1",
+      "title": "电脑操控驱动启动并答复（serve --socket）",
+      "status": "pass",
+      "detail": "Cua Driver daemon listening on \\\\.\\pipe\\hxbot-check-bcb52b6b-bbaa-4e19-ae65-ef02418f2e2f\n"
+    },
+    {
+      "id": "S2",
+      "title": "授权",
+      "status": "skip",
+      "detail": "Windows 不需要额外授权"
+    },
+    {
+      "id": "S3",
+      "title": "打开 Notepad，找到它的窗口",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "S4",
+      "title": "读出窗口提纲，有可输入的文字框",
+      "status": "pass",
+      "detail": "notepad.exe — hxbot-check.txt - Notepad (pid 9636, window 197008)\n [0] field \"Text Editor\" = \"HXBot check\"\n [1] titlebar \"hxbot-check.txt - Notepad\"\n   [2] menu \"System\"\n  [3] button \"Minimize\"\n  [4] button \"Maximize\"\n  [5] button \"Close\"\n  [6] menu \"File\"\n  [7] menu \"Edit\"\n  [8] menu \"Format\"\n  [9] menu \"View\"\n  [10] menu \"Help\"\nThe driver did not read the whole window."
+    },
+    {
+      "id": "S5",
+      "title": "固定步骤：在文字框里输入并保存，文件里有这段文字",
+      "status": "pass",
+      "detail": "done；Text Editor: 15 characters [foreground, checked]；ctrl+s [keyboard]；文件：HXBot check\n HXBot-38bc08c3"
+    },
+    {
+      "id": "S6",
+      "title": "“删除”这类步骤先停下来问（status confirm），不执行",
+      "status": "pass",
+      "detail": "\"Delete\" sends, pays, buys, deletes or publishes. Ask the user in the chat first; after a yes, repeat the step with confirmed true."
+    },
+    {
+      "id": "S7",
+      "title": "按停止键后，下一步不再执行",
+      "status": "pass",
+      "detail": "stopped"
+    },
+    {
+      "id": "S8",
+      "title": "真实模型：列计划、一步步输入并保存",
+      "status": "skip",
+      "detail": "没有可用的模型"
+    },
+    {
+      "id": "I1",
+      "title": "安装应用（computer_install）",
+      "status": "skip",
+      "detail": "这台机器是 win32，安装应用只在 Mac 上检查"
+    },
+    {
+      "id": "A1",
+      "title": "列出正在运行的应用",
+      "status": "pass",
+      "detail": "Windows Explorer、Notepad、Windows Terminal Host"
+    },
+    {
+      "id": "A2",
+      "title": "打开文件后把记事本切到前台",
+      "status": "pass",
+      "detail": "{\"status\":\"done\",\"action\":\"front\",\"app\":\"Notepad\",\"route\":\"direct\",\"tried\":[]}"
+    },
+    {
+      "id": "A3",
+      "title": "窗口放到左半边",
+      "status": "pass",
+      "detail": "{\"status\":\"done\",\"action\":\"window\",\"app\":\"Notepad\",\"route\":\"direct\",\"tried\":[],\"detail\":\"left: 0, 0, 512, 720\"}"
+    },
+    {
+      "id": "A4",
+      "title": "Windows 的菜单交给逐步操作（use-steps）",
+      "status": "pass",
+      "detail": "{\"status\":\"use-steps\",\"reason\":\"Menus of Windows apps go through the controls: Use computer_look on the app's window and computer_do (a menu or a click step); a screenshot with capture_screen is the last way.\",\"tried\":[{\"route\":\"command\",\"why\":\"Windows has no script interface for another app's menus\"}]}"
+    },
+    {
+      "id": "A5",
+      "title": "隐藏（Windows：最小化）",
+      "status": "pass",
+      "detail": "{\"status\":\"done\",\"action\":\"hide\",\"app\":\"Notepad\",\"route\":\"direct\",\"tried\":[]}"
+    },
+    {
+      "id": "A6",
+      "title": "正常退出并核对已经退出",
+      "status": "pass",
+      "detail": "{\"status\":\"done\",\"action\":\"quit\",\"app\":\"Notepad\",\"route\":\"direct\",\"tried\":[],\"detail\":\"quit normally\"}"
+    },
+    {
+      "id": "A7",
+      "title": "在 HXBot 里运行一段 PowerShell 脚本，读回输出",
+      "status": "pass",
+      "detail": "{\"status\":\"ran\",\"language\":\"powershell\",\"output\":\"Microsoft Windows NT 10.0.26100.0\",\"truncated\":false}"
+    },
+    {
+      "id": "A8",
+      "title": "有没保存的改动时退出：应用自己问（waiting），强制退出没同意先问，同意后退出",
+      "status": "pass",
+      "detail": "{\"status\":\"waiting\",\"app\":\"Notepad\",\"reason\":\"Notepad did not quit in 6 seconds: it most likely asks whether to save. Its own dialog is for the user; tell the user. Force quit only after the user agrees (force and confirmed true).\"}；{\"status\":\"confirm\",\"reason\":\"Force quit loses what Notepad has not saved. Ask the user in the chat first; after a yes, call again with force and conf；{\"status\":\"done\",\"action\":\"quit\",\"app\":\"Notepad\",\"route\":\"direct\",\"tried\":[],\"detail\":\"forced\"}"
+    },
+    {
+      "id": "A9",
+      "title": "读默认浏览器",
+      "status": "pass",
+      "detail": "{\"status\":\"default\",\"kind\":\"browser\",\"target\":\"web pages\",\"app\":\"MSEdgeHTM\",\"route\":\"direct\"}"
+    }
+  ],
+  "models": [
+    {
+      "name": "GitHub Models openai/gpt-4.1-mini",
+      "answer": "GitHub Models openai/gpt-4.1-mini: 200 text/plain: not JSON: OK\r\n"
+    },
+    {
+      "name": "GitHub Models openai/gpt-4.1-mini (great-unicorn-ai)",
+      "answer": "GitHub Models openai/gpt-4.1-mini (great-unicorn-ai): 200 text/plain: not JSON: OK\r\n"
+    }
+  ]
+}
