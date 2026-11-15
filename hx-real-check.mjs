@@ -13572,6 +13572,7 @@ function hxCandidateLine(element) {
 }
 
 // src/backend/hx-computer/steps.ts
+var HX_FRONT_SEEN_MS = 2000;
 var HX_CLIPBOARD_BACK_MS = 300;
 
 class HxComputerStops {
@@ -13711,6 +13712,7 @@ class HxStepRun {
   #front;
   #clipboard;
   #keysSent = false;
+  #frontSeenAt = 0;
   constructor(options) {
     this.#driver = options.driver;
     this.#stopped = options.stopped;
@@ -13746,14 +13748,15 @@ class HxStepRun {
     const front = this.#front;
     if (!this.#keysToFront || !window || !front)
       return null;
+    if (Date.now() - this.#frontSeenAt < HX_FRONT_SEEN_MS)
+      return null;
     const now = await front.frontPid();
-    if (now === null || now === window.pid)
+    if (now === null || now === window.pid) {
+      if (now !== null)
+        this.#frontSeenAt = Date.now();
       return null;
-    await front.bringFront(window.pid);
-    const again = await front.frontPid();
-    if (again === null || again === window.pid)
-      return null;
-    return `Another app is in front now (the user moved to it), so HXBot did not send the keys there. ${window.app} did not come back to the front. Ask the user, then run the steps again.`;
+    }
+    return `The user works in another app now, so HXBot did not send the keys there and did not take the front from the user. Ask the user to go back to ${window.app} or to say when, then run the steps again.`;
   }
   async#runAll(steps) {
     const window = this.#window;
@@ -21899,20 +21902,14 @@ var Json2 = /* @__PURE__ */ make7(/* @__PURE__ */ annotate(Json, {
 var join6 = fiberJoin;
 // src/backend/hx-computer/front.ts
 var MAC_FRONT_PID = "ObjC.import('AppKit'); String($.NSWorkspace.sharedWorkspace.frontmostApplication.processIdentifier)";
-var MAC_BRING_FRONT = "ObjC.import('AppKit'); const a = $.NSRunningApplication.runningApplicationWithProcessIdentifier(Number($.NSProcessInfo.processInfo.environment.objectForKey('HX_PID').js)); a.isNil() ? 'false' : String(a.activateWithOptions(1))";
 var MAC_RELEASE = "ObjC.import('CoreGraphics'); for (const k of [55, 54, 56, 60, 58, 61, 59, 62, 63]) { $.CGEventPost(0, $.CGEventCreateKeyboardEvent(null, k, false)); } 'ok'";
 var WIN_USER322 = `Add-Type -Namespace HXF -Name W -MemberDefinition @'
 [DllImport("user32.dll")] public static extern System.IntPtr GetForegroundWindow();
 [DllImport("user32.dll")] public static extern uint GetWindowThreadProcessId(System.IntPtr h, out uint p);
-[DllImport("user32.dll")] public static extern bool SetForegroundWindow(System.IntPtr h);
-[DllImport("user32.dll")] public static extern bool ShowWindowAsync(System.IntPtr h, int c);
-[DllImport("user32.dll")] public static extern bool IsIconic(System.IntPtr h);
 [DllImport("user32.dll")] public static extern void keybd_event(byte v, byte s, uint f, System.UIntPtr e);
 '@;
 `;
 var WIN_FRONT_PID = `${WIN_USER322}$p = 0; [void][HXF.W]::GetWindowThreadProcessId([HXF.W]::GetForegroundWindow(), [ref]$p); "$p"`;
-var WIN_BRING_FRONT = `${WIN_USER322}$h = (Get-Process -Id ([int]$env:HX_PID)).MainWindowHandle;
-if ($h -eq 0) { 'false' } else { if ([HXF.W]::IsIconic($h)) { [void][HXF.W]::ShowWindowAsync($h, 9) }; "$([HXF.W]::SetForegroundWindow($h))".ToLower() }`;
 var WIN_RELEASE = `${WIN_USER322}foreach ($v in 0x10,0x11,0x12,0xA0,0xA1,0xA2,0xA3,0xA4,0xA5,0x5B,0x5C) { [HXF.W]::keybd_event([byte]$v, 0, 2, [System.UIntPtr]::Zero) }; 'ok'`;
 function powershell(text) {
   return [
@@ -21937,10 +21934,6 @@ function hxFrontWatch(run, platform = process.platform) {
         const result = await jxa(MAC_FRONT_PID);
         return hxRunOk(result) ? pidOf(result.stdout) : null;
       },
-      async bringFront(pid) {
-        const result = await jxa(MAC_BRING_FRONT, { HX_PID: String(pid) });
-        return hxRunOk(result) && result.stdout.trim() === "true";
-      },
       async releaseModifiers() {
         await jxa(MAC_RELEASE);
       }
@@ -21952,10 +21945,6 @@ function hxFrontWatch(run, platform = process.platform) {
       async frontPid() {
         const result = await ps(WIN_FRONT_PID);
         return hxRunOk(result) ? pidOf(result.stdout) : null;
-      },
-      async bringFront(pid) {
-        const result = await ps(WIN_BRING_FRONT, { HX_PID: String(pid) });
-        return hxRunOk(result) && result.stdout.trim() === "true";
       },
       async releaseModifiers() {
         await ps(WIN_RELEASE);
@@ -22085,17 +22074,18 @@ var stopProcessTree = fn2("ProcessTree.stop")(function* (child) {
 var run3 = promisify3(execFile5);
 var sleep3 = (ms) => new Promise((done) => setTimeout(done, ms));
 function ps(text) {
+  const script = `$ProgressPreference = 'SilentlyContinue'; ${text}`;
   return [
     "-NoLogo",
     "-NoProfile",
     "-NonInteractive",
     "-EncodedCommand",
-    Buffer.from(text, "utf16le").toString("base64")
+    Buffer.from(script, "utf16le").toString("base64")
   ];
 }
-async function output(command, args) {
-  const result = await hxRun(command, args, { timeoutMs: 30000 });
-  return `${result.stdout}${result.stderr ? ` [${result.stderr.trim().slice(0, 200)}]` : ""}`.trim();
+async function output(command, args, env) {
+  const result = await hxRun(command, args, { timeoutMs: 30000, ...env ? { env } : {} });
+  return result.stdout.trim();
 }
 async function macPid(name) {
   const text = await output("/usr/bin/pgrep", ["-x", name]);
@@ -22118,7 +22108,7 @@ var WIN_USER323 = `Add-Type -Namespace HXQ -Name K -MemberDefinition '[DllImport
 var WIN_HELD = `${WIN_USER323}$n = 0; foreach ($v in 0x10,0x11,0x12,0xA0,0xA1,0xA2,0xA3,0xA4,0xA5,0x5B,0x5C) { if ([HXQ.K]::GetAsyncKeyState($v) -band 0x8000) { $n++ } }; "$n"`;
 var WIN_PRESS_SHIFT = `${WIN_USER323}[HXQ.K]::keybd_event([byte]0x10, 0, 0, [System.UIntPtr]::Zero); 'ok'`;
 async function clipboardText(mac) {
-  return mac ? (await hxRun("/usr/bin/pbpaste", [], { timeoutMs: 1e4 })).stdout : (await output(HX_POWERSHELL, ps("Get-Clipboard -Raw"))).replace(/\r?\n$/u, "");
+  return mac ? (await hxRun("/usr/bin/pbpaste", [], { timeoutMs: 1e4 })).stdout : await output(HX_POWERSHELL, ps("Get-Clipboard -Raw"));
 }
 async function setClipboard(mac, text) {
   if (mac) {
@@ -22179,11 +22169,9 @@ async function hxQuietRealCheck(input) {
       spawn3("explorer.exe", [work], { detached: true, stdio: "ignore" }).unref();
     await sleep3(2500);
     const away = await front.frontPid();
-    const brought = await front.bringFront(target);
     await sleep3(1000);
-    const back = await front.frontPid();
-    const status = back === target ? "pass" : away === target ? "warn" : brought ? "warn" : "fail";
-    items.add("Q2", "用户切走以后，把目标应用叫回前台；叫不回来时按键不发出（单元测试）", status, `target ${target}; after the move ${away ?? "none"}; bring ${brought}; then ${back ?? "none"}`);
+    const later = await front.frontPid();
+    items.check("Q2", "用户切走以后，HXBot 看得出来，也不把目标应用拉回前台", away !== null && away !== target && later === away, `target ${target}; after the move ${away ?? "none"}; a second later ${later ?? "none"}`);
   }
   const press = mac ? await output("/usr/bin/osascript", ["-l", "JavaScript", "-e", MAC_PRESS_SHIFT]) : await output(HX_POWERSHELL, ps(WIN_PRESS_SHIFT));
   const heldBefore = mac ? await output("/usr/bin/osascript", ["-l", "JavaScript", "-e", MAC_HELD]) : await output(HX_POWERSHELL, ps(WIN_HELD));
@@ -22200,21 +22188,20 @@ async function hxQuietRealCheck(input) {
     items.add("Q5", "停助手的进程时留下它打开的应用", "skip", "Mac 上用 open 打开的应用不在助手的进程组里");
   else {
     const before = new Set(await winPids("notepad"));
-    const tree = spawn3(HX_POWERSHELL, ps(`$n = Start-Process notepad -PassThru; $p = Start-Process ping -ArgumentList '-n','300','127.0.0.1' -WindowStyle Hidden -PassThru; "PIDS $($n.Id) $($p.Id)"; Start-Sleep -Seconds 300`), { stdio: ["ignore", "pipe", "ignore"], windowsHide: true });
-    let text = "";
-    tree.stdout?.on("data", (chunk) => {
-      text += chunk.toString("utf8");
-    });
-    for (let i = 0;i < 60 && !/PIDS \d+ \d+/u.test(text); i++)
-      await sleep3(500);
-    const match = /PIDS (\d+) (\d+)/u.exec(text);
-    const ping = match ? Number.parseInt(match[2] ?? "0", 10) : 0;
+    const tree = spawn3(HX_POWERSHELL, ps("Start-Process notepad; Start-Process ping -ArgumentList '-n','300','127.0.0.1' -WindowStyle Hidden; Start-Sleep -Seconds 300"), { stdio: "ignore", windowsHide: true });
+    let ping = 0;
     let notepad = 0;
-    for (let i = 0;i < 30 && notepad === 0; i++) {
+    let children = "";
+    for (let i = 0;i < 40 && (ping === 0 || notepad === 0); i++) {
       await sleep3(500);
-      notepad = (await winPids("notepad")).find((pid) => !before.has(pid)) ?? 0;
+      children = await output(HX_POWERSHELL, ps("@(Get-CimInstance Win32_Process -Filter ('ParentProcessId=' + $env:HX_PID) | ForEach-Object { $_.Name + ':' + $_.ProcessId }) -join ' '"), { HX_PID: String(tree.pid ?? 0) });
+      const pinged = /(?:^|\s)PING\.EXE:(\d+)/iu.exec(children);
+      ping = pinged ? Number.parseInt(pinged[1] ?? "0", 10) : 0;
+      const child = /(?:^|\s)notepad\.exe:(\d+)/iu.exec(children);
+      const windowed = (await winPids("notepad")).find((pid) => !before.has(pid)) ?? 0;
+      notepad = child && Number.parseInt(child[1] ?? "0", 10) === windowed ? windowed : 0;
     }
-    log(`tree: ${text.trim()}; notepad window ${notepad}`);
+    log(`tree ${tree.pid}: ${children}; notepad window ${notepad}`);
     const started = Date.now();
     await runPromise2(stopWindowsProcessTree(tree)).catch((error) => log(`stop: ${String(error)}`));
     const seconds = (Date.now() - started) / 1000;
@@ -22222,14 +22209,14 @@ async function hxQuietRealCheck(input) {
     const shellGone = tree.exitCode !== null || tree.signalCode !== null;
     const pingGone = ping > 0 && !await winAlive(ping);
     const notepadKept = notepad > 0 && await winAlive(notepad);
-    items.check("Q5", "停助手的进程树：它打开的记事本留下，后台的 ping 和 PowerShell 停下", shellGone && pingGone && notepadKept, `shell gone ${shellGone}; ping ${ping} gone ${pingGone}; notepad ${notepad} kept ${notepadKept}; ${seconds.toFixed(1)} s`);
+    items.check("Q5", "停助手的进程树：它打开的记事本留下，后台的 ping 和 PowerShell 停下", shellGone && pingGone && notepadKept, `shell gone ${shellGone}; ping ${ping} gone ${pingGone}; notepad ${notepad} kept ${notepadKept}; ${seconds.toFixed(1)} s; children ${children.slice(0, 200)}`);
     if (notepad > 0)
       await run3("taskkill", ["/PID", String(notepad), "/F"]).catch(() => {
         return;
       });
   }
   const after = await clipboardText(mac);
-  items.check("Q6", "用户的剪贴板在检查前后不变", after === sentinel, `${JSON.stringify(after.slice(0, 80))}`);
+  items.check("Q6", "用户的剪贴板在检查前后不变", after.trim() === sentinel, `${JSON.stringify(after.slice(0, 80))}`);
   if (target !== null) {
     if (mac)
       await run3("/usr/bin/osascript", ["-e", 'tell application "TextEdit" to quit saving no']).catch(() => {
