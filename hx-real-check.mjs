@@ -21902,7 +21902,7 @@ var Json2 = /* @__PURE__ */ make7(/* @__PURE__ */ annotate(Json, {
 var join6 = fiberJoin;
 // src/backend/hx-computer/front.ts
 var MAC_FRONT_PID = "ObjC.import('AppKit'); String($.NSWorkspace.sharedWorkspace.frontmostApplication.processIdentifier)";
-var MAC_RELEASE = "ObjC.import('CoreGraphics'); for (const k of [55, 54, 56, 60, 58, 61, 59, 62, 63]) { $.CGEventPost(0, $.CGEventCreateKeyboardEvent(null, k, false)); } 'ok'";
+var MAC_RELEASE = "ObjC.import('CoreGraphics'); ObjC.import('Foundation'); let left = 'held'; for (let i = 0; i < 5; i++) { for (const k of [55, 54, 56, 60, 58, 61, 59, 62, 63]) { $.CGEventPost(0, $.CGEventCreateKeyboardEvent(null, k, false)); } const f = $.CGEventCreate(null); $.CGEventSetType(f, 12); $.CGEventSetFlags(f, 0); $.CGEventPost(0, f); $.NSThread.sleepForTimeInterval(0.1); if ((($.CGEventSourceFlagsState(1) & 0x00FF0000) >>> 0) === 0) { left = 'ok'; break; } } left";
 var WIN_USER322 = `Add-Type -Namespace HXF -Name W -MemberDefinition @'
 [DllImport("user32.dll")] public static extern System.IntPtr GetForegroundWindow();
 [DllImport("user32.dll")] public static extern uint GetWindowThreadProcessId(System.IntPtr h, out uint p);
@@ -22180,7 +22180,7 @@ async function hxQuietRealCheck(input) {
   const press = mac ? await output("/usr/bin/osascript", ["-l", "JavaScript", "-e", MAC_PRESS_SHIFT]) : await output(HX_POWERSHELL, ps(WIN_PRESS_SHIFT));
   const heldBefore = mac ? await output("/usr/bin/osascript", ["-l", "JavaScript", "-e", MAC_HELD]) : await output(HX_POWERSHELL, ps(WIN_HELD));
   await front.releaseModifiers();
-  await sleep3(300);
+  await sleep3(1000);
   const heldAfter = mac ? await output("/usr/bin/osascript", ["-l", "JavaScript", "-e", MAC_HELD]) : await output(HX_POWERSHELL, ps(WIN_HELD));
   items.add("Q3", "修饰键卡在“按下”时，松开以后没有按下的修饰键", heldAfter.trim() !== "0" ? "fail" : heldBefore.trim() === "0" ? "warn" : "pass", `press ${press}; held before ${heldBefore}; held after ${heldAfter}`);
   const low = mac ? await hxRunBackground("/bin/sh", ["-c", "sleep 1; ps -o nice= -p $$"], { timeoutMs: 20000 }) : await hxRunBackground(HX_POWERSHELL, ps("Start-Sleep -Seconds 2; [string](Get-Process -Id $PID).PriorityClass"), {
