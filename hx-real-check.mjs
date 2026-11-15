@@ -15007,6 +15007,7 @@ function automationRefused(result) {
   return /-1743|Not authorized to send Apple events/iu.test(`${result.stderr}
 ${result.stdout}`);
 }
+var CONTROLS_APP = /\btell\s+application\b|\bApplication\s*\(/iu;
 async function hxRunScript(deps, input) {
   const script = input.script;
   if (!script.trim() || script.length > MAX_SCRIPT)
@@ -15069,6 +15070,11 @@ ${input.input ?? ""}`) && !input.confirmed)
         reason: "macOS did not let HXBot control that app (Automation). The Automation page of System Settings is open: tell the user to turn on the app under HXBot there, then run the script again."
       };
     }
+    if (mac && result.timedOut && CONTROLS_APP.test(script))
+      return {
+        status: "needs-permission",
+        reason: "macOS did not answer in time: it most likely asks the user whether HXBot may control that app. Tell the user to click OK (Allow) in that dialog, then run the script again."
+      };
     if (!hxRunOk(result)) {
       const { text } = trim(result.stdout);
       return {
@@ -15187,6 +15193,8 @@ end tell`
     }
     const browser = await hxAppControl(deps, { action: "default", kind: "browser" });
     items.check("A9", "读默认浏览器", browser.status === "default" && browser.app !== "", line2(browser));
+    const changed = mac ? await hxAppControl(deps, { action: "default", kind: "type", type: "md", app: "TextEdit" }) : await hxAppControl(deps, { action: "default", kind: "browser", app: "Microsoft Edge" });
+    items.add("A10", mac ? "把 .md 文件的默认应用改成文本编辑，读回核对" : "改默认浏览器：打开“默认应用”页（status page）", mac ? changed.status === "default" && changed.app.toLowerCase() === "com.apple.textedit" ? "pass" : changed.status === "confirm-dialog" ? "warn" : "fail" : changed.status === "page" ? "pass" : "fail", line2(changed));
   } catch (error) {
     items.add("A99", "应用命令的检查没有跑完", "fail", error instanceof Error ? error.message : String(error));
   }
