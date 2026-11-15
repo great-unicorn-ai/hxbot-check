@@ -15594,7 +15594,14 @@ async function unpack(deps, source) {
       return { status: "failed", reason: hxRunFailure("hdiutil", attach) };
     }
     const done = async () => {
-      await run("/usr/bin/hdiutil", ["detach", mount, "-quiet"], { timeoutMs: 60000 });
+      for (let tried = 1;tried <= ATTACH_TRIES; tried++) {
+        const force = tried === ATTACH_TRIES ? ["-force"] : [];
+        const detach = await run("/usr/bin/hdiutil", ["detach", mount, "-quiet", ...force], { timeoutMs: 60000 });
+        if (hxRunOk(detach))
+          break;
+        if (tried < ATTACH_TRIES)
+          await wait(ATTACH_WAIT_MS);
+      }
       await files.remove(mount).catch(() => {
         return;
       });
