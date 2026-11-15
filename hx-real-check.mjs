@@ -22188,7 +22188,15 @@ async function hxQuietRealCheck(input) {
     items.add("Q5", "停助手的进程时留下它打开的应用", "skip", "Mac 上用 open 打开的应用不在助手的进程组里");
   else {
     const before = new Set(await winPids("notepad"));
-    const tree = spawn3(HX_POWERSHELL, ps("Start-Process notepad; Start-Process ping -ArgumentList '-n','300','127.0.0.1' -WindowStyle Hidden; Start-Sleep -Seconds 300"), { stdio: "ignore", windowsHide: true });
+    const tree = spawn3("cmd.exe", ["/d", "/s", "/c", '"start "" notepad.exe & ping -n 300 127.0.0.1 > nul"'], {
+      stdio: ["ignore", "ignore", "pipe"],
+      windowsHide: true,
+      windowsVerbatimArguments: true
+    });
+    let errors = "";
+    tree.stderr?.on("data", (chunk) => {
+      errors += chunk.toString("utf8");
+    });
     let ping = 0;
     let notepad = 0;
     let children = "";
@@ -22209,7 +22217,7 @@ async function hxQuietRealCheck(input) {
     const shellGone = tree.exitCode !== null || tree.signalCode !== null;
     const pingGone = ping > 0 && !await winAlive(ping);
     const notepadKept = notepad > 0 && await winAlive(notepad);
-    items.check("Q5", "停助手的进程树：它打开的记事本留下，后台的 ping 和 PowerShell 停下", shellGone && pingGone && notepadKept, `shell gone ${shellGone}; ping ${ping} gone ${pingGone}; notepad ${notepad} kept ${notepadKept}; ${seconds.toFixed(1)} s; children ${children.slice(0, 200)}`);
+    items.check("Q5", "停助手的进程树：它打开的记事本留下，后台的 ping 和 PowerShell 停下", shellGone && pingGone && notepadKept, `shell gone ${shellGone}; ping ${ping} gone ${pingGone}; notepad ${notepad} kept ${notepadKept}; ${seconds.toFixed(1)} s; children ${children.slice(0, 200)}; ${errors.slice(0, 200)}`);
     if (notepad > 0)
       await run3("taskkill", ["/PID", String(notepad), "/F"]).catch(() => {
         return;
