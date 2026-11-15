@@ -1,0 +1,17 @@
+[2026-11-15T12:12:12.084Z] == 逐步操作
+
+[2026-11-15T12:12:23.879Z] == 安装应用
+
+[2026-11-15T12:12:28.330Z] test apps: /var/folders/2s/vty41l455yv698g4xkgfv7z00000gn/T/hxbot-install-check-gZNvlz/v1/HXInstallCheck.app, /var/folders/2s/vty41l455yv698g4xkgfv7z00000gn/T/hxbot-install-check-gZNvlz/HXInstallCheck-2.0.zip, /var/folders/2s/vty41l455yv698g4xkgfv7z00000gn/T/hxbot-install-check-gZNvlz/v3/HXInstallCheck.app → /var/folders/2s/vty41l455yv698g4xkgfv7z00000gn/T/hxbot-install-check-gZNvlz/HXInstallCheck-3.0.dmg
+
+[2026-11-15T12:12:32.524Z] == 应用命令
+
+[2026-11-15T12:12:32.617Z] jxa bridge: {"status":"ran","language":"jxa","output":"{\"count\":[\"string\",\"34\"],\"policy\":[\"string\",\"1\"],\"pid\":[\"number\",\"148\"],\"active\":[\"boolean\",\"false\"]}","truncated":false}
+
+[2026-11-15T12:12:33.338Z] list after open: {"status":"apps","apps":[{"name":"Finder","id":"com.apple.finder","pid":344,"active":false,"hidden":false},{"name":"TextEdit","id":"com.apple.TextEdit","pid":1149,"active":true,"hidden":false}]}
+
+[2026-11-15T12:12:33.338Z] opened TextEdit: true
+
+[2026-11-15T12:12:38.894Z] list after open: {"status":"apps","apps":[{"name":"Finder","id":"com.apple.finder","pid":344,"active":false,"hidden":false},{"name":"TextEdit","id":"com.apple.TextEdit","pid":1669,"active":true,"hidden":false}]}
+
+[2026-11-15T12:14:39.834Z] == 不打扰其他应用
