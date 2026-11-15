@@ -14494,7 +14494,8 @@ if (want) {
   if (scheme === 'http') { code = $.LSSetDefaultHandlerForURLScheme($('http'), $(want)); $.LSSetDefaultHandlerForURLScheme($('https'), $(want)); }
   else if (scheme) code = $.LSSetDefaultHandlerForURLScheme($(scheme), $(want));
   else code = $.LSSetDefaultRoleHandlerForContentType($(uti), 0xFFFFFFFF, $(want));
-  delay(1.5);
+  // The change can take a moment to read back (macOS 26 on GitHub, 2026-11-14): wait up to 6 seconds.
+  for (let i = 0; i < 12 && read().toLowerCase() !== want.toLowerCase(); i++) delay(0.5);
 }
 JSON.stringify({ before: before, after: read(), code: code, uti: uti });`;
 var MAC_BUNDLE = `${JXA_ENV}const want = env('HX_APP'); const ws = $.NSWorkspace.sharedWorkspace;
@@ -14618,7 +14619,7 @@ var PLACED = object({
   sent: boolean2().optional()
 });
 var BUNDLE = object({ id: string2(), name: string2() });
-var MAC_DEFAULT_ANSWER = object({ before: string2(), after: string2() });
+var MAC_DEFAULT_ANSWER = object({ before: string2(), after: string2(), code: number2().nullable().optional() });
 var WIN_DEFAULT_ANSWER = object({
   progId: string2().nullable().transform((value) => value ?? "")
 });
@@ -14883,7 +14884,7 @@ async function macDefault(input, jxa) {
     return { status: "default", kind, target, app: answer.after, route: "direct" };
   return {
     status: "confirm-dialog",
-    reason: `macOS asks the user to confirm in a dialog before ${wantName} opens ${target} (it is still ${answer.before || "the system default"}). Tell the user to click "Use ${wantName}" in that dialog, or click it with computer_look and computer_do, then call again without app to read it.`
+    reason: `macOS asks the user to confirm in a dialog before ${wantName} opens ${target} (it is still ${answer.before || "the system default"}; macOS answered ${answer.code ?? "nothing"}). Tell the user to click "Use ${wantName}" in that dialog, or click it with computer_look and computer_do, then call again without app to read it.`
   };
 }
 async function windows(deps, input) {
