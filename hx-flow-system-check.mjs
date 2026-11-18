@@ -854,25 +854,29 @@ async function windows() {
     detail: `5 次回答（毫秒）：${answers.join("、")}`,
     ms: Math.max(...answers)
   });
-  const script = [
-    "const { spawn } = require('node:child_process');",
-    `const form = spawn('powershell.exe', ['-NoProfile', '-Command', 'Add-Type -AssemblyName System.Windows.Forms; $f = New-Object System.Windows.Forms.Form; $f.Text = "HX check"; [System.Windows.Forms.Application]::Run($f)'], { stdio: 'ignore' });`,
-    "const worker = spawn(process.execPath, ['-e', 'setInterval(() => {}, 1e6)'], { stdio: 'ignore' });",
-    "console.log(JSON.stringify({ form: form.pid, worker: worker.pid }));",
-    "setInterval(() => {}, 1e6);"
-  ].join(`
-`);
-  const root = spawn2(process.execPath, ["-e", script], { stdio: ["ignore", "pipe", "ignore"], windowsHide: true });
-  const ids = await new Promise((done) => {
-    root.stdout.once("data", (chunk) => {
-      try {
-        done(JSON.parse(String(chunk)));
-      } catch {
-        done(null);
-      }
-    });
-    setTimeout(() => done(null), 30000);
-  });
+  const formScript = Buffer.from('Add-Type -AssemblyName System.Windows.Forms; $f = New-Object System.Windows.Forms.Form; $f.Text = "HX check"; [System.Windows.Forms.Application]::Run($f)', "utf16le").toString("base64");
+  const root = spawn2("cmd.exe", [
+    "/d",
+    "/s",
+    "/c",
+    `"start "" powershell.exe -NoProfile -EncodedCommand ${formScript} & ping -n 300 127.0.0.1 > nul"`
+  ], { stdio: "ignore", windowsHide: true, windowsVerbatimArguments: true });
+  const childrenDeadline = performance.now() + 30000;
+  let ids = null;
+  while (root.pid !== undefined && ids === null && performance.now() < childrenDeadline) {
+    const rows = await command("powershell.exe", [
+      "-NoProfile",
+      "-Command",
+      `Get-CimInstance Win32_Process -Filter 'ParentProcessId=${root.pid}' | ForEach-Object { '' + $_.ProcessId + ' ' + $_.Name }`
+    ]);
+    const children = rows.stdout.split(/\r?\n/u).map((line) => /^(\d+) (.+)$/u.exec(line.trim())).filter((match) => match !== null);
+    const shell = children.find((match) => match[2]?.toLowerCase() === "powershell.exe");
+    const ping = children.find((match) => match[2]?.toLowerCase() === "ping.exe");
+    if (shell && ping)
+      ids = { form: Number(shell[1]), worker: Number(ping[1]) };
+    else
+      await wait(500);
+  }
   const windowDeadline = performance.now() + 90000;
   let windowed = false;
   while (ids && !windowed && performance.now() < windowDeadline) {
