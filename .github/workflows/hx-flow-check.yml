@@ -38,6 +38,9 @@ jobs:
         run: |
           if [ -f out/summary.md ]; then
             cat out/summary.md >> "$GITHUB_STEP_SUMMARY"
+            # Also in the log, which can be read without downloading the results.
+            cat out/summary.md
+            if [ -f out/report.json ]; then cat out/report.json; fi
           else
             echo "检查程序没有写出结果。" >> "$GITHUB_STEP_SUMMARY"
           fi
