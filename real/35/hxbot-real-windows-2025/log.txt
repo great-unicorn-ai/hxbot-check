@@ -1,0 +1,55 @@
+[2026-11-19T07:26:24.172Z] == 逐步操作
+
+[2026-11-19T07:26:33.521Z] == 安装应用
+
+[2026-11-19T07:26:33.521Z] == 应用命令
+
+[2026-11-19T07:26:35.531Z] list after open: {"status":"apps","apps":[{"name":"Windows Explorer","id":"explorer","pid":7672,"title":""},{"name":"Notepad","id":"notepad","pid":6340,"title":"hxbot-check.txt - Notepad"},{"name":"Notepad","id":"notepad","pid":8028,"title":"hxbot-app-check.txt - Notepad"},{"name":"Windows Terminal Host","id":"WindowsTerminal","pid":7116,"title":"C:\\ProgramData\\GitHub\\HostedComputeAgent\\hosted-compute-agent"}]}
+
+[2026-11-19T07:26:35.531Z] opened notepad: true
+
+[2026-11-19T07:26:40.118Z] list after open: {"status":"apps","apps":[{"name":"Windows Explorer","id":"explorer","pid":7672,"title":""},{"name":"Notepad","id":"notepad","pid":5648,"title":"hxbot-app-check.txt - Notepad"},{"name":"Notepad","id":"notepad","pid":8028,"title":"hxbot-app-check.txt - Notepad"},{"name":"Windows Terminal Host","id":"WindowsTerminal","pid":7116,"title":"C:\\ProgramData\\GitHub\\HostedComputeAgent\\hosted-compute-agent"}]}
+
+[2026-11-19T07:26:45.471Z] == 不打扰其他应用
+
+[2026-11-19T07:26:57.835Z] tree 212: conhost.exe:1864 notepad.exe:8104 PING.EXE:7304; notepad window 8104
+
+[2026-11-19T07:27:02.435Z] == 分道与礼让
+
+[2026-11-19T07:27:06.265Z] idle reader reads; idle 13538 ms
+
+[2026-11-19T07:27:07.482Z] windows: a {"pid":6176,"windowId":66422,"app":"notepad.exe","title":"hxbot-lane-a.txt - Notepad"}; b {"pid":10156,"windowId":262778,"app":"charmap.exe","title":"Character Map"}
+
+[2026-11-19T07:27:10.490Z] b computer_do {"title":"Character Map","steps":[{"act":"wait","seconds":3}]} → {"status":"done","window":{"app":"charmap.exe","title":"Character Map","windowId":262778},"steps":[{"n":1,"act":"wait","what":"3 s","route":"none","check":"verified","checked":true}],"borrowedScreen":false,"summary":{"verified":1,"unchecked":0,"pending":0}}
+
+[2026-11-19T07:27:10.514Z] a computer_do {"title":"hxbot-lane-a","steps":[{"act":"wait","seconds":3}]} → {"status":"done","window":{"app":"notepad.exe","title":"hxbot-lane-a.txt - Notepad","windowId":66422},"steps":[{"n":1,"act":"wait","what":"3 s","route":"none","check":"verified","checked":true}],"borrowedScreen":false,"summary":{"verified":1,"unchecked":0,"pending":0}}
+
+[2026-11-19T07:27:13.519Z] c computer_do {"title":"hxbot-lane-a","steps":[{"act":"wait","seconds":3}]} → {"status":"done","window":{"app":"notepad.exe","title":"hxbot-lane-a.txt - Notepad","windowId":66422},"steps":[{"n":1,"act":"wait","what":"3 s","route":"none","check":"verified","checked":true}],"borrowedScreen":false,"summary":{"verified":1,"unchecked":0,"pending":0}}
+
+[2026-11-19T07:27:16.528Z] a computer_do {"title":"hxbot-lane-a","steps":[{"act":"wait","seconds":3}]} → {"status":"done","window":{"app":"notepad.exe","title":"hxbot-lane-a.txt - Notepad","windowId":66422},"steps":[{"n":1,"act":"wait","what":"3 s","route":"none","check":"verified","checked":true}],"borrowedScreen":false,"summary":{"verified":1,"unchecked":0,"pending":0}}
+
+[2026-11-19T07:27:23.626Z] a computer_do {"title":"hxbot-lane-a","steps":[{"act":"key","key":"end"},{"act":"key","key":"end"}]} → {"status":"done","window":{"app":"notepad.exe","title":"hxbot-lane-a.txt - Notepad","windowId":66422},"steps":[{"n":1,"act":"key","what":"end","route":"keyboard","check":"unchecked","checked":false},{"n":2,"act":"key","what":"end","route":"keyboard","check":"unchecked","checked":false}],"borrowedScreen":true,"summary":{"verified":0,"unchecked":2,"pending":0}}
+
+[2026-11-19T07:28:02.678Z] b computer_do {"title":"Character Map","steps":[{"act":"key","key":"escape"}]} → {"status":"waiting_user","window":{"app":"charmap.exe","title":"Character Map","windowId":262778},"steps":[],"stoppedAt":{"n":1,"act":"key","reason":"The user works in another window now (charmap.exe – Character Map is not in front), and HXBot does not take the front from the user. HXBot parked this step and sends you a message to continue when the user has not used the keyboard or the mouse for 5 seconds and charmap.exe – Character Map is the window in front. Until then, do the parts of the wor
+
+[2026-11-19T07:28:33.075Z] a computer_do {"title":"hxbot-lane-a","steps":[{"act":"key","key":"end"}]} → {"status":"busy","reason":"Another agent (Zed) works in this app now. Do the parts of the work that do not need it first, then run the remaining steps again.","etaMs":4424}
+
+[2026-11-19T07:29:06.142Z] a computer_do {"title":"hxbot-lane-a","steps":[{"act":"key","key":"end"},{"act":"type","text":" HXBot-e07d49","by":"keys"},{"act":"hotkey","keys":["ctrl","s"]}]} → {"status":"waiting_user","window":{"app":"notepad.exe","title":"hxbot-lane-a.txt - Notepad","windowId":66422},"steps":[],"stoppedAt":{"n":1,"act":"key","reason":"The user is using the keyboard or the mouse now, and HXBot does not type or click under the user's hands. HXBot parked this step and sends you a message to continue when the user has not used the keyboard or the mouse for 5 seconds and notepad.exe – hxbot-lane-a.txt - Notepad is the window in front. Until then, do the parts of the work 
+
+[2026-11-19T07:29:13.490Z] a computer_do {"title":"hxbot-lane-a","steps":[{"act":"key","key":"end"},{"act":"key","key":"end"},{"act":"key","key":"end"}]} → {"status":"done","window":{"app":"notepad.exe","title":"hxbot-lane-a.txt - Notepad","windowId":66422},"steps":[{"n":1,"act":"key","what":"end","route":"keyboard","check":"unchecked","checked":false},{"n":2,"act":"key","what":"end","route":"keyboard","check":"unchecked","checked":false},{"n":3,"act":"key","what":"end","route":"keyboard","check":"unchecked","checked":false}],"borrowedScreen":true,"summary":{"verified":0,"unchecked":3,"pending":0}}
+
+[2026-11-19T07:29:15.593Z] a computer_do {"title":"hxbot-lane-a","steps":[{"act":"key","key":"end"}]} → {"status":"stopped","window":{"app":"notepad.exe","title":"hxbot-lane-a.txt - Notepad","windowId":66422},"steps":[],"stoppedAt":{"n":1,"act":"key","reason":"The user stopped the work on the computer."},"borrowedScreen":false,"summary":{"verified":0,"unchecked":0,"pending":0},"next":"The user stopped the work on the computer. Do not go on; say what was done and wait."}
+
+[2026-11-19T07:29:21.754Z] a computer_look {"title":"Character Map"} → {"status":"window","outline":"charmap.exe — Character Map (pid 10156, window 262778)\n [0] field \"Characters to copy :\"\n [1] button \"Select\"\n [2] check \"Advanced view\"\n [3] field \"Font :\" = \"Arial\"\n  [4] text \"Font :\" = \"Arial\"\n  [5] button \"Open\"\n [6] link \"Help\"\n [7] slider \"204\"\n  [8] button \"Line up\"\n  [9] button \"Page down\"\n  [10] button \"Line down\"\n [11] titlebar \"Character Map\"\n   [12] menu \"System\"\n  [13] button \"Minimize\"\n  [14] button \"Clo
+
+[2026-11-19T07:29:21.754Z] L9 fields ["[0] field \"Characters to copy :\"","[3] field \"Font :\" = \"Arial\""]
+
+[2026-11-19T07:29:22.072Z] a computer_do {"title":"Character Map","steps":[{"act":"type","target":{"index":0},"text":"HXBot value caa728","by":"value"}]} → {"status":"done","window":{"app":"charmap.exe","title":"Character Map","windowId":262778},"steps":[{"n":1,"act":"type","what":"Characters to copy :: 18 characters","route":"value","check":"verified","checked":true,"readback":"the field shows \"HXBot value caa728\""}],"borrowedScreen":false,"summary":{"verified":1,"unchecked":0,"pending":0}}
+
+[2026-11-19T07:29:25.656Z] a computer_look {"title":"hxbot-lane-a"} → {"status":"window","outline":"notepad.exe — hxbot-lane-a.txt - Notepad (pid 6176, window 66422)\n [0] field \"Text Editor\" = \"HXBot lanes\"\n [1] titlebar \"hxbot-lane-a.txt - Notepad\"\n   [2] menu \"System\"\n  [3] button \"Minimize\"\n  [4] button \"Maximize\"\n  [5] button \"Close\"\n  [6] menu \"File\"\n  [7] menu \"Edit\"\n  [8] menu \"Format\"\n  [9] menu \"View\"\n  [10] menu \"Help\"\nThe driver did not read the whole window."}
+
+[2026-11-19T07:29:25.706Z] a computer_do {"title":"hxbot-lane-a","steps":[{"act":"type","target":{"index":0},"text":"HXBot value caa728","by":"value"}]} → {"status":"failed","window":{"app":"notepad.exe","title":"hxbot-lane-a.txt - Notepad","windowId":66422},"steps":[],"stoppedAt":{"n":1,"act":"type","reason":"This field does not take its text as a value (the driver refused it: set_value: element [0] does not implement ValuePattern or RangeValuePattern. For controls with TogglePattern (CheckBox) or SelectionItemPattern (RadioButton / ComboBoxItem), use the `click` tool instead.). Type it with by keys."},"borrowedScreen":false,"summary":{"verified"
+
+[2026-11-19T07:29:36.831Z] a computer_do {"title":"hxbot-lane-a","steps":[{"act":"wait","expect":{"name":"hxbot-never-f6a76a"}}]} → {"status":"timed_out","window":{"app":"notepad.exe","title":"hxbot-lane-a.txt - Notepad","windowId":66422},"steps":[],"stoppedAt":{"n":1,"act":"wait","reason":"没等到: HXBot waited 10 s and \"hxbot-never-f6a76a\" did not show (the driver could not tell, and the name is not in the window). It is not done.","candidates":[]},"borrowedScreen":false,"summary":{"verified":0,"unchecked":0,"pending":0},"next":"What the wait step expects did not show in time (没等到). It is not done: look at the window and dec
+
+[2026-11-19T07:29:39.103Z] a computer_do {"title":"hxbot-lane-a","steps":[{"act":"key","key":"end"}]} → {"status":"done","window":{"app":"notepad.exe","title":"hxbot-lane-a.txt - Notepad","windowId":66422},"steps":[{"n":1,"act":"key","what":"end","route":"keyboard","check":"unchecked","checked":false}],"borrowedScreen":true,"summary":{"verified":0,"unchecked":1,"pending":0}}
