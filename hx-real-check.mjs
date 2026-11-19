@@ -13577,6 +13577,7 @@ var HX_FRONT_SEEN_MS = 2000;
 var HX_CLIPBOARD_BACK_MS = 300;
 var HX_WAIT_MAX_MS = 1e4;
 var HX_VALUE_READBACK_MS = 200;
+var HX_SHOT_EDGE = 1600;
 function hxSnapshotOf(read, at) {
   return {
     windowId: read.windowId,
@@ -13755,6 +13756,8 @@ class HxStepRun {
   #gateStop = null;
   #snapshot;
   #record;
+  #platform;
+  #pixels = null;
   constructor(options) {
     this.#driver = options.driver;
     this.#stopped = options.stopped;
@@ -13765,6 +13768,7 @@ class HxStepRun {
     this.#gate = options.gate ?? null;
     this.#snapshot = options.snapshot ?? null;
     this.#record = options.record ?? null;
+    this.#platform = options.platform ?? process.platform;
   }
   async open(choice) {
     const listed = await this.#driver.call("list_windows", { on_screen_only: true }, 5000);
@@ -13804,7 +13808,7 @@ class HxStepRun {
       window_id: window.windowId,
       include_screenshot: true,
       include_accessibility_tree: false,
-      max_image_dimension: 1600
+      max_image_dimension: HX_SHOT_EDGE
     }, 15000);
     if (!answer.ok)
       return { error: answer.error ?? "The window could not be read." };
@@ -13816,6 +13820,7 @@ class HxStepRun {
     const content = answer.content ?? {};
     const width = typeof content.screenshot_width === "number" ? content.screenshot_width : window.width;
     const height = typeof content.screenshot_height === "number" ? content.screenshot_height : window.height;
+    this.#pixels = { width, height };
     return { image, width, height };
   }
   async run(steps) {
@@ -13995,10 +14000,53 @@ class HxStepRun {
     const read = hxReadWindow(answer.content);
     if (!read)
       return "The driver gave no window.";
+    this.#pixels = null;
     if (query === undefined)
       this.#read = read;
     this.#lastRead = { read, at: this.#now() };
     return read;
+  }
+  async#pixelRead() {
+    const window = this.#window;
+    if (!window)
+      return "No window.";
+    const answer = await this.#driver.call("get_window_state", {
+      pid: window.pid,
+      window_id: window.windowId,
+      include_screenshot: true,
+      max_image_dimension: HX_SHOT_EDGE,
+      max_elements: 1500,
+      timeout_ms: 2000
+    }, 15000);
+    if (!answer.ok)
+      return answer.error ?? "The window could not be read.";
+    if (answer.refused)
+      return short(`The window could not be read with a screenshot: ${answer.text || "the driver refused"}. A click at a point needs one; Screen Recording may be off for HXBot.`, 300);
+    const read = hxReadWindow(answer.content);
+    if (!read)
+      return "The driver gave no window.";
+    const content = answer.content ?? {};
+    this.#pixels = {
+      width: typeof content.screenshot_width === "number" ? content.screenshot_width : window.width,
+      height: typeof content.screenshot_height === "number" ? content.screenshot_height : window.height
+    };
+    this.#read = read;
+    this.#lastRead = { read, at: this.#now() };
+    return read;
+  }
+  async#pixelOf(element) {
+    const read = await this.#pixelRead();
+    if (typeof read === "string")
+      return read;
+    if (!element) {
+      const size = this.#pixels;
+      return size ? { x: Math.round(size.width / 2), y: Math.round(size.height / 2) } : "No window.";
+    }
+    const same = read.elements.find((item) => item.index === element.index && item.role === element.role) ?? read.elements.find((item) => item.role === element.role && item.label === element.label);
+    const frame = same?.frame;
+    if (!frame)
+      return "The element has no position to click.";
+    return { x: Math.round(frame.x + frame.w / 2), y: Math.round(frame.y + frame.h / 2) };
   }
   #target() {
     const window = this.#window;
@@ -14077,9 +14125,20 @@ class HxStepRun {
           break;
       }
     }
-    const point = at ?? (element?.frame ? { x: Math.round(element.frame.x + element.frame.w / 2), y: Math.round(element.frame.y + element.frame.h / 2) } : null);
-    if (!point)
+    if (!at && !element?.frame)
       return { reason: "The element has no position to click." };
+    let point;
+    if (at) {
+      const read = this.#pixels ? null : await this.#pixelRead();
+      if (typeof read === "string")
+        return { reason: read };
+      point = at;
+    } else {
+      const found = await this.#pixelOf(element);
+      if (typeof found === "string")
+        return { reason: found };
+      point = found;
+    }
     let reason = "The click did not happen.";
     for (const mode of modes) {
       if (mode === "foreground") {
@@ -14105,19 +14164,19 @@ class HxStepRun {
     return { reason };
   }
   async#pointOf(target, at) {
-    if (at)
-      return at;
+    if (at) {
+      const read = this.#pixels ? null : await this.#pixelRead();
+      return typeof read === "string" ? { stop: "failed", reason: read } : at;
+    }
+    let element = null;
     if (target) {
       const found = await this.#find(target);
       if ("stop" in found)
         return found;
-      const frame = found.element.frame;
-      if (!frame)
-        return { stop: "failed", reason: "The element has no position." };
-      return { x: Math.round(frame.x + frame.w / 2), y: Math.round(frame.y + frame.h / 2) };
+      element = found.element;
     }
-    const window = this.#window;
-    return window ? { x: Math.round(window.width / 2), y: Math.round(window.height / 2) } : { stop: "no_window", reason: "No window." };
+    const point = await this.#pixelOf(element);
+    return typeof point === "string" ? { stop: "failed", reason: point } : point;
   }
   async#setValue(field, text, by) {
     const window = this.#window;
@@ -14159,6 +14218,30 @@ class HxStepRun {
       check: "pending",
       readback: `the field shows ${JSON.stringify(short(same.value))}`,
       pending: `HXBot set the text on the field, but it shows ${JSON.stringify(short(same.value))}.`
+    };
+  }
+  async#insert(field, text, label) {
+    if (!field.token)
+      return null;
+    const answer = await this.#act("type_text", { target: this.#target(), element_token: field.token, text, delivery_mode: "background" }, 30000);
+    const effect = actionEffect(answer);
+    if (!effect.worked)
+      return null;
+    this.#keysToFront = true;
+    const what = `${label ? `${label}: ` : ""}${text.length} characters`;
+    if (effect.sure)
+      return { what, route: "background", check: "verified", readback: "the driver read the field back" };
+    const landed = await this.#landed(field, text);
+    if (landed === true)
+      return { what, route: "background", check: "verified", readback: "the field shows the text" };
+    if (landed === null)
+      return { what, route: "background", check: "unchecked" };
+    return {
+      what,
+      route: "background",
+      check: "pending",
+      readback: "the field does not show the end of the text",
+      pending: "The text was sent to the field, but the field does not show it."
     };
   }
   async#step(step) {
@@ -14215,6 +14298,11 @@ class HxStepRun {
               stop: "failed",
               reason: "This field does not take its text as a value. Type it with by keys."
             };
+          if (this.#platform === "darwin") {
+            const inserted = await this.#insert(found.element, step.text, label);
+            if (inserted)
+              return inserted;
+          }
           const focused = await this.#click(found.element, null, {}, ["foreground"]);
           if ("stop" in focused)
             return focused;
@@ -14288,15 +14376,30 @@ class HxStepRun {
         };
       }
       case "scroll": {
-        const point = await this.#pointOf(step.target, step.at);
-        if ("stop" in point)
-          return point;
+        let where;
+        if (step.target && !step.at) {
+          const found = await this.#find(step.target);
+          if ("stop" in found)
+            return found;
+          if (found.element.token)
+            where = { element_token: found.element.token };
+          else {
+            const point = await this.#pixelOf(found.element);
+            if (typeof point === "string")
+              return { stop: "failed", reason: point };
+            where = { x: point.x, y: point.y };
+          }
+        } else {
+          const point = await this.#pointOf(undefined, step.at);
+          if ("stop" in point)
+            return point;
+          where = { x: point.x, y: point.y };
+        }
         const blocked = await this.#needFront();
         if (blocked)
           return blocked;
         const answer = await this.#act("scroll", {
-          x: point.x,
-          y: point.y,
+          ...where,
           direction: step.direction ?? "down",
           amount: step.amount ?? 3,
           target: this.#target()
@@ -14327,6 +14430,7 @@ class HxStepRun {
           from_y: from.y,
           to_x: to.x,
           to_y: to.y,
+          delivery_mode: "foreground",
           target: this.#target()
         });
         const effect = actionEffect(answer);
@@ -16453,7 +16557,7 @@ class HxComputerLanes {
       return null;
     const average = list.reduce((sum, value) => sum + value, 0) / list.length;
     const held = this.#held.get(lane);
-    const left = held ? Math.max(0, average - (this.#now() - held.since)) : 0;
+    const left = held ? Math.max(average / 2, average - (this.#now() - held.since)) : 0;
     const queued = this.#waiting.filter((waiter) => waiter.lane === lane).length;
     return Math.round(left + queued * average);
   }
@@ -17067,7 +17171,7 @@ async function hxComputerStepToolCall(deps, params) {
           if ("stop" in begun) {
             return answer({
               status: begun.stop,
-              reason: begun.stop === "busy" ? `${begun.reason} ${WHY.busy}` : begun.reason,
+              reason: begun.stop === "busy" ? `${begun.reason} Do the parts of the work that do not need it first, then run the remaining steps again.` : begun.reason,
               etaMs: begun.etaMs
             }, false);
           }
@@ -24098,7 +24202,7 @@ function editor(platform) {
   return null;
 }
 async function hxCheckStartDriver(executable, platform) {
-  const address = platform === "win32" ? `\\\\.\\pipe\\hxbot-check-${randomUUID()}` : join8(tmpdir7(), `hxc-${process.pid}.sock`);
+  const address = platform === "win32" ? `\\\\.\\pipe\\hxbot-check-${randomUUID()}` : join8(tmpdir7(), `hxc-${process.pid}-${randomUUID().slice(0, 6)}.sock`);
   const child = spawn5(executable, ["serve", "--socket", address, "--no-overlay"], {
     env: {
       ...process.env,
@@ -24418,6 +24522,12 @@ async function hxLanesRealCheck(input) {
       for (let i = 0;i < 40 && reader.idleMs() < ms; i += 1)
         await wait2(500);
     };
+    for (let i = 0;i < 40; i += 1) {
+      if (await windowOf(a.choice) && await windowOf(b.choice))
+        break;
+      await wait2(1000);
+    }
+    log(`windows: a ${JSON.stringify(await windowOf(a.choice))}; b ${JSON.stringify(await windowOf(b.choice))}`);
     await quiet(6000);
     const pause = [{ act: "wait", seconds: 3 }];
     const [one, two] = await Promise.all([call("a", a.choice, pause), call("b", b.choice, pause)]);
@@ -24495,7 +24605,7 @@ async function hxLanesRealCheck(input) {
     await wait2(2000);
     const saved = await fileText();
     const first9 = Array.isArray(set.answer.steps) ? set.answer.steps[0] : null;
-    items.check("L9", "直接赋值输入后读回一致，保存后文件里就是这段文字", set.answer.status === "done" && first9?.route === "value" && first9?.check === "verified" && saved.includes(value), `${set.answer.status}; step 1 ${first9 ? `${first9.route}/${first9.check}` : "none"}; file ${JSON.stringify(saved.slice(0, 80))}`);
+    items.check("L9", "直接赋值输入后读回一致，保存后文件里就是这段文字", set.answer.status === "done" && first9?.route === "value" && first9?.check === "verified" && saved.includes(value), `${set.answer.status}; step 1 ${first9 ? `${first9.route}/${first9.check}` : "none"}; ${String(set.answer.stoppedAt?.reason ?? set.answer.reason ?? "").slice(0, 200)}; file ${JSON.stringify(saved.slice(0, 80))}`);
     const never = await call("a", a.choice, [
       { act: "wait", expect: { name: `hxbot-never-${randomUUID2().slice(0, 6)}` } }
     ]);
