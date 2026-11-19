@@ -13757,6 +13757,7 @@ class HxStepRun {
   #snapshot;
   #record;
   #platform;
+  #valueWhy = "";
   #pixels = null;
   constructor(options) {
     this.#driver = options.driver;
@@ -14189,8 +14190,10 @@ class HxStepRun {
       return null;
     const answer = await this.#act("set_value", { pid: window.pid, element_token: field.token, value: text });
     const effect = actionEffect(answer);
-    if (!effect.worked)
+    if (!effect.worked) {
+      this.#valueWhy = `the driver refused it: ${effect.reason || "no reason"}`;
       return null;
+    }
     await this.#wait(HX_VALUE_READBACK_MS);
     const same = await this.#again(field);
     const label = describe2(field);
@@ -14210,8 +14213,10 @@ class HxStepRun {
         check: "verified",
         readback: `the field shows ${JSON.stringify(short(same.value))}`
       };
-    if (same.value === field.value)
+    if (same.value === field.value) {
+      this.#valueWhy = `the field still shows ${JSON.stringify(short(same.value))} after it`;
       return null;
+    }
     return {
       what,
       route: "value",
@@ -14296,7 +14301,7 @@ class HxStepRun {
           if (step.by === "value")
             return {
               stop: "failed",
-              reason: "This field does not take its text as a value. Type it with by keys."
+              reason: `This field does not take its text as a value (${this.#valueWhy || "it is not a text field"}). Type it with by keys.`
             };
           if (this.#platform === "darwin") {
             const inserted = await this.#insert(found.element, step.text, label);
@@ -24201,6 +24206,22 @@ function editor(platform) {
     };
   return null;
 }
+async function hxCheckWhyUnsaved(run, driver, file, token, saveKeys, platform) {
+  const front = await hxFrontWatch(hxRun, platform)?.front().catch(() => null);
+  const window = run.window();
+  const seen = await run.look(token, 4000);
+  const shows = "outline" in seen ? seen.outline.includes(token) : `look: ${seen.error.slice(0, 120)}`;
+  let again = "no window";
+  if (window) {
+    const fronted = await driver.call("bring_to_front", { pid: window.pid, window_id: window.windowId }, 1e4);
+    await wait(1000);
+    const saved = await run.run([{ act: "hotkey", keys: saveKeys }]);
+    await wait(2000);
+    const text = await readFile2(file, "utf8").catch(() => "");
+    again = `front ${fronted.ok && !fronted.refused ? "ok" : (fronted.error ?? fronted.text).slice(0, 120)}, save ${saved.status}, file has it ${text.includes(token)}`;
+  }
+  return `；原因排查：窗口里有这段文字 ${shows}；当时在最前面 ${JSON.stringify(front)}（目标 ${window ? `${window.pid}/${window.windowId}` : "无"}）；再拉到前面保存一次：${again}`;
+}
 async function hxCheckStartDriver(executable, platform) {
   const address = platform === "win32" ? `\\\\.\\pipe\\hxbot-check-${randomUUID()}` : join8(tmpdir7(), `hxc-${process.pid}-${randomUUID().slice(0, 6)}.sock`);
   const child = spawn5(executable, ["serve", "--socket", address, "--no-overlay"], {
@@ -24282,7 +24303,8 @@ async function hxStepsRealCheck(input) {
     const clip = await hxCheckClipboardText(platform === "darwin");
     items.check("S9", "驱动输入文字以后，剪贴板还是用户原来的内容", clip.trim() === sentinel, JSON.stringify(clip.slice(0, 80)));
     const afterSteps = await readFile2(file, "utf8").catch(() => "");
-    items.check("S5", "固定步骤：在文字框里输入并保存，文件里有这段文字", typed.status === "done" && afterSteps.includes(token), `${typed.status}${typed.stoppedAt ? `：${typed.stoppedAt.reason}` : ""}；${typed.steps.map((step) => `${step.what} [${step.route}${step.checked ? ", checked" : ""}]`).join("；")}；文件：${afterSteps.slice(0, 200)}`);
+    const why = afterSteps.includes(token) ? "" : await hxCheckWhyUnsaved(run, driver.socket, file, token, app.saveKeys, platform);
+    items.check("S5", "固定步骤：在文字框里输入并保存，文件里有这段文字", typed.status === "done" && afterSteps.includes(token), `${typed.status}${typed.stoppedAt ? `：${typed.stoppedAt.reason}` : ""}；${typed.steps.map((step) => `${step.what} [${step.route}${step.checked ? ", checked" : ""}]`).join("；")}；文件：${afterSteps.slice(0, 200)}${why}`);
     const risky = await run.run([{ act: "menu", path: ["Edit", "Delete"] }]);
     items.check("S6", "“删除”这类步骤先停下来问（status confirm），不执行", risky.status === "confirm", risky.stoppedAt?.reason ?? risky.status);
     stops.stop("check");
@@ -24466,7 +24488,7 @@ async function hxLanesRealCheck(input) {
       }
       return found;
     };
-    const call = async (agentId, choice, steps, tap = null) => {
+    const tool = async (agentId, name, args, tap = null) => {
       const raw = socket(agentId);
       const own = {
         call: (tool, args, timeoutMs) => {
@@ -24498,13 +24520,14 @@ async function hxLanesRealCheck(input) {
           note: (text) => notes.push(`${agentId}: ${text}`),
           parkedLine: (work, seconds) => `${work.window.app} parked ${work.why} ${seconds}s`
         })
-      }, { tool: "computer_do", arguments: { ...choice, steps } });
+      }, { tool: name, arguments: args });
       const item = result.contentItems[0];
       const answer = JSON.parse(item && item.type === "inputText" ? item.text : "{}");
       const ended = Date.now();
-      log(`${agentId} ${JSON.stringify(choice)} ${JSON.stringify(steps).slice(0, 200)} → ${JSON.stringify(answer).slice(0, 500)}`);
+      log(`${agentId} ${name} ${JSON.stringify(args).slice(0, 240)} → ${JSON.stringify(answer).slice(0, 500)}`);
       return { answer, started, ended };
     };
+    const call = (agentId, choice, steps, tap = null) => tool(agentId, "computer_do", { ...choice, steps }, tap);
     const windowOf = async (choice) => {
       const run = new HxStepRun({ driver: socket("front"), stopped: () => false });
       return await run.open(choice) === null ? run.window() : null;
@@ -24547,8 +24570,8 @@ async function hxLanesRealCheck(input) {
       ]),
       call("b", b.choice, [{ act: "key", key: "escape" }])
     ]);
-    items.check("L3", "前台按键全机一个：目标窗口不在最前面的那个智能体停放，不往别的窗口发键", inFront.answer.status === "done" && behind.answer.status === "waiting_user" && behind.answer.parked === "other_window", `in front: ${inFront.answer.status}; behind: ${behind.answer.status} ${behind.answer.parked ?? ""}; file unchanged ${await fileText() === before}`);
-    parked.drop("b");
+    items.check("L3", "前台按键全机一个：目标窗口不在最前面的那个智能体停放，不往别的窗口发键", inFront.answer.status === "done" && behind.answer.status === "waiting_user" && behind.answer.parked === "other_window", `in front: ${inFront.answer.status} ${inFront.answer.parked ?? ""} ${String(inFront.answer.stoppedAt?.reason ?? "").slice(0, 160)}; behind: ${behind.answer.status} ${behind.answer.parked ?? ""}; file unchanged ${await fileText() === before}; front ${JSON.stringify(await hxFrontWindow(watch, watchSocket))}, a ${JSON.stringify(await windowOf(a.choice))}`);
+    parked.dropAll();
     const target = await windowOf(a.choice);
     const holder = await lanes.acquire(hxAppLane(target?.app || `pid${target?.pid ?? 0}`), { agentId: "z", name: "Zed", tier: 0 }, Date.now() + 120000);
     const busy = await call("a", a.choice, [{ act: "key", key: "end" }]);
@@ -24569,9 +24592,10 @@ async function hxLanesRealCheck(input) {
     const stoppedUserAt = Date.now();
     await wait2(1000);
     items.check("L5", "你在用电脑时：前台步骤停放（等待用户），一个键也不发", blocked.answer.status === "waiting_user" && blocked.answer.parked === "user_active" && await fileText() === text5, `${blocked.answer.status} ${blocked.answer.parked ?? ""}; idle when it parked ${reader.idleMs()} ms; file unchanged ${await fileText() === text5}`);
-    for (let i = 0;i < 30 && resumed.length === 0; i += 1)
+    const resumedAfter = () => resumed.find((entry) => entry.agentId === "a" && entry.at >= stoppedUserAt);
+    for (let i = 0;i < 30 && !resumedAfter(); i += 1)
       await wait2(500);
-    const resume = resumed.find((entry) => entry.agentId === "a");
+    const resume = resumedAfter();
     items.check("L6", "你停手 5 秒、那个窗口在最前面：自动续做", resume !== undefined && resume.at - stoppedUserAt >= 4000 && resume.at - stoppedUserAt <= 15000, resume ? `resumed ${resume.at - stoppedUserAt} ms after the user stopped; lines: ${notes.join(" | ").slice(0, 300)}` : `not resumed; parked ${parked.size()}`);
     parked.dropAll();
     await quiet(6000);
@@ -24598,14 +24622,20 @@ async function hxLanesRealCheck(input) {
     await front(a.choice);
     await quiet(6000);
     const value = `HXBot value ${randomUUID2().slice(0, 6)}`;
+    const looked = await tool("a", "computer_look", { ...a.choice });
+    const fields = String(looked.answer.outline ?? "").split(`
+`).map((line) => /^\s*\[(\d+)\]\s+field\b(.*)$/u.exec(line)).filter((match) => match !== null);
+    const pick = fields.find((match) => (match[2] ?? "").includes("HXBot lanes")) ?? fields[0];
+    const field9 = pick ? { index: Number(pick[1]) } : { role: "field" };
+    log(`L9 fields ${JSON.stringify(fields.map((match) => match[0].trim().slice(0, 80)))}`);
     const set = await call("a", a.choice, [
-      { act: "type", target: { role: "field" }, text: value, by: "value" },
+      { act: "type", target: field9, text: value, by: "value" },
       { act: "hotkey", keys: save }
     ]);
     await wait2(2000);
     const saved = await fileText();
     const first9 = Array.isArray(set.answer.steps) ? set.answer.steps[0] : null;
-    items.check("L9", "直接赋值输入后读回一致，保存后文件里就是这段文字", set.answer.status === "done" && first9?.route === "value" && first9?.check === "verified" && saved.includes(value), `${set.answer.status}; step 1 ${first9 ? `${first9.route}/${first9.check}` : "none"}; ${String(set.answer.stoppedAt?.reason ?? set.answer.reason ?? "").slice(0, 200)}; file ${JSON.stringify(saved.slice(0, 80))}`);
+    items.check("L9", "直接赋值输入后读回一致，保存后文件里就是这段文字", set.answer.status === "done" && first9?.route === "value" && first9?.check === "verified" && saved.includes(value), `${set.answer.status}; step 1 ${first9 ? `${first9.route}/${first9.check}` : "none"}; ${String(set.answer.stoppedAt?.reason ?? set.answer.reason ?? "").slice(0, 200)}; fields ${fields.length}, chose ${JSON.stringify(field9)}; candidates ${JSON.stringify(set.answer.stoppedAt?.candidates ?? []).slice(0, 300)}; file ${JSON.stringify(saved.slice(0, 80))}`);
     const never = await call("a", a.choice, [
       { act: "wait", expect: { name: `hxbot-never-${randomUUID2().slice(0, 6)}` } }
     ]);
@@ -29015,6 +29045,8 @@ var STOPPED_KEYS = {
 var ACTIVE = new Set(["queued", "running", "waiting"]);
 var SETTLED = new Set(["completed", "failed", "cancelled"]);
 var HX_TEAM_TICK_MS = 15000;
+var HX_TEAM_HASH_ENTRIES = 4000;
+var HX_TEAM_HASH_SKIP = new Set(["node_modules", ".git", ".venv", "venv", "__pycache__"]);
 function hxStated(limits) {
   if (!limits)
     return;
@@ -29926,14 +29958,18 @@ ${hxFormTemplate("en")}`;
       return null;
     try {
       const hash = createHash("sha256");
+      let left = HX_TEAM_HASH_ENTRIES;
       const walk = (folder, depth) => {
         for (const entry of readdirSync2(folder, { withFileTypes: true }).sort((a, b) => a.name.localeCompare(b.name))) {
+          if (left <= 0)
+            return;
           const path = join12(folder, entry.name);
           if (entry.isDirectory()) {
-            if (depth < 3)
+            if (depth < 3 && !HX_TEAM_HASH_SKIP.has(entry.name))
               walk(path, depth + 1);
             continue;
           }
+          left -= 1;
           const info = statSync(path);
           hash.update(`${path}\x00${info.size}\x00${info.mtimeMs}
 `);
