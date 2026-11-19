@@ -13577,6 +13577,7 @@ var HX_FRONT_SEEN_MS = 2000;
 var HX_CLIPBOARD_BACK_MS = 300;
 var HX_WAIT_MAX_MS = 1e4;
 var HX_VALUE_READBACK_MS = 200;
+var HX_INSERT_SETTLE_MS = 250;
 var HX_SHOT_EDGE = 1600;
 function hxSnapshotOf(read, at) {
   return {
@@ -13830,11 +13831,14 @@ class HxStepRun {
     } finally {
       const front = this.#front;
       if (this.#keysSent && front) {
-        const start = this.#now();
-        await front.releaseModifiers().catch(() => {
-          return;
-        });
-        this.#gate?.input(start, this.#now());
+        const done = this.#gate?.ownInput();
+        try {
+          await front.releaseModifiers().catch(() => {
+            return;
+          });
+        } finally {
+          done?.();
+        }
       }
     }
   }
@@ -13865,11 +13869,11 @@ class HxStepRun {
     return { stop: stop.stop, reason: stop.reason };
   }
   async#act(tool, args, timeoutMs) {
-    const start = this.#now();
+    const done = this.#gate?.ownInput();
     try {
       return await this.#driver.call(tool, args, timeoutMs);
     } finally {
-      this.#gate?.input(start, this.#now());
+      done?.();
     }
   }
   #fromGate(stop) {
@@ -14236,6 +14240,7 @@ class HxStepRun {
     const effect = actionEffect(answer);
     if (!effect.worked)
       return null;
+    await this.#wait(HX_INSERT_SETTLE_MS);
     this.#keysToFront = true;
     const what = `${label ? `${label}: ` : ""}${text.length} characters`;
     if (effect.sure)
@@ -16740,6 +16745,8 @@ class HxPresence {
   #source = null;
   #now;
   #own = [];
+  #open = new Map;
+  #opened = 0;
   #lastUserAt = null;
   constructor(now = Date.now) {
     this.#now = now;
@@ -16755,7 +16762,21 @@ class HxPresence {
     this.#own = this.#own.filter(([, until]) => now - until < OWN_INPUT_KEEP_MS);
     this.#own.push([start, Math.max(start, end)]);
   }
+  beginOwnInput(start = this.#now()) {
+    this.#opened += 1;
+    const id = this.#opened;
+    this.#open.set(id, start);
+    return () => {
+      if (!this.#open.delete(id))
+        return;
+      this.noteOwnInput(start, this.#now());
+    };
+  }
   #ours(at) {
+    const now = this.#now();
+    for (const start of this.#open.values())
+      if (now - start < OWN_INPUT_KEEP_MS && at >= start - OWN_INPUT_HEAD_MS)
+        return true;
     return this.#own.some(([start, end]) => at >= start - OWN_INPUT_HEAD_MS && at <= end + OWN_INPUT_TAIL_MS);
   }
   userIdleMs() {
@@ -16796,6 +16817,8 @@ var hxPresence = new HxPresence;
 var HX_PARK_REMIND_MS = 30 * 60000;
 var HX_NOW_CONSENT_MS = 120000;
 var HX_PARK_CHECK_MS = 1000;
+var HX_PARK_SLOW_AFTER_MS = 60000;
+var HX_PARK_SLOW_CHECK_MS = 5000;
 function hxSameWindow(front, window) {
   if (!front)
     return false;
@@ -16811,6 +16834,7 @@ class HxParkedSteps {
   #host = null;
   #timer = null;
   #checking = false;
+  #frontReadAt = Number.NEGATIVE_INFINITY;
   #now;
   #every;
   constructor(options = {}) {
@@ -16894,9 +16918,13 @@ class HxParkedSteps {
       if (host.locked())
         return;
       const idle = host.userIdleMs();
-      const ready = [...this.#work.values()].filter((work) => idle >= hxIdleNeeded(work.tier) && !this.#held.has(work.agentId));
+      const ready = [...this.#work.values()].filter((work) => idle >= hxIdleNeeded(work.tier) && !this.#held.has(work.agentId) && host.autoResume(work.agentId));
       if (ready.length === 0)
         return;
+      const fresh = ready.some((work) => now - work.since < HX_PARK_SLOW_AFTER_MS);
+      if (!fresh && now - this.#frontReadAt < HX_PARK_SLOW_CHECK_MS)
+        return;
+      this.#frontReadAt = now;
       const front = await host.frontWindow();
       for (const work of ready) {
         if (!hxSameWindow(front, work.window))
@@ -17255,8 +17283,8 @@ class HxComputerGate {
       return { stop: "stopped", reason: STOPPED };
     return null;
   }
-  input(start, end) {
-    this.#deps.presence.noteOwnInput(start, end);
+  ownInput() {
+    return this.#deps.presence.beginOwnInput();
   }
   after() {
     const { leases, app } = this.#deps;
@@ -17372,12 +17400,12 @@ function hxStepWork(holder, deps) {
             const driver = deps.driver();
             if (!driver)
               return false;
-            const start = now();
+            const done = deps.presence.beginOwnInput();
             try {
               const answer = await driver.call("bring_to_front", { pid: front.pid, window_id: front.windowId }, 1e4);
               return answer.ok && answer.refused !== true;
             } finally {
-              deps.presence.noteOwnInput(start, now());
+              done();
             }
           },
           parkedAlready,
@@ -24473,10 +24501,16 @@ async function hxLanesRealCheck(input) {
     const zero = Date.now();
 
     class HxTracedPresence extends HxPresence {
-      noteOwnInput(start, end) {
+      beginOwnInput(start) {
+        const from = start ?? Date.now();
         if (tracing)
-          trace.push(`own ${start - zero}..${(end ?? Date.now()) - zero}`);
-        super.noteOwnInput(start, end);
+          trace.push(`own from ${from - zero}`);
+        const done = super.beginOwnInput(from);
+        return () => {
+          if (tracing)
+            trace.push(`own ${from - zero}..${Date.now() - zero}`);
+          done();
+        };
       }
       userIdleMs() {
         const idle = super.userIdleMs();
