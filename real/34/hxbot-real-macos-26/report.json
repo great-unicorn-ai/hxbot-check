@@ -1,0 +1,282 @@
+{
+  "machine": "macos-26",
+  "model": "",
+  "startedAt": "2026-11-19T07:16:32.729Z",
+  "seconds": 410.788,
+  "items": [
+    {
+      "id": "M1",
+      "title": "有可用的真实模型",
+      "status": "skip",
+      "detail": "没有配模型（仓库 Secret HX_CHECK_MODEL_URL、HX_CHECK_MODEL_KEY、HX_CHECK_MODEL）；GitHub Models openai/gpt-4.1-mini：GitHub Models openai/gpt-4.1-mini: 200 text/plain: not JSON: OK\r\n；GitHub Models openai/gpt-4.1-mini (great-unicorn-ai)：GitHub Models openai/gpt-4.1-mini (great-unicorn-ai): 200 text/plain: not JSON: OK\r\n"
+    },
+    {
+      "id": "S1",
+      "title": "电脑操控驱动启动并答复（serve --socket）",
+      "status": "pass",
+      "detail": "Cua Driver daemon listening on /var/folders/h5/t85nd63d71x27_8gl5gw3l_w0000gn/T/hxc-2506-71f626.sock\n"
+    },
+    {
+      "id": "S2",
+      "title": "Mac 的授权（辅助功能、屏幕录制）",
+      "status": "pass",
+      "detail": "{\"accessibility\":true,\"direct_capture_error\":null,\"direct_capture_status\":\"not_checked\",\"screen_recording\":true,\"screen_recording_capturable\":null,\"source\":{\"attribution\":\"host\",\"direct_runtime\":false,\"disclaim_env\":false,\"embedded\":true,\"executable\":\"/Users/runner/work/_temp/driver/cua-driver\",\"host_bundle_id\":\"\",\"note\":\"Embedded mode: these booleans reflect the HOST app's TCC grant (the driver i"
+    },
+    {
+      "id": "S3",
+      "title": "打开 TextEdit，找到它的窗口",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "id": "S4",
+      "title": "读出窗口提纲，有可输入的文字框",
+      "status": "pass",
+      "detail": "TextEdit — hxbot-check.txt (pid 2561, window 34)\n[0] window \"hxbot-check.txt\"\n [1] field \"HXBot check\"\n [2] button\n [3] button\n [4] button\n[5] menu \"_NS:833\"\n [6] menu \"Apple\"\n  [7] menu\n   [8] menu \"About This Mac\"\n   [9] menu \"System Information\"\n   [10] menu \"System Settings…, 1 update\"\n   [11] menu \"App Store\"\nThe driver did not read the whole window."
+    },
+    {
+      "id": "S9",
+      "title": "驱动输入文字以后，剪贴板还是用户原来的内容",
+      "status": "pass",
+      "detail": "\"hxbot-clip-6054cd6b\""
+    },
+    {
+      "id": "S5",
+      "title": "固定步骤：在文字框里输入并保存，文件里有这段文字",
+      "status": "fail",
+      "detail": "done；HXBot check: 15 characters [background, checked]；cmd+s [keyboard]；文件：HXBot check\n；原因排查：窗口里有这段文字 look: The Computer Use driver did not answer get_window_state in 10 s.；当时在最前面 {\"pid\":2561,\"windowId\":null}（目标 2561/34）；再拉到前面保存一次：front bring_to_front: exact window 34 for pid 2561 was not verified as the frontmost process's focused window and the front wi, save done, file has it false"
+    },
+    {
+      "id": "S6",
+      "title": "“删除”这类步骤先停下来问（status confirm），不执行",
+      "status": "pass",
+      "detail": "\"Delete\" sends, pays, buys, deletes or publishes. Ask the user in the chat first; after a yes, repeat the step with confirmed true."
+    },
+    {
+      "id": "S7",
+      "title": "按停止键后，下一步不再执行",
+      "status": "pass",
+      "detail": "stopped"
+    },
+    {
+      "id": "S8",
+      "title": "真实模型：列计划、一步步输入并保存",
+      "status": "skip",
+      "detail": "没有可用的模型"
+    },
+    {
+      "id": "I1",
+      "title": "装进“应用程序”文件夹：读回版本和签名，隔离标记保留",
+      "status": "pass",
+      "detail": "{\"status\":\"installed\",\"app\":{\"name\":\"HXInstallCheck\",\"id\":\"org.example.hxinstall\",\"version\":\"1.0\",\"path\":\"/Applications/HXInstallCheck.app\"},\"signature\":{\"authority\":\"ad-hoc\",\"team\":\"\",\"notarized\":false},\"replaced\":null}"
+    },
+    {
+      "id": "I2",
+      "title": "已经装了时先问（confirm），不动原来的",
+      "status": "pass",
+      "detail": "{\"status\":\"confirm\",\"reason\":\"HXInstallCheck 1.0 is installed. Ask the user in the chat whether to replace it with 2.0; after a yes, call again with replace: true.\",\"installed\":{\"name\":\"HXInstallCheck\",\"id\":\"org.example.hxinstall\",\"version\":\"1.0\",\"path\":\"/Applications/HXInstallCheck.app\"},\"incoming\":{\"name\":\"HXInstallCheck\",\"id\":\"org.example.hxinstall\",\"version\":\"2.0\",\"path\":\"/var/folders/h5/t85nd63d71x27_8gl5gw3l_w0000gn/T/hxbot-install-JUrN45/HXInstallCheck.app\"},\"signature\":{\"authority\":\"ad-hoc\",\"team\":\"\",\"notarized\":false}}"
+    },
+    {
+      "id": "I3",
+      "title": "同意替换后装上新版本，旧版进废纸篓，不留临时文件",
+      "status": "pass",
+      "detail": "{\"status\":\"installed\",\"app\":{\"name\":\"HXInstallCheck\",\"id\":\"org.example.hxinstall\",\"version\":\"2.0\",\"path\":\"/Applications/HXInstallCheck.app\"},\"signature\":{\"authority\":\"ad-hoc\",\"team\":\"\",\"notarized\":false},\"replaced\":{\"version\":\"1.0\"}}；废纸篓里有旧版：true；“应用程序”文件夹里的临时文件：无"
+    },
+    {
+      "id": "I4",
+      "title": "从磁盘映像装，装好后卸下",
+      "status": "pass",
+      "detail": "{\"status\":\"installed\",\"app\":{\"name\":\"HXInstallCheck\",\"id\":\"org.example.hxinstall\",\"version\":\"3.0\",\"path\":\"/Applications/HXInstallCheck.app\"},\"signature\":{\"authority\":\"ad-hoc\",\"team\":\"\",\"notarized\":false},\"replaced\":{\"version\":\"2.0\"}}；映像还挂着：false"
+    },
+    {
+      "id": "A1",
+      "title": "列出正在运行的应用",
+      "status": "pass",
+      "detail": "Finder、TextEdit"
+    },
+    {
+      "id": "A2",
+      "title": "打开文件后把文本编辑切到前台",
+      "status": "pass",
+      "detail": "{\"status\":\"done\",\"action\":\"front\",\"app\":\"TextEdit\",\"route\":\"direct\",\"tried\":[]}"
+    },
+    {
+      "id": "A3",
+      "title": "窗口放到左半边",
+      "status": "warn",
+      "detail": "{\"status\":\"needs-permission\",\"reason\":\"HXBot has no Accessibility grant, which menus and windows need. Tell the user to grant it in Settings › Computer Use, then call again.\"}"
+    },
+    {
+      "id": "A4",
+      "title": "读菜单、点“编辑 › 全选”；“删除”这类菜单命令先问",
+      "status": "warn",
+      "detail": "{\"status\":\"needs-permission\",\"reason\":\"HXBot has no Accessibility grant, which menus and windows need. Tell the user to grant it in Settings › Computer Use, then call again.\"}；{\"status\":\"needs-permission\",\"reason\":\"HXBot has no Accessibility grant, which menus and windows need. Tell the user to grant it in Settings › Computer Use, then call again.\"}；{\"status\":\"confirm\",\"reason\":\"Edit › Delete sends, pays, buys, deletes or publishes. Ask the user in the chat first; after a yes, call again with confirmed true.\"}"
+    },
+    {
+      "id": "A5",
+      "title": "隐藏（Windows：最小化）",
+      "status": "pass",
+      "detail": "{\"status\":\"done\",\"action\":\"hide\",\"app\":\"TextEdit\",\"route\":\"command\",\"tried\":[{\"route\":\"direct\",\"why\":\"the app is still shown\"}]}"
+    },
+    {
+      "id": "A6",
+      "title": "正常退出并核对已经退出",
+      "status": "fail",
+      "detail": "{\"status\":\"needs-permission\",\"reason\":\"macOS did not answer in time: it most likely asks the user whether HXBot may control this app. Tell the user to click OK (Allow) in that dialog, then call again.\"}"
+    },
+    {
+      "id": "A7",
+      "title": "在 HXBot 里运行一段 JXA 脚本，读回输出",
+      "status": "pass",
+      "detail": "{\"status\":\"ran\",\"language\":\"jxa\",\"output\":\"Version 26.7.2 (Build 25G332)\",\"truncated\":false}"
+    },
+    {
+      "id": "A8",
+      "title": "有没保存的改动时退出：应用自己问，强制退出先问",
+      "status": "warn",
+      "detail": "改不了文件内容（needs-permission；GitHub 的机器上没有人点“自动化”授权框）：{\"status\":\"needs-permission\",\"reason\":\"macOS did not answer in time: it most likely asks the user whether HXBot may control that app. Tell the user to click OK (Allow) in that dialog, then run the script again.\"}；打开自动化页 0 次"
+    },
+    {
+      "id": "A9",
+      "title": "读默认浏览器",
+      "status": "pass",
+      "detail": "{\"status\":\"default\",\"kind\":\"browser\",\"target\":\"web pages (http, https)\",\"app\":\"com.apple.Safari\",\"route\":\"direct\"}"
+    },
+    {
+      "id": "A10",
+      "title": "把 .md 文件的默认应用改成文本编辑，读回核对",
+      "status": "warn",
+      "detail": "{\"status\":\"confirm-dialog\",\"reason\":\"macOS asks the user to confirm in a dialog before TextEdit opens .md files (it is still com.apple.dt.Xcode; macOS answered 0). Tell the user to click \\\"Use TextEdit\\\" in that dialog, or click it with computer_look and computer_do, then call again without app to read it.\"}"
+    },
+    {
+      "id": "Q1",
+      "title": "读得到最前面的应用",
+      "status": "pass",
+      "detail": "front 8812; target 8812"
+    },
+    {
+      "id": "Q2",
+      "title": "用户切走以后，HXBot 看得出来，也不把目标应用拉回前台",
+      "status": "pass",
+      "detail": "target 8812; after the move 368; a second later 368"
+    },
+    {
+      "id": "Q3",
+      "title": "修饰键卡在“按下”时，松开以后没有按下的修饰键",
+      "status": "pass",
+      "detail": "press ok; held before 131072; held after 0"
+    },
+    {
+      "id": "Q4",
+      "title": "后台读目录的命令以最低优先级运行",
+      "status": "pass",
+      "detail": "19 "
+    },
+    {
+      "id": "Q5",
+      "title": "停助手的进程时留下它打开的应用",
+      "status": "skip",
+      "detail": "Mac 上用 open 打开的应用不在助手的进程组里"
+    },
+    {
+      "id": "Q7",
+      "title": "助手的进程和它启动的命令以“低于正常”的优先级运行",
+      "status": "pass",
+      "detail": "10"
+    },
+    {
+      "id": "Q6",
+      "title": "用户的剪贴板在检查前后不变",
+      "status": "pass",
+      "detail": "\"hxbot-quiet-1795072842593\""
+    },
+    {
+      "id": "L0",
+      "title": "电脑操控驱动启动并答复",
+      "status": "pass",
+      "detail": "Cua Driver daemon listening on /var/folders/h5/t85nd63d71x27_8gl5gw3l_w0000gn/T/hxc-2506-d3e0ec.sock\n"
+    },
+    {
+      "id": "L1",
+      "title": "两个智能体操作两个不同的应用，后台步骤同时进行",
+      "status": "pass",
+      "detail": "a done 3043 ms; b done 3030 ms; overlap 3030 ms"
+    },
+    {
+      "id": "L2",
+      "title": "同一个应用的两次调用一个接一个",
+      "status": "pass",
+      "detail": "a done; c done; together 3010 ms; from the first start to the last end 6015 ms"
+    },
+    {
+      "id": "L3",
+      "title": "前台按键全机一个：目标窗口不在最前面的那个智能体停放，不往别的窗口发键",
+      "status": "pass",
+      "detail": "in front: done  ; behind: waiting_user other_window; file unchanged true; front {\"pid\":9141,\"windowId\":61}, a {\"pid\":9141,\"windowId\":61,\"app\":\"TextEdit\",\"title\":\"hxbot-lane-a.txt\"}; step -"
+    },
+    {
+      "id": "L4",
+      "title": "等满 30 秒还轮不到：答复“忙”、谁在用、大约多久",
+      "status": "pass",
+      "detail": "busy; Another agent (Zed) works in this app now. Do the parts of the work that do not need it first, then run the remaining steps again.; eta 3947; waited 30026 ms"
+    },
+    {
+      "id": "L5",
+      "title": "你在用电脑时：前台步骤停放（等待用户），一个键也不发",
+      "status": "pass",
+      "detail": "waiting_user user_active; idle when it parked 1014 ms; file unchanged true"
+    },
+    {
+      "id": "L6",
+      "title": "你停手 5 秒、那个窗口在最前面：自动续做",
+      "status": "pass",
+      "detail": "resumed 5096 ms after the user stopped; lines: b: Calculator parked other_window 5s | a: TextEdit parked user_active 5s"
+    },
+    {
+      "id": "L7",
+      "title": "驱动自己发的按键不算你在用：连续三个前台按键不停放",
+      "status": "pass",
+      "detail": "done; system idle before 6030 ms, after 758 ms (the driver's input counts in it)"
+    },
+    {
+      "id": "L8",
+      "title": "停止键对所有道生效：在等的调用马上停下",
+      "status": "pass",
+      "detail": "stopped after 1506 ms"
+    },
+    {
+      "id": "L9",
+      "title": "直接赋值输入后读回一致，保存后文件里就是这段文字",
+      "status": "pass",
+      "detail": "done; step 1 value/verified the field shows \"HXBot value 2de479\"; ; fields 1, chose {\"index\":1}; candidates []; file \"HXBot value 2de479\""
+    },
+    {
+      "id": "L9b",
+      "title": "不能直接赋值的文字区：答复改用按键，不动文字",
+      "status": "skip",
+      "detail": "TextEdit 的文字区可以直接赋值"
+    },
+    {
+      "id": "L10",
+      "title": "等一个不会出现的控件：10 秒后报“没等到”，不当成完成",
+      "status": "pass",
+      "detail": "timed_out; 10595 ms; 没等到: HXBot waited 10 s and \"hxbot-never-b79916\" did not show (the driver could not tell, and the name is not in the wind"
+    },
+    {
+      "id": "L11",
+      "title": "回复“现在做”：把目标窗口切到最前面马上做",
+      "status": "pass",
+      "detail": "done ; bring_to_front called"
+    }
+  ],
+  "models": [
+    {
+      "name": "GitHub Models openai/gpt-4.1-mini",
+      "answer": "GitHub Models openai/gpt-4.1-mini: 200 text/plain: not JSON: OK\r\n"
+    },
+    {
+      "name": "GitHub Models openai/gpt-4.1-mini (great-unicorn-ai)",
+      "answer": "GitHub Models openai/gpt-4.1-mini (great-unicorn-ai): 200 text/plain: not JSON: OK\r\n"
+    }
+  ]
+}
