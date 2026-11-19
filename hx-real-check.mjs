@@ -13828,10 +13828,14 @@ class HxStepRun {
     try {
       return await this.#runAll(steps);
     } finally {
-      if (this.#keysSent)
-        await this.#front?.releaseModifiers().catch(() => {
+      const front = this.#front;
+      if (this.#keysSent && front) {
+        const start = this.#now();
+        await front.releaseModifiers().catch(() => {
           return;
         });
+        this.#gate?.input(start, this.#now());
+      }
     }
   }
   async#keysGoToTarget() {
@@ -17368,8 +17372,13 @@ function hxStepWork(holder, deps) {
             const driver = deps.driver();
             if (!driver)
               return false;
-            const answer = await driver.call("bring_to_front", { pid: front.pid, window_id: front.windowId }, 1e4);
-            return answer.ok && answer.refused !== true;
+            const start = now();
+            try {
+              const answer = await driver.call("bring_to_front", { pid: front.pid, window_id: front.windowId }, 1e4);
+              return answer.ok && answer.refused !== true;
+            } finally {
+              deps.presence.noteOwnInput(start, now());
+            }
           },
           parkedAlready,
           stopped: deps.stopped,
@@ -24459,7 +24468,24 @@ async function hxLanesRealCheck(input) {
       await wait2(500);
     log(`idle reader ${reader.fresh() ? "reads" : "does not read"}; idle ${reader.idleMs()} ms`);
     const lanes = new HxComputerLanes;
-    const presence = new HxPresence;
+    const trace = [];
+    let tracing = false;
+    const zero = Date.now();
+
+    class HxTracedPresence extends HxPresence {
+      noteOwnInput(start, end) {
+        if (tracing)
+          trace.push(`own ${start - zero}..${(end ?? Date.now()) - zero}`);
+        super.noteOwnInput(start, end);
+      }
+      userIdleMs() {
+        const idle = super.userIdleMs();
+        if (tracing)
+          trace.push(`idle@${Date.now() - zero} system ${reader.idleMs()} user ${idle}`);
+        return idle;
+      }
+    }
+    const presence = new HxTracedPresence;
     presence.setSource({ idleSeconds: () => reader.idleMs() / 1000, locked: () => false });
     const looks = new Map;
     const resumed = [];
@@ -24563,6 +24589,7 @@ async function hxLanesRealCheck(input) {
     await front(a.choice);
     await quiet(6000);
     const before = await fileText();
+    tracing = true;
     const [inFront, behind] = await Promise.all([
       call("a", a.choice, [
         { act: "key", key: "end" },
@@ -24570,7 +24597,10 @@ async function hxLanesRealCheck(input) {
       ]),
       call("b", b.choice, [{ act: "key", key: "escape" }])
     ]);
-    items.check("L3", "前台按键全机一个：目标窗口不在最前面的那个智能体停放，不往别的窗口发键", inFront.answer.status === "done" && behind.answer.status === "waiting_user" && behind.answer.parked === "other_window", `in front: ${inFront.answer.status} ${inFront.answer.parked ?? ""} ${String(inFront.answer.stoppedAt?.reason ?? "").slice(0, 160)}; behind: ${behind.answer.status} ${behind.answer.parked ?? ""}; file unchanged ${await fileText() === before}; front ${JSON.stringify(await hxFrontWindow(watch, watchSocket))}, a ${JSON.stringify(await windowOf(a.choice))}`);
+    items.check("L3", "前台按键全机一个：目标窗口不在最前面的那个智能体停放，不往别的窗口发键", inFront.answer.status === "done" && behind.answer.status === "waiting_user" && behind.answer.parked === "other_window", `in front: ${inFront.answer.status} ${inFront.answer.parked ?? ""} ${String(inFront.answer.stoppedAt?.reason ?? "").slice(0, 160)}; behind: ${behind.answer.status} ${behind.answer.parked ?? ""}; file unchanged ${await fileText() === before}; front ${JSON.stringify(await hxFrontWindow(watch, watchSocket))}, a ${JSON.stringify(await windowOf(a.choice))}; step ${inFront.answer.stoppedAt?.n ?? "-"}; ${inFront.answer.status === "done" ? "" : trace.slice(0, 14).join(" | ")}`);
+    tracing = false;
+    if (inFront.answer.status !== "done")
+      log(`L3 trace: ${trace.slice(0, 60).join(" | ")}`);
     parked.dropAll();
     const target = await windowOf(a.choice);
     const holder = await lanes.acquire(hxAppLane(target?.app || `pid${target?.pid ?? 0}`), { agentId: "z", name: "Zed", tier: 0 }, Date.now() + 120000);
@@ -24619,23 +24649,43 @@ async function hxLanesRealCheck(input) {
     if (holdFront.ok)
       holdFront.lease.release();
     items.check("L8", "停止键对所有道生效：在等的调用马上停下", halted.answer.status === "stopped" && halted.ended - halted.started < 1e4, `${halted.answer.status} after ${halted.ended - halted.started} ms`);
-    await front(a.choice);
+    const fieldsOf = async (agentId, choice) => {
+      const looked = await tool(agentId, "computer_look", { ...choice });
+      return String(looked.answer.outline ?? "").split(`
+`).map((line) => /^\s*\[(\d+)\]\s+field\b(.*)$/u.exec(line)).filter((match) => match !== null);
+    };
+    const indexOf = (fields, word) => {
+      const pick = fields.find((match) => word.test(match[2] ?? "")) ?? fields[0];
+      return pick ? { index: Number(pick[1]) } : { role: "field" };
+    };
+    const onMac = platform === "darwin";
+    const choice9 = onMac ? a.choice : b.choice;
+    await front(choice9);
     await quiet(6000);
     const value = `HXBot value ${randomUUID2().slice(0, 6)}`;
-    const looked = await tool("a", "computer_look", { ...a.choice });
-    const fields = String(looked.answer.outline ?? "").split(`
-`).map((line) => /^\s*\[(\d+)\]\s+field\b(.*)$/u.exec(line)).filter((match) => match !== null);
-    const pick = fields.find((match) => (match[2] ?? "").includes("HXBot lanes")) ?? fields[0];
-    const field9 = pick ? { index: Number(pick[1]) } : { role: "field" };
+    const fields = await fieldsOf("a", choice9);
+    const field9 = indexOf(fields, onMac ? /HXBot lanes/u : /copy/iu);
     log(`L9 fields ${JSON.stringify(fields.map((match) => match[0].trim().slice(0, 80)))}`);
-    const set = await call("a", a.choice, [
+    const set = await call("a", choice9, [
       { act: "type", target: field9, text: value, by: "value" },
-      { act: "hotkey", keys: save }
+      ...onMac ? [{ act: "hotkey", keys: save }] : []
     ]);
     await wait2(2000);
     const saved = await fileText();
     const first9 = Array.isArray(set.answer.steps) ? set.answer.steps[0] : null;
-    items.check("L9", "直接赋值输入后读回一致，保存后文件里就是这段文字", set.answer.status === "done" && first9?.route === "value" && first9?.check === "verified" && saved.includes(value), `${set.answer.status}; step 1 ${first9 ? `${first9.route}/${first9.check}` : "none"}; ${String(set.answer.stoppedAt?.reason ?? set.answer.reason ?? "").slice(0, 200)}; fields ${fields.length}, chose ${JSON.stringify(field9)}; candidates ${JSON.stringify(set.answer.stoppedAt?.candidates ?? []).slice(0, 300)}; file ${JSON.stringify(saved.slice(0, 80))}`);
+    items.check("L9", onMac ? "直接赋值输入后读回一致，保存后文件里就是这段文字" : "直接赋值输入后读回一致（字符映射表的“复制字符”框）", set.answer.status === "done" && first9?.route === "value" && first9?.check === "verified" && (!onMac || saved.includes(value)), `${set.answer.status}; step 1 ${first9 ? `${first9.route}/${first9.check} ${String(first9.readback ?? "").slice(0, 80)}` : "none"}; ${String(set.answer.stoppedAt?.reason ?? set.answer.reason ?? "").slice(0, 200)}; fields ${fields.length}, chose ${JSON.stringify(field9)}; candidates ${JSON.stringify(set.answer.stoppedAt?.candidates ?? []).slice(0, 300)}${onMac ? `; file ${JSON.stringify(saved.slice(0, 80))}` : ""}`);
+    if (onMac)
+      items.add("L9b", "不能直接赋值的文字区：答复改用按键，不动文字", "skip", "TextEdit 的文字区可以直接赋值");
+    else {
+      await front(a.choice);
+      await quiet(6000);
+      const notepad = indexOf(await fieldsOf("a", a.choice), /HXBot lanes/u);
+      const before9 = await fileText();
+      const refused = await call("a", a.choice, [{ act: "type", target: notepad, text: value, by: "value" }]);
+      await wait2(1000);
+      const reason9 = String(refused.answer.stoppedAt?.reason ?? refused.answer.reason ?? "");
+      items.check("L9b", "不能直接赋值的文字区（记事本）：答复说明原因、改用按键，不动文字", refused.answer.status === "failed" && reason9.includes("by keys") && await fileText() === before9, `${refused.answer.status}; ${reason9.slice(0, 240)}`);
+    }
     const never = await call("a", a.choice, [
       { act: "wait", expect: { name: `hxbot-never-${randomUUID2().slice(0, 6)}` } }
     ]);
