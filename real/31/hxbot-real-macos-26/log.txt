@@ -1,0 +1,53 @@
+[2026-11-19T03:33:29.416Z] == 逐步操作
+
+[2026-11-19T03:33:41.021Z] == 安装应用
+
+[2026-11-19T03:33:55.288Z] test apps: /var/folders/q2/p1t6rgxj5fj32g1dc7dmd49r0000gn/T/hxbot-install-check-xco68x/v1/HXInstallCheck.app, /var/folders/q2/p1t6rgxj5fj32g1dc7dmd49r0000gn/T/hxbot-install-check-xco68x/HXInstallCheck-2.0.zip, /var/folders/q2/p1t6rgxj5fj32g1dc7dmd49r0000gn/T/hxbot-install-check-xco68x/v3/HXInstallCheck.app → /var/folders/q2/p1t6rgxj5fj32g1dc7dmd49r0000gn/T/hxbot-install-check-xco68x/HXInstallCheck-3.0.dmg
+
+[2026-11-19T03:33:57.573Z] == 应用命令
+
+[2026-11-19T03:33:57.733Z] jxa bridge: {"status":"ran","language":"jxa","output":"{\"count\":[\"string\",\"36\"],\"policy\":[\"string\",\"1\"],\"pid\":[\"number\",\"156\"],\"active\":[\"boolean\",\"false\"]}","truncated":false}
+
+[2026-11-19T03:33:58.646Z] list after open: {"status":"apps","apps":[{"name":"Finder","id":"com.apple.finder","pid":362,"active":false,"hidden":false},{"name":"TextEdit","id":"com.apple.TextEdit","pid":1217,"active":true,"hidden":false}]}
+
+[2026-11-19T03:33:58.647Z] opened TextEdit: true
+
+[2026-11-19T03:34:06.404Z] list after open: {"status":"apps","apps":[{"name":"Finder","id":"com.apple.finder","pid":362,"active":false,"hidden":false},{"name":"TextEdit","id":"com.apple.TextEdit","pid":1939,"active":true,"hidden":false}]}
+
+[2026-11-19T03:36:15.354Z] == 不打扰其他应用
+
+[2026-11-19T03:36:25.511Z] == 分道与礼让
+
+[2026-11-19T03:36:29.413Z] idle reader reads; idle 8751 ms
+
+[2026-11-19T03:36:30.447Z] windows: a {"pid":5113,"windowId":75,"app":"TextEdit","title":"hxbot-lane-a.txt"}; b {"pid":5091,"windowId":69,"app":"Calculator","title":"Calculator"}
+
+[2026-11-19T03:36:33.470Z] b computer_do {"app":"Calculator","steps":[{"act":"wait","seconds":3}]} → {"status":"done","window":{"app":"Calculator","title":"Calculator","windowId":69},"steps":[{"n":1,"act":"wait","what":"3 s","route":"none","check":"verified","checked":true}],"borrowedScreen":false,"summary":{"verified":1,"unchecked":0,"pending":0}}
+
+[2026-11-19T03:36:33.471Z] a computer_do {"title":"hxbot-lane-a","steps":[{"act":"wait","seconds":3}]} → {"status":"done","window":{"app":"TextEdit","title":"hxbot-lane-a.txt","windowId":75},"steps":[{"n":1,"act":"wait","what":"3 s","route":"none","check":"verified","checked":true}],"borrowedScreen":false,"summary":{"verified":1,"unchecked":0,"pending":0}}
+
+[2026-11-19T03:36:36.490Z] c computer_do {"title":"hxbot-lane-a","steps":[{"act":"wait","seconds":3}]} → {"status":"done","window":{"app":"TextEdit","title":"hxbot-lane-a.txt","windowId":75},"steps":[{"n":1,"act":"wait","what":"3 s","route":"none","check":"verified","checked":true}],"borrowedScreen":false,"summary":{"verified":1,"unchecked":0,"pending":0}}
+
+[2026-11-19T03:36:39.497Z] a computer_do {"title":"hxbot-lane-a","steps":[{"act":"wait","seconds":3}]} → {"status":"done","window":{"app":"TextEdit","title":"hxbot-lane-a.txt","windowId":75},"steps":[{"n":1,"act":"wait","what":"3 s","route":"none","check":"verified","checked":true}],"borrowedScreen":false,"summary":{"verified":1,"unchecked":0,"pending":0}}
+
+[2026-11-19T03:36:45.192Z] a computer_do {"title":"hxbot-lane-a","steps":[{"act":"key","key":"end"},{"act":"key","key":"end"}]} → {"status":"done","window":{"app":"TextEdit","title":"hxbot-lane-a.txt","windowId":75},"steps":[{"n":1,"act":"key","what":"end","route":"keyboard","check":"unchecked","checked":false},{"n":2,"act":"key","what":"end","route":"keyboard","check":"unchecked","checked":false}],"borrowedScreen":true,"summary":{"verified":0,"unchecked":2,"pending":0}}
+
+[2026-11-19T03:37:15.742Z] b computer_do {"app":"Calculator","steps":[{"act":"key","key":"escape"}]} → {"status":"waiting_user","window":{"app":"Calculator","title":"Calculator","windowId":69},"steps":[],"stoppedAt":{"n":1,"act":"key","reason":"The user works in another window now (Calculator – Calculator is not in front), and HXBot does not take the front from the user. HXBot parked this step and sends you a message to continue when the user has not used the keyboard or the mouse for 5 seconds and Calculator – Calculator is the window in front. Until then, do the parts of the work that do not ne
+
+[2026-11-19T03:37:45.858Z] a computer_do {"title":"hxbot-lane-a","steps":[{"act":"key","key":"end"}]} → {"status":"busy","reason":"Another agent (Zed) works in this app now. Do the parts of the work that do not need it first, then run the remaining steps again.","etaMs":4032}
+
+[2026-11-19T03:38:20.070Z] a computer_do {"title":"hxbot-lane-a","steps":[{"act":"key","key":"end"},{"act":"type","text":" HXBot-8a9bd0","by":"keys"},{"act":"hotkey","keys":["cmd","s"]}]} → {"status":"waiting_user","window":{"app":"TextEdit","title":"hxbot-lane-a.txt","windowId":75},"steps":[],"stoppedAt":{"n":1,"act":"key","reason":"The user is using the keyboard or the mouse now, and HXBot does not type or click under the user's hands. HXBot parked this step and sends you a message to continue when the user has not used the keyboard or the mouse for 5 seconds and TextEdit – hxbot-lane-a.txt is the window in front. Until then, do the parts of the work that do not need the screen, 
+
+[2026-11-19T03:38:30.178Z] a computer_do {"title":"hxbot-lane-a","steps":[{"act":"key","key":"end"},{"act":"key","key":"end"},{"act":"key","key":"end"}]} → {"status":"done","window":{"app":"TextEdit","title":"hxbot-lane-a.txt","windowId":75},"steps":[{"n":1,"act":"key","what":"end","route":"keyboard","check":"unchecked","checked":false},{"n":2,"act":"key","what":"end","route":"keyboard","check":"unchecked","checked":false},{"n":3,"act":"key","what":"end","route":"keyboard","check":"unchecked","checked":false}],"borrowedScreen":true,"summary":{"verified":0,"unchecked":3,"pending":0}}
+
+[2026-11-19T03:38:32.282Z] a computer_do {"title":"hxbot-lane-a","steps":[{"act":"key","key":"end"}]} → {"status":"stopped","window":{"app":"TextEdit","title":"hxbot-lane-a.txt","windowId":75},"steps":[],"stoppedAt":{"n":1,"act":"key","reason":"The user stopped the work on the computer."},"borrowedScreen":false,"summary":{"verified":0,"unchecked":0,"pending":0},"next":"The user stopped the work on the computer. Do not go on; say what was done and wait."}
+
+[2026-11-19T03:38:37.836Z] a computer_look {"title":"hxbot-lane-a"} → {"status":"window","outline":"TextEdit — hxbot-lane-a.txt (pid 5113, window 75)\n[0] window \"hxbot-lane-a.txt\"\n [1] field \"HXBot lanes\"\n [2] button\n [3] button\n [4] button\n[5] menu \"_NS:833\"\n [6] menu \"Apple\"\n  [7] menu\n   [8] menu \"About This Mac\"\n   [9] menu \"System Information\"\n   [10] menu \"System Settings…, 1 update\"\n   [11] menu \"App Store\"\n   [12] menu \"Recent Items\"\n    [13] menu\n     [14] menu \"Calculator\"\n     [15] menu \"Show “Calculator” in Finder\"
+
+[2026-11-19T03:38:37.837Z] L9 fields ["[1] field \"HXBot lanes\""]
+
+[2026-11-19T03:38:41.542Z] a computer_do {"title":"hxbot-lane-a","steps":[{"act":"type","target":{"index":1},"text":"HXBot value 57d898","by":"value"},{"act":"hotkey","keys":["cmd","s"]}]} → {"status":"done","window":{"app":"TextEdit","title":"hxbot-lane-a.txt","windowId":75},"steps":[{"n":1,"act":"type","what":"HXBot lanes: 18 characters","route":"value","check":"verified","checked":true,"readback":"the field shows \"HXBot value 57d898\""},{"n":2,"act":"hotkey","what":"cmd+s","route":"keyboard","check":"unchecked","checked":false}],"borrowedScreen":true,"summary":{"verified":1,"unchecked":1,"pending":0}}
+
+[2026-11-19T03:38:54.193Z] a computer_do {"title":"hxbot-lane-a","steps":[{"act":"wait","expect":{"name":"hxbot-never-d62b55"}}]} → {"status":"timed_out","window":{"app":"TextEdit","title":"hxbot-lane-a.txt","windowId":75},"steps":[],"stoppedAt":{"n":1,"act":"wait","reason":"没等到: HXBot waited 10 s and \"hxbot-never-d62b55\" did not show (the driver could not tell, and the name is not in the window). It is not done.","candidates":[]},"borrowedScreen":false,"summary":{"verified":0,"unchecked":0,"pending":0},"next":"What the wait step expects did not show in time (没等到). It is not done: look at the window and decide.","outline":
+
+[2026-11-19T03:39:00.285Z] a computer_do {"title":"hxbot-lane-a","steps":[{"act":"key","key":"end"}]} → {"status":"done","window":{"app":"TextEdit","title":"hxbot-lane-a.txt","windowId":75},"steps":[{"n":1,"act":"key","what":"end","route":"keyboard","check":"unchecked","checked":false}],"borrowedScreen":true,"summary":{"verified":0,"unchecked":1,"pending":0}}
