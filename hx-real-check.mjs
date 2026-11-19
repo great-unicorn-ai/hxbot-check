@@ -24597,10 +24597,14 @@ async function hxLanesRealCheck(input) {
       ]),
       call("b", b.choice, [{ act: "key", key: "escape" }])
     ]);
-    items.check("L3", "前台按键全机一个：目标窗口不在最前面的那个智能体停放，不往别的窗口发键", inFront.answer.status === "done" && behind.answer.status === "waiting_user" && behind.answer.parked === "other_window", `in front: ${inFront.answer.status} ${inFront.answer.parked ?? ""} ${String(inFront.answer.stoppedAt?.reason ?? "").slice(0, 160)}; behind: ${behind.answer.status} ${behind.answer.parked ?? ""}; file unchanged ${await fileText() === before}; front ${JSON.stringify(await hxFrontWindow(watch, watchSocket))}, a ${JSON.stringify(await windowOf(a.choice))}; step ${inFront.answer.stoppedAt?.n ?? "-"}; ${inFront.answer.status === "done" ? "" : trace.slice(0, 14).join(" | ")}`);
+    items.check("L3", "前台按键全机一个：目标窗口不在最前面的那个智能体停放，不往别的窗口发键", inFront.answer.status === "done" && behind.answer.status === "waiting_user" && behind.answer.parked === "other_window", `in front: ${inFront.answer.status} ${inFront.answer.parked ?? ""} ${String(inFront.answer.stoppedAt?.reason ?? "").slice(0, 160)}; behind: ${behind.answer.status} ${behind.answer.parked ?? ""}; file unchanged ${await fileText() === before}; front ${JSON.stringify(await hxFrontWindow(watch, watchSocket))}, a ${JSON.stringify(await windowOf(a.choice))}; step ${inFront.answer.stoppedAt?.n ?? "-"}`);
     tracing = false;
-    if (inFront.answer.status !== "done")
-      log(`L3 trace: ${trace.slice(0, 60).join(" | ")}`);
+    if (inFront.answer.status !== "done") {
+      log(`L3 trace: ${trace.slice(0, 80).join(" | ")}`);
+      for (let i = 0;i < Math.min(trace.length, 80); i += 4)
+        process.stdout.write(`L3 trace ${i}: ${trace.slice(i, i + 4).join(" | ")}
+`);
+    }
     parked.dropAll();
     const target = await windowOf(a.choice);
     const holder = await lanes.acquire(hxAppLane(target?.app || `pid${target?.pid ?? 0}`), { agentId: "z", name: "Zed", tier: 0 }, Date.now() + 120000);
@@ -27685,7 +27689,17 @@ function isWarm(lane, context) {
   return ended !== undefined && context.now - ended <= HX_FLOW_WARM_MS;
 }
 function hxFlowSort(candidates, context) {
-  return [...candidates].sort((left, right) => hxFlowCompare(left, right, context));
+  const tiers = new Map;
+  const byLane = [...candidates].sort((left, right) => left.lane < right.lane ? -1 : left.lane > right.lane ? 1 : 0);
+  for (const candidate of byLane) {
+    const tier = hxFlowEffectiveTier(candidate, context.now);
+    const group = tiers.get(tier);
+    if (group)
+      group.push(candidate);
+    else
+      tiers.set(tier, [candidate]);
+  }
+  return [...tiers.entries()].sort(([left], [right]) => left - right).flatMap(([, group]) => group.sort((left, right) => hxFlowCompare(left, right, context)));
 }
 
 // src/backend/hx-flow/ledger.ts
@@ -27786,11 +27800,12 @@ class HxFlowLedger {
     const free = limit - running.length - this.#heldForRooms(now);
     if (free <= 0)
       return false;
-    if (candidate.tier !== 0 && limit >= 3 && this.#otherRunning(running) + this.#heldForRooms(now) >= limit - 1)
+    const personOnly = limit >= 3 && this.#otherRunning(running) + this.#heldForRooms(now) >= limit - 1;
+    if (personOnly && candidate.tier !== 0)
       return false;
-    const context = this.#context(now);
-    const ahead = waiting.filter((other) => other.lane !== candidate.lane && hxFlowCompare(other, candidate, context) < 0);
-    return ahead.length < free;
+    const lanes = waiting.filter((other) => other.lane !== candidate.lane && (!personOnly || other.tier === 0));
+    const place = hxFlowSort([...lanes, candidate], this.#context(now)).findIndex((other) => other.lane === candidate.lane);
+    return place >= 0 && place < free;
   }
   started(lane, candidate, taskId) {
     const now = this.#now();
